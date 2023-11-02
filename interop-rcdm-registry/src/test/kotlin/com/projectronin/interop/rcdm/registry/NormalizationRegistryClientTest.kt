@@ -32,7 +32,11 @@ import io.mockk.mockkObject
 import io.mockk.unmockkAll
 import io.mockk.verify
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -496,13 +500,13 @@ class NormalizationRegistryClientTest {
         }        
     """.trimIndent()
     private val conceptMapMetadata = ConceptMapMetadata(
-        registryEntryType = "concept-map",
+        registryEntryType = RegistryType.CONCEPT_MAP.value,
         conceptMapName = "test-concept-map",
         conceptMapUuid = "573b456efca5-03d51d53-1a31-49a9-af74",
         version = "1"
     )
     private val valueSetMetadata = ValueSetMetadata(
-        registryEntryType = "value_set",
+        registryEntryType = RegistryType.VALUE_SET.value,
         valueSetName = "test-value-set",
         valueSetUuid = "03d51d53-1a31-49a9-af74-573b456efca5",
         version = "2"
@@ -515,7 +519,6 @@ class NormalizationRegistryClientTest {
 
     @AfterEach
     fun tearDown() {
-        client.itemLastUpdated.clear()
         client.conceptMapCache.invalidateAll()
         client.valueSetCache.invalidateAll()
         unmockkAll()
@@ -535,35 +538,35 @@ class NormalizationRegistryClientTest {
                 coding,
                 mockk<Patient>()
             )
-        Assertions.assertNull(mapping)
+        assertNull(mapping)
     }
 
     @Test
     fun `getConceptMapping for Coding pulls new registry and maps`() {
         val cmTestRegistry = listOf(
             NormalizationRegistryItem(
-                data_element = "Appointment.status",
-                registry_uuid = "12345",
+                dataElement = "Appointment.status",
+                registryUuid = "12345",
                 filename = "file1.json",
-                concept_map_name = "AppointmentStatus-tenant",
-                concept_map_uuid = "cm-111",
-                registry_entry_type = "concept_map",
+                conceptMapName = "AppointmentStatus-tenant",
+                conceptMapUuid = "cm-111",
+                registryEntryType = RegistryType.CONCEPT_MAP,
                 version = "1",
-                source_extension_url = "ext1",
-                resource_type = "Appointment",
-                tenant_id = "test"
+                sourceExtensionUrl = "ext1",
+                resourceType = "Appointment",
+                tenantId = "test"
             ),
             NormalizationRegistryItem(
-                data_element = "Patient.telecom.use",
-                registry_uuid = "67890",
+                dataElement = "Patient.telecom.use",
+                registryUuid = "67890",
                 filename = "file2.json",
-                concept_map_name = "PatientTelecomUse-tenant",
-                concept_map_uuid = "cm-222",
-                registry_entry_type = "concept_map",
+                conceptMapName = "PatientTelecomUse-tenant",
+                conceptMapUuid = "cm-222",
+                registryEntryType = RegistryType.CONCEPT_MAP,
                 version = "1",
-                source_extension_url = "ext2",
-                resource_type = "Patient",
-                tenant_id = "test"
+                sourceExtensionUrl = "ext2",
+                resourceType = "Patient",
+                tenantId = "test"
             )
         )
         val mockkMap1 = mockk<ConceptMap> {
@@ -643,10 +646,10 @@ class NormalizationRegistryClientTest {
             coding1,
             mockk<Appointment>()
         )!!
-        Assertions.assertEquals(mapping1.coding.code!!.value, "targetValueAAA")
-        Assertions.assertEquals(mapping1.coding.system!!.value, "targetSystemAAA")
-        Assertions.assertEquals(mapping1.extension.url!!.value, "ext1")
-        Assertions.assertEquals(mapping1.extension.value!!.value, coding1)
+        assertEquals(mapping1.coding.code!!.value, "targetValueAAA")
+        assertEquals(mapping1.coding.system!!.value, "targetSystemAAA")
+        assertEquals(mapping1.extension.url!!.value, "ext1")
+        assertEquals(mapping1.extension.value!!.value, coding1)
         val coding2 = Coding(
             code = Code(value = "sourceValue2"),
             system = Uri(value = "sourceSystem2")
@@ -658,10 +661,10 @@ class NormalizationRegistryClientTest {
                 coding2,
                 mockk<Patient>()
             )!!
-        Assertions.assertEquals(mapping2.coding.code!!.value, "targetValue222")
-        Assertions.assertEquals(mapping2.coding.system!!.value, "targetSystem222")
-        Assertions.assertEquals(mapping2.extension.url!!.value, "ext2")
-        Assertions.assertEquals(mapping2.extension.value!!.value, coding2)
+        assertEquals(mapping2.coding.code!!.value, "targetValue222")
+        assertEquals(mapping2.coding.system!!.value, "targetSystem222")
+        assertEquals(mapping2.extension.url!!.value, "ext2")
+        assertEquals(mapping2.extension.value!!.value, coding2)
     }
 
     @Test
@@ -680,7 +683,7 @@ class NormalizationRegistryClientTest {
                 RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value,
                 mockk<Patient>()
             )
-        Assertions.assertNull(mapping)
+        assertNull(mapping)
     }
 
     @Test
@@ -699,13 +702,13 @@ class NormalizationRegistryClientTest {
                 RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value,
                 mockk<Patient>()
             )
-        Assertions.assertNotNull(mapping)
+        assertNotNull(mapping)
         mapping!!
-        Assertions.assertEquals(
+        assertEquals(
             coding,
             mapping.coding
         )
-        Assertions.assertEquals(
+        assertEquals(
             Extension(
                 url = RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.uri,
                 value = DynamicValue(DynamicValueType.CODING, value = coding)
@@ -717,7 +720,7 @@ class NormalizationRegistryClientTest {
     @Test
     fun `getConceptMappingForEnum with match found in registry - returns target and extension`() {
         val registry1 = ConceptMapItem(
-            source_extension_url = "ext1",
+            sourceExtensionUrl = "ext1",
             map = mapOf(
                 SourceConcept(
                     element = setOf(
@@ -743,13 +746,12 @@ class NormalizationRegistryClientTest {
             metadata = listOf(conceptMapMetadata)
         )
         val key = CacheKey(
-            NormalizationRegistryItem.RegistryType.ConceptMap,
+            RegistryType.CONCEPT_MAP,
             "Patient.telecom.system",
             "test"
         )
         client.conceptMapCache.put(key, registry1)
         client.registryLastUpdated = LocalDateTime.now()
-        client.itemLastUpdated[key] = LocalDateTime.now()
         val coding = RoninConceptMap.CODE_SYSTEMS.toCoding(
             tenant,
             "ContactPoint.system",
@@ -763,7 +765,7 @@ class NormalizationRegistryClientTest {
             RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value,
             mockk<Patient>()
         )!!
-        Assertions.assertEquals(
+        assertEquals(
             Coding(
                 system = Uri("good-or-bad-for-enum"),
                 code = Code("good-or-bad-for-enum"),
@@ -772,7 +774,7 @@ class NormalizationRegistryClientTest {
             ),
             mapping.coding
         )
-        Assertions.assertEquals(
+        assertEquals(
             Extension(
                 url = Uri("ext1"),
                 value = DynamicValue(DynamicValueType.CODING, value = coding)
@@ -788,43 +790,43 @@ class NormalizationRegistryClientTest {
                 "Patient.telecom.system",
                 "specialAppointment"
             )
-        Assertions.assertTrue(mapping.codes.isEmpty())
+        assertTrue(mapping.codes.isEmpty())
     }
 
     @Test
     fun `getValueSet pulls registry and returns set`() {
         val vsTestRegistry = listOf(
             NormalizationRegistryItem(
-                data_element = "Appointment.status",
-                registry_uuid = "01234",
+                dataElement = "Appointment.status",
+                registryUuid = "01234",
                 filename = "file3.json",
-                value_set_name = "AppointmentStatus",
-                value_set_uuid = "vs-333",
-                registry_entry_type = "value_set",
+                valueSetName = "AppointmentStatus",
+                valueSetUuid = "vs-333",
+                registryEntryType = RegistryType.VALUE_SET,
                 version = "1",
-                resource_type = "Appointment",
-                profile_url = "specialAppointment"
+                resourceType = "Appointment",
+                profileUrl = "specialAppointment"
             ),
             NormalizationRegistryItem(
-                data_element = "Patient.telecom.use",
-                registry_uuid = "56789",
+                dataElement = "Patient.telecom.use",
+                registryUuid = "56789",
                 filename = "file4.json",
-                value_set_name = "PatientTelecomUse",
-                value_set_uuid = "vs-4444",
-                registry_entry_type = "value_set",
+                valueSetName = "PatientTelecomUse",
+                valueSetUuid = "vs-4444",
+                registryEntryType = RegistryType.VALUE_SET,
                 version = "1",
-                resource_type = "Patient",
-                profile_url = "specialPatient"
+                resourceType = "Patient",
+                profileUrl = "specialPatient"
             )
         )
         val valueSetMetadata1 = ValueSetMetadata(
-            registryEntryType = "value_set",
+            registryEntryType = RegistryType.VALUE_SET.value,
             valueSetName = "AppointmentStatus",
             valueSetUuid = "vs-333",
             version = "1"
         )
         val valueSetMetadata2 = ValueSetMetadata(
-            registryEntryType = "value_set",
+            registryEntryType = RegistryType.VALUE_SET.value,
             valueSetName = "PatientTelecomUse",
             valueSetUuid = "vs-4444",
             version = "1"
@@ -873,7 +875,7 @@ class NormalizationRegistryClientTest {
             ),
             valueSetMetadata1
         )
-        Assertions.assertEquals(valueSet1, expectedCoding1)
+        assertEquals(valueSet1, expectedCoding1)
 
         val valueSet2 = client.getValueSet("Patient.telecom.use", "specialPatient")
         val expectedCoding2 = ValueSetList(
@@ -887,7 +889,7 @@ class NormalizationRegistryClientTest {
             ),
             valueSetMetadata2
         )
-        Assertions.assertEquals(valueSet2, expectedCoding2)
+        assertEquals(valueSet2, expectedCoding2)
     }
 
     @Test
@@ -904,22 +906,21 @@ class NormalizationRegistryClientTest {
             metadata = valueSetMetadata
         )
         val key = CacheKey(
-            NormalizationRegistryItem.RegistryType.ValueSet,
+            RegistryType.VALUE_SET,
             "Patient.telecom.system",
             null,
             "specialPatient"
         )
         client.valueSetCache.put(key, registry1)
         client.registryLastUpdated = LocalDateTime.now()
-        client.itemLastUpdated[key] = LocalDateTime.now()
 
         val mapping =
             client.getValueSet(
                 "Patient.telecom.system",
                 "specialPatient"
             )
-        Assertions.assertEquals(1, mapping.codes.size)
-        Assertions.assertEquals(Code("code1"), mapping.codes[0].code)
+        assertEquals(1, mapping.codes.size)
+        assertEquals(Code("code1"), mapping.codes[0].code)
     }
 
     @Test
@@ -936,21 +937,20 @@ class NormalizationRegistryClientTest {
             metadata = valueSetMetadata
         )
         val key = CacheKey(
-            NormalizationRegistryItem.RegistryType.ValueSet,
+            RegistryType.VALUE_SET,
             "Patient.telecom.system",
             null,
             "specialPatient"
         )
         client.valueSetCache.put(key, registry1)
         client.registryLastUpdated = LocalDateTime.now()
-        client.itemLastUpdated[key] = LocalDateTime.now()
         val actualValueSet =
             client.getRequiredValueSet(
                 "Patient.telecom.system",
                 "specialPatient"
             )
-        Assertions.assertEquals(1, actualValueSet.codes.size)
-        Assertions.assertEquals(Code("code1"), actualValueSet.codes[0].code)
+        assertEquals(1, actualValueSet.codes.size)
+        assertEquals(Code("code1"), actualValueSet.codes[0].code)
     }
 
     @Test
@@ -966,7 +966,7 @@ class NormalizationRegistryClientTest {
             assertThrows<MissingNormalizationContentException> {
                 client.getRequiredValueSet("Patient.telecom.system", "specialPatient")
             }
-        Assertions.assertEquals(
+        assertEquals(
             "Required value set for specialPatient and Patient.telecom.system not found",
             exception.message
         )
@@ -975,17 +975,16 @@ class NormalizationRegistryClientTest {
     @Test
     fun `getConceptMapping for Coding with no system`() {
         val registry = ConceptMapItem(
-            source_extension_url = "ext-AB",
+            sourceExtensionUrl = "ext-AB",
             map = mapAB,
             metadata = listOf(conceptMapMetadata)
         )
         val key = CacheKey(
-            NormalizationRegistryItem.RegistryType.ConceptMap,
+            RegistryType.CONCEPT_MAP,
             "Observation.code",
             tenant
         )
         client.conceptMapCache.put(key, registry)
-        client.itemLastUpdated[key] = LocalDateTime.now()
 
         val sourceCoding1 = Coding(
             code = Code("valueA")
@@ -997,23 +996,22 @@ class NormalizationRegistryClientTest {
             sourceCoding1,
             mockk<Observation>()
         )
-        Assertions.assertNull(mappedResult1)
+        assertNull(mappedResult1)
     }
 
     @Test
     fun `getConceptMapping for Coding with no value`() {
         val registry = ConceptMapItem(
-            source_extension_url = "ext-AB",
+            sourceExtensionUrl = "ext-AB",
             map = mapAB,
             metadata = listOf(conceptMapMetadata)
         )
         val key = CacheKey(
-            NormalizationRegistryItem.RegistryType.ConceptMap,
+            RegistryType.CONCEPT_MAP,
             "Observation.code",
             tenant
         )
         client.conceptMapCache.put(key, registry)
-        client.itemLastUpdated[key] = LocalDateTime.now()
 
         val sourceCoding1 = Coding(
             system = Uri("system")
@@ -1025,24 +1023,23 @@ class NormalizationRegistryClientTest {
             sourceCoding1,
             mockk<Observation>()
         )
-        Assertions.assertNull(mappedResult1)
+        assertNull(mappedResult1)
     }
 
     @Test
     fun `getConceptMapping for Coding - correctly selects 1 entry from many in same map`() {
         val registry = ConceptMapItem(
-            source_extension_url = "ext-AB",
+            sourceExtensionUrl = "ext-AB",
             map = mapAB,
             metadata = listOf(conceptMapMetadata)
         )
         val key = CacheKey(
-            NormalizationRegistryItem.RegistryType.ConceptMap,
+            RegistryType.CONCEPT_MAP,
             "Observation.code",
             tenant
         )
         client.conceptMapCache.put(key, registry)
         client.registryLastUpdated = LocalDateTime.now()
-        client.itemLastUpdated[key] = LocalDateTime.now()
 
         val sourceCoding1 = Coding(
             system = Uri("systemA"),
@@ -1067,11 +1064,11 @@ class NormalizationRegistryClientTest {
             sourceCoding1,
             mockk<Observation>()
         )
-        Assertions.assertEquals(
+        assertEquals(
             targetCoding1,
             mappedResult1?.coding
         )
-        Assertions.assertEquals(
+        assertEquals(
             targetSourceExtension1,
             mappedResult1?.extension
         )
@@ -1099,11 +1096,11 @@ class NormalizationRegistryClientTest {
             sourceCoding2,
             mockk<Observation>()
         )
-        Assertions.assertEquals(
+        assertEquals(
             targetCoding2,
             mappedResult2?.coding
         )
-        Assertions.assertEquals(
+        assertEquals(
             targetSourceExtension2,
             mappedResult2?.extension
         )
@@ -1112,12 +1109,12 @@ class NormalizationRegistryClientTest {
     @Test
     fun `getConceptMapping for Coding - map found - contains no matching code`() {
         val registry1 = ConceptMapItem(
-            source_extension_url = "sourceExtensionUrl",
+            sourceExtensionUrl = "sourceExtensionUrl",
             map = mapA,
             metadata = listOf(conceptMapMetadata)
         )
         val key1hr = CacheKey(
-            NormalizationRegistryItem.RegistryType.ConceptMap,
+            RegistryType.CONCEPT_MAP,
             "Observation.code",
             tenant
         )
@@ -1134,7 +1131,7 @@ class NormalizationRegistryClientTest {
             sourceCoding,
             mockk<Observation>()
         )
-        Assertions.assertNull(mappedResult)
+        assertNull(mappedResult)
     }
 
     @Test
@@ -1152,35 +1149,35 @@ class NormalizationRegistryClientTest {
                 concept,
                 mockk<Patient>()
             )
-        Assertions.assertNull(mapping)
+        assertNull(mapping)
     }
 
     @Test
     fun `getConceptMapping for CodeableConcept pulls new registry and maps`() {
         val cmTestRegistry = listOf(
             NormalizationRegistryItem(
-                data_element = "Appointment.status",
-                registry_uuid = "12345",
+                dataElement = "Appointment.status",
+                registryUuid = "12345",
                 filename = "file1.json",
-                concept_map_name = "AppointmentStatus-tenant",
-                concept_map_uuid = "cm-111",
-                registry_entry_type = "concept_map",
+                conceptMapName = "AppointmentStatus-tenant",
+                conceptMapUuid = "cm-111",
+                registryEntryType = RegistryType.CONCEPT_MAP,
                 version = "1",
-                source_extension_url = "ext1",
-                resource_type = "Appointment",
-                tenant_id = "test"
+                sourceExtensionUrl = "ext1",
+                resourceType = "Appointment",
+                tenantId = "test"
             ),
             NormalizationRegistryItem(
-                data_element = "Patient.telecom.use",
-                registry_uuid = "67890",
+                dataElement = "Patient.telecom.use",
+                registryUuid = "67890",
                 filename = "file2.json",
-                concept_map_name = "PatientTelecomUse-tenant",
-                concept_map_uuid = "cm-222",
-                registry_entry_type = "concept_map",
+                conceptMapName = "PatientTelecomUse-tenant",
+                conceptMapUuid = "cm-222",
+                registryEntryType = RegistryType.CONCEPT_MAP,
                 version = "1",
-                source_extension_url = "ext2",
-                resource_type = "Patient",
-                tenant_id = "test"
+                sourceExtensionUrl = "ext2",
+                resourceType = "Patient",
+                tenantId = "test"
             )
         )
         val mockkMap1 = mockk<ConceptMap> {
@@ -1264,10 +1261,10 @@ class NormalizationRegistryClientTest {
             concept1,
             mockk<Appointment>()
         )!!
-        Assertions.assertEquals(mapping1.codeableConcept.coding.first().code!!.value, "targetValueAAA")
-        Assertions.assertEquals(mapping1.codeableConcept.coding.first().system!!.value, "targetSystemAAA")
-        Assertions.assertEquals(mapping1.extension.url!!.value, "ext1")
-        Assertions.assertEquals(mapping1.extension.value!!.value, concept1)
+        assertEquals(mapping1.codeableConcept.coding.first().code!!.value, "targetValueAAA")
+        assertEquals(mapping1.codeableConcept.coding.first().system!!.value, "targetSystemAAA")
+        assertEquals(mapping1.extension.url!!.value, "ext1")
+        assertEquals(mapping1.extension.value!!.value, concept1)
         val coding2 = Coding(
             code = Code(value = "sourceValue2"),
             system = Uri(value = "sourceSystem2")
@@ -1282,27 +1279,26 @@ class NormalizationRegistryClientTest {
             concept2,
             mockk<Patient>()
         )!!
-        Assertions.assertEquals(mapping2.codeableConcept.coding.first().code!!.value, "targetValue222")
-        Assertions.assertEquals(mapping2.codeableConcept.coding.first().system!!.value, "targetSystem222")
-        Assertions.assertEquals(mapping2.extension.url!!.value, "ext2")
-        Assertions.assertEquals(mapping2.extension.value!!.value, concept2)
+        assertEquals(mapping2.codeableConcept.coding.first().code!!.value, "targetValue222")
+        assertEquals(mapping2.codeableConcept.coding.first().system!!.value, "targetSystem222")
+        assertEquals(mapping2.extension.url!!.value, "ext2")
+        assertEquals(mapping2.extension.value!!.value, concept2)
     }
 
     @Test
     fun `getConceptMapping for CodeableConcept - correctly selects 1 entry from many in same map`() {
         val registry = ConceptMapItem(
-            source_extension_url = "ext-AB",
+            sourceExtensionUrl = "ext-AB",
             map = mapAB,
             metadata = listOf(conceptMapMetadata)
         )
         val key = CacheKey(
-            NormalizationRegistryItem.RegistryType.ConceptMap,
+            RegistryType.CONCEPT_MAP,
             "Observation.code",
             tenant
         )
         client.conceptMapCache.put(key, registry)
         client.registryLastUpdated = LocalDateTime.now()
-        client.itemLastUpdated[key] = LocalDateTime.now()
 
         val sourceCoding1 = Coding(
             system = Uri("systemA"),
@@ -1332,11 +1328,11 @@ class NormalizationRegistryClientTest {
             sourceConcept1,
             mockk<Observation>()
         )
-        Assertions.assertEquals(
+        assertEquals(
             targetConcept1,
             mappedResult1?.codeableConcept
         )
-        Assertions.assertEquals(
+        assertEquals(
             targetSourceExtension1,
             mappedResult1?.extension
         )
@@ -1369,11 +1365,11 @@ class NormalizationRegistryClientTest {
             sourceConcept2,
             mockk<Observation>()
         )
-        Assertions.assertEquals(
+        assertEquals(
             targetConcept2,
             mappedResult2?.codeableConcept
         )
-        Assertions.assertEquals(
+        assertEquals(
             targetSourceExtension2,
             mappedResult2?.extension
         )
@@ -1382,12 +1378,12 @@ class NormalizationRegistryClientTest {
     @Test
     fun `getConceptMapping for CodeableConcept - map found - contains no matching code`() {
         val registry1 = ConceptMapItem(
-            source_extension_url = "sourceExtensionUrl",
+            sourceExtensionUrl = "sourceExtensionUrl",
             map = mapA,
             metadata = listOf(conceptMapMetadata)
         )
         val key1hr = CacheKey(
-            NormalizationRegistryItem.RegistryType.ConceptMap,
+            RegistryType.CONCEPT_MAP,
             "Observation.code",
             tenant
         )
@@ -1405,13 +1401,13 @@ class NormalizationRegistryClientTest {
             sourceConcept,
             mockk<Observation>()
         )
-        Assertions.assertNull(mappedResult)
+        assertNull(mappedResult)
     }
 
     @Test
     fun `getConceptMapping for CodeableConcept - map found - target text replaces non-empty source text`() {
         val registry1 = ConceptMapItem(
-            source_extension_url = "extl",
+            sourceExtensionUrl = "extl",
             map = mapOf(
                 SourceConcept(
                     element = setOf(
@@ -1437,13 +1433,12 @@ class NormalizationRegistryClientTest {
             metadata = listOf(conceptMapMetadata)
         )
         val key1 = CacheKey(
-            NormalizationRegistryItem.RegistryType.ConceptMap,
+            RegistryType.CONCEPT_MAP,
             "Observation.code",
             tenant
         )
         client.conceptMapCache.put(key1, registry1)
         client.registryLastUpdated = LocalDateTime.now()
-        client.itemLastUpdated[key1] = LocalDateTime.now()
 
         val sourceCoding = Coding(
             system = Uri("systemA"),
@@ -1477,11 +1472,11 @@ class NormalizationRegistryClientTest {
             sourceConcept,
             mockk<Observation>()
         )
-        Assertions.assertEquals(
+        assertEquals(
             targetConcept,
             mappedResult?.codeableConcept
         )
-        Assertions.assertEquals(
+        assertEquals(
             targetSourceExtension,
             mappedResult?.extension
         )
@@ -1491,40 +1486,40 @@ class NormalizationRegistryClientTest {
     fun `getConceptMapping for CodeableConcept concatenates multiple matching concept maps`() {
         val cmTestRegistry = listOf(
             NormalizationRegistryItem(
-                data_element = "Observation.code",
-                registry_uuid = "11111",
+                dataElement = "Observation.code",
+                registryUuid = "11111",
                 filename = "file1.json",
-                concept_map_name = "Staging-test-1",
-                concept_map_uuid = "cm-111",
-                registry_entry_type = "concept_map",
+                conceptMapName = "Staging-test-1",
+                conceptMapUuid = "cm-111",
+                registryEntryType = RegistryType.CONCEPT_MAP,
                 version = "1",
-                source_extension_url = "ObservationCode-1",
-                resource_type = "Observation",
-                tenant_id = "test"
+                sourceExtensionUrl = "ObservationCode-1",
+                resourceType = "Observation",
+                tenantId = "test"
             ),
             NormalizationRegistryItem(
-                data_element = "Observation.code",
-                registry_uuid = "22222",
+                dataElement = "Observation.code",
+                registryUuid = "22222",
                 filename = "file2.json",
-                concept_map_name = "AllVitals-test-2",
-                concept_map_uuid = "cm-222",
-                registry_entry_type = "concept_map",
+                conceptMapName = "AllVitals-test-2",
+                conceptMapUuid = "cm-222",
+                registryEntryType = RegistryType.CONCEPT_MAP,
                 version = "1",
-                source_extension_url = "ObservationCode-1",
-                resource_type = "Observation",
-                tenant_id = "test"
+                sourceExtensionUrl = "ObservationCode-1",
+                resourceType = "Observation",
+                tenantId = "test"
             ),
             NormalizationRegistryItem(
-                data_element = "Observation.code",
-                registry_uuid = "33333",
+                dataElement = "Observation.code",
+                registryUuid = "33333",
                 filename = "file3.json",
-                concept_map_name = "HeartRate-test-3",
-                concept_map_uuid = "cm-333",
-                registry_entry_type = "concept_map",
+                conceptMapName = "HeartRate-test-3",
+                conceptMapUuid = "cm-333",
+                registryEntryType = RegistryType.CONCEPT_MAP,
                 version = "1",
-                source_extension_url = "ObservationCode-1",
-                resource_type = "Observation",
-                tenant_id = "test"
+                sourceExtensionUrl = "ObservationCode-1",
+                resourceType = "Observation",
+                tenantId = "test"
             )
         )
         val mockkMap1 = mockk<ConceptMap> {
@@ -1665,13 +1660,13 @@ class NormalizationRegistryClientTest {
             concept1,
             mockk<Observation>()
         )!!
-        Assertions.assertEquals("targetTextBBB", mapping1.codeableConcept.text!!.value)
-        Assertions.assertEquals(1, mapping1.codeableConcept.coding.size)
-        Assertions.assertEquals("targetSystem-1", mapping1.codeableConcept.coding[0].system!!.value)
-        Assertions.assertEquals("targetValueBBB", mapping1.codeableConcept.coding[0].code!!.value)
-        Assertions.assertEquals("targetDisplayBBB", mapping1.codeableConcept.coding[0].display!!.value)
-        Assertions.assertEquals("ObservationCode-1", mapping1.extension.url!!.value)
-        Assertions.assertEquals(concept1, mapping1.extension.value!!.value)
+        assertEquals("targetTextBBB", mapping1.codeableConcept.text!!.value)
+        assertEquals(1, mapping1.codeableConcept.coding.size)
+        assertEquals("targetSystem-1", mapping1.codeableConcept.coding[0].system!!.value)
+        assertEquals("targetValueBBB", mapping1.codeableConcept.coding[0].code!!.value)
+        assertEquals("targetDisplayBBB", mapping1.codeableConcept.coding[0].display!!.value)
+        assertEquals("ObservationCode-1", mapping1.extension.url!!.value)
+        assertEquals(concept1, mapping1.extension.value!!.value)
         val coding2 = Coding(
             code = Code(value = "sourceValueZ"),
             system = Uri(value = "system-AllVitals-2")
@@ -1686,13 +1681,13 @@ class NormalizationRegistryClientTest {
             concept2,
             mockk<Observation>()
         )!!
-        Assertions.assertEquals("targetTextZZZ", mapping2.codeableConcept.text!!.value)
-        Assertions.assertEquals(1, mapping2.codeableConcept.coding.size)
-        Assertions.assertEquals("targetSystem-2", mapping2.codeableConcept.coding[0].system!!.value)
-        Assertions.assertEquals("targetValueZZZ", mapping2.codeableConcept.coding[0].code!!.value)
-        Assertions.assertEquals("targetDisplayZZZ", mapping2.codeableConcept.coding[0].display!!.value)
-        Assertions.assertEquals("ObservationCode-1", mapping2.extension.url!!.value)
-        Assertions.assertEquals(concept2, mapping2.extension.value!!.value)
+        assertEquals("targetTextZZZ", mapping2.codeableConcept.text!!.value)
+        assertEquals(1, mapping2.codeableConcept.coding.size)
+        assertEquals("targetSystem-2", mapping2.codeableConcept.coding[0].system!!.value)
+        assertEquals("targetValueZZZ", mapping2.codeableConcept.coding[0].code!!.value)
+        assertEquals("targetDisplayZZZ", mapping2.codeableConcept.coding[0].display!!.value)
+        assertEquals("ObservationCode-1", mapping2.extension.url!!.value)
+        assertEquals(concept2, mapping2.extension.value!!.value)
         val coding3 = Coding(
             code = Code(value = "sourceValueC"),
             system = Uri(value = "system-HeartRate-3")
@@ -1707,77 +1702,77 @@ class NormalizationRegistryClientTest {
             concept3,
             mockk<Observation>()
         )!!
-        Assertions.assertEquals("targetTextCCC", mapping3.codeableConcept.text!!.value)
-        Assertions.assertEquals(1, mapping3.codeableConcept.coding.size)
-        Assertions.assertEquals("targetSystem-3", mapping3.codeableConcept.coding[0].system!!.value)
-        Assertions.assertEquals("targetValueCCC", mapping3.codeableConcept.coding[0].code!!.value)
-        Assertions.assertEquals("targetDisplayCCC", mapping3.codeableConcept.coding[0].display!!.value)
-        Assertions.assertEquals("ObservationCode-1", mapping3.extension.url!!.value)
-        Assertions.assertEquals(concept3, mapping3.extension.value!!.value)
+        assertEquals("targetTextCCC", mapping3.codeableConcept.text!!.value)
+        assertEquals(1, mapping3.codeableConcept.coding.size)
+        assertEquals("targetSystem-3", mapping3.codeableConcept.coding[0].system!!.value)
+        assertEquals("targetValueCCC", mapping3.codeableConcept.coding[0].code!!.value)
+        assertEquals("targetDisplayCCC", mapping3.codeableConcept.coding[0].display!!.value)
+        assertEquals("ObservationCode-1", mapping3.extension.url!!.value)
+        assertEquals(concept3, mapping3.extension.value!!.value)
     }
 
     @Test
     fun `getConceptMapping for CodeableConcept concatenates multiple matching concept maps - excludes non-matching entries`() {
         val cmTestRegistry = listOf(
             NormalizationRegistryItem(
-                data_element = "Observation.code",
-                registry_uuid = "11111",
+                dataElement = "Observation.code",
+                registryUuid = "11111",
                 filename = "file1.json",
-                concept_map_name = "Staging-test-1",
-                concept_map_uuid = "cm-111",
-                registry_entry_type = "concept_map",
+                conceptMapName = "Staging-test-1",
+                conceptMapUuid = "cm-111",
+                registryEntryType = RegistryType.CONCEPT_MAP,
                 version = "1",
-                source_extension_url = "ObservationCode-1",
-                resource_type = "Observation",
-                tenant_id = "test"
+                sourceExtensionUrl = "ObservationCode-1",
+                resourceType = "Observation",
+                tenantId = "test"
             ),
             NormalizationRegistryItem(
-                data_element = "Observation.code",
-                registry_uuid = "22222",
+                dataElement = "Observation.code",
+                registryUuid = "22222",
                 filename = "file2.json",
-                concept_map_name = "AllVitals-test-2",
-                concept_map_uuid = "cm-222",
-                registry_entry_type = "concept_map",
+                conceptMapName = "AllVitals-test-2",
+                conceptMapUuid = "cm-222",
+                registryEntryType = RegistryType.CONCEPT_MAP,
                 version = "1",
-                source_extension_url = "ObservationCode-1",
-                resource_type = "Observation",
-                tenant_id = "test"
+                sourceExtensionUrl = "ObservationCode-1",
+                resourceType = "Observation",
+                tenantId = "test"
             ),
             NormalizationRegistryItem(
-                data_element = "Appointment.status",
-                registry_uuid = "33333",
+                dataElement = "Appointment.status",
+                registryUuid = "33333",
                 filename = "file3.json",
-                concept_map_name = "Appointment-status-test",
-                concept_map_uuid = "cm-333",
-                registry_entry_type = "concept_map",
+                conceptMapName = "Appointment-status-test",
+                conceptMapUuid = "cm-333",
+                registryEntryType = RegistryType.CONCEPT_MAP,
                 version = "1",
-                source_extension_url = "Appointment-status-test",
-                resource_type = "Appointment",
-                tenant_id = "test"
+                sourceExtensionUrl = "Appointment-status-test",
+                resourceType = "Appointment",
+                tenantId = "test"
             ),
             NormalizationRegistryItem(
-                data_element = "Observation.code",
-                registry_uuid = "33333",
+                dataElement = "Observation.code",
+                registryUuid = "33333",
                 filename = "file3.json",
-                concept_map_name = "HeartRate-test-3",
-                concept_map_uuid = "cm-333",
-                registry_entry_type = "concept_map",
+                conceptMapName = "HeartRate-test-3",
+                conceptMapUuid = "cm-333",
+                registryEntryType = RegistryType.CONCEPT_MAP,
                 version = "1",
-                source_extension_url = "ObservationCode-1",
-                resource_type = "Observation",
-                tenant_id = "other" // wrong tenantId
+                sourceExtensionUrl = "ObservationCode-1",
+                resourceType = "Observation",
+                tenantId = "other" // wrong tenantId
             ),
             NormalizationRegistryItem(
-                data_element = "Appointment.status", // wrong elementName
-                registry_uuid = "44444",
+                dataElement = "Appointment.status", // wrong elementName
+                registryUuid = "44444",
                 filename = "file4.json",
-                concept_map_name = "Appointment-status-test",
-                concept_map_uuid = "cm-444",
-                registry_entry_type = "concept_map",
+                conceptMapName = "Appointment-status-test",
+                conceptMapUuid = "cm-444",
+                registryEntryType = RegistryType.CONCEPT_MAP,
                 version = "1",
-                source_extension_url = "Appointment-status-test",
-                resource_type = "Appointment",
-                tenant_id = "test"
+                sourceExtensionUrl = "Appointment-status-test",
+                resourceType = "Appointment",
+                tenantId = "test"
             )
         )
         val mockkMap1 = mockk<ConceptMap> {
@@ -1883,13 +1878,13 @@ class NormalizationRegistryClientTest {
             concept1,
             mockk<Observation>()
         )!!
-        Assertions.assertEquals("targetTextBBB", mapping1.codeableConcept.text!!.value)
-        Assertions.assertEquals(1, mapping1.codeableConcept.coding.size)
-        Assertions.assertEquals("targetSystem-1", mapping1.codeableConcept.coding[0].system!!.value)
-        Assertions.assertEquals("targetValueBBB", mapping1.codeableConcept.coding[0].code!!.value)
-        Assertions.assertEquals("targetDisplayBBB", mapping1.codeableConcept.coding[0].display!!.value)
-        Assertions.assertEquals("ObservationCode-1", mapping1.extension.url!!.value)
-        Assertions.assertEquals(concept1, mapping1.extension.value!!.value)
+        assertEquals("targetTextBBB", mapping1.codeableConcept.text!!.value)
+        assertEquals(1, mapping1.codeableConcept.coding.size)
+        assertEquals("targetSystem-1", mapping1.codeableConcept.coding[0].system!!.value)
+        assertEquals("targetValueBBB", mapping1.codeableConcept.coding[0].code!!.value)
+        assertEquals("targetDisplayBBB", mapping1.codeableConcept.coding[0].display!!.value)
+        assertEquals("ObservationCode-1", mapping1.extension.url!!.value)
+        assertEquals(concept1, mapping1.extension.value!!.value)
         val coding2 = Coding(
             code = Code(value = "sourceValueZ"),
             system = Uri(value = "system-AllVitals-2")
@@ -1904,13 +1899,13 @@ class NormalizationRegistryClientTest {
             concept2,
             mockk<Observation>()
         )!!
-        Assertions.assertEquals("targetTextZZZ", mapping2.codeableConcept.text!!.value)
-        Assertions.assertEquals(1, mapping2.codeableConcept.coding.size)
-        Assertions.assertEquals("targetSystem-2", mapping2.codeableConcept.coding[0].system!!.value)
-        Assertions.assertEquals("targetValueZZZ", mapping2.codeableConcept.coding[0].code!!.value)
-        Assertions.assertEquals("targetDisplayZZZ", mapping2.codeableConcept.coding[0].display!!.value)
-        Assertions.assertEquals("ObservationCode-1", mapping2.extension.url!!.value)
-        Assertions.assertEquals(concept2, mapping2.extension.value!!.value)
+        assertEquals("targetTextZZZ", mapping2.codeableConcept.text!!.value)
+        assertEquals(1, mapping2.codeableConcept.coding.size)
+        assertEquals("targetSystem-2", mapping2.codeableConcept.coding[0].system!!.value)
+        assertEquals("targetValueZZZ", mapping2.codeableConcept.coding[0].code!!.value)
+        assertEquals("targetDisplayZZZ", mapping2.codeableConcept.coding[0].display!!.value)
+        assertEquals("ObservationCode-1", mapping2.extension.url!!.value)
+        assertEquals(concept2, mapping2.extension.value!!.value)
         val coding3 = Coding(
             code = Code(value = "sourceValueC"),
             system = Uri(value = "system-HeartRate-3")
@@ -1925,7 +1920,7 @@ class NormalizationRegistryClientTest {
             concept3,
             mockk<Observation>()
         )
-        Assertions.assertNull(mapping3)
+        assertNull(mapping3)
         val coding4 = Coding(
             code = Code(value = "arrived"),
             system = Uri(value = "AppointmentStatus-4")
@@ -1940,47 +1935,47 @@ class NormalizationRegistryClientTest {
             concept4,
             mockk<Appointment>()
         )
-        Assertions.assertNull(mapping4)
+        assertNull(mapping4)
     }
 
     @Test
     fun `getConceptMapping for CodeableConcept concatenates multiple matching concept maps - multiple entries in target Coding lists`() {
         val cmTestRegistry = listOf(
             NormalizationRegistryItem(
-                data_element = "Observation.code",
-                registry_uuid = "11111",
+                dataElement = "Observation.code",
+                registryUuid = "11111",
                 filename = "file1.json",
-                concept_map_name = "Staging-test-1",
-                concept_map_uuid = "cm-111",
-                registry_entry_type = "concept_map",
+                conceptMapName = "Staging-test-1",
+                conceptMapUuid = "cm-111",
+                registryEntryType = RegistryType.CONCEPT_MAP,
                 version = "1",
-                source_extension_url = "ObservationCode-1",
-                resource_type = "Observation",
-                tenant_id = "test"
+                sourceExtensionUrl = "ObservationCode-1",
+                resourceType = "Observation",
+                tenantId = "test"
             ),
             NormalizationRegistryItem(
-                data_element = "Observation.code",
-                registry_uuid = "22222",
+                dataElement = "Observation.code",
+                registryUuid = "22222",
                 filename = "file2.json",
-                concept_map_name = "AllVitals-test-2",
-                concept_map_uuid = "cm-222",
-                registry_entry_type = "concept_map",
+                conceptMapName = "AllVitals-test-2",
+                conceptMapUuid = "cm-222",
+                registryEntryType = RegistryType.CONCEPT_MAP,
                 version = "1",
-                source_extension_url = "ObservationCode-1",
-                resource_type = "Observation",
-                tenant_id = "test"
+                sourceExtensionUrl = "ObservationCode-1",
+                resourceType = "Observation",
+                tenantId = "test"
             ),
             NormalizationRegistryItem(
-                data_element = "Observation.code",
-                registry_uuid = "33333",
+                dataElement = "Observation.code",
+                registryUuid = "33333",
                 filename = "file3.json",
-                concept_map_name = "HeartRate-test-3",
-                concept_map_uuid = "cm-333",
-                registry_entry_type = "concept_map",
+                conceptMapName = "HeartRate-test-3",
+                conceptMapUuid = "cm-333",
+                registryEntryType = RegistryType.CONCEPT_MAP,
                 version = "1",
-                source_extension_url = "ObservationCode-1",
-                resource_type = "Observation",
-                tenant_id = "test"
+                sourceExtensionUrl = "ObservationCode-1",
+                resourceType = "Observation",
+                tenantId = "test"
             )
         )
         val mockkMap1 = mockk<ConceptMap> {
@@ -2097,16 +2092,16 @@ class NormalizationRegistryClientTest {
             concept1,
             mockk<Observation>()
         )!!
-        Assertions.assertEquals("targetTextAB", mapping1.codeableConcept.text!!.value)
-        Assertions.assertEquals(2, mapping1.codeableConcept.coding.size)
-        Assertions.assertEquals("targetSystem-1", mapping1.codeableConcept.coding[0].system!!.value)
-        Assertions.assertEquals("targetValueAAA", mapping1.codeableConcept.coding[0].code!!.value)
-        Assertions.assertEquals("targetDisplayAAA", mapping1.codeableConcept.coding[0].display!!.value)
-        Assertions.assertEquals("targetSystem-1", mapping1.codeableConcept.coding[1].system!!.value)
-        Assertions.assertEquals("targetValueBBB", mapping1.codeableConcept.coding[1].code!!.value)
-        Assertions.assertEquals("targetDisplayBBB", mapping1.codeableConcept.coding[1].display!!.value)
-        Assertions.assertEquals("ObservationCode-1", mapping1.extension.url!!.value)
-        Assertions.assertEquals(concept1, mapping1.extension.value!!.value)
+        assertEquals("targetTextAB", mapping1.codeableConcept.text!!.value)
+        assertEquals(2, mapping1.codeableConcept.coding.size)
+        assertEquals("targetSystem-1", mapping1.codeableConcept.coding[0].system!!.value)
+        assertEquals("targetValueAAA", mapping1.codeableConcept.coding[0].code!!.value)
+        assertEquals("targetDisplayAAA", mapping1.codeableConcept.coding[0].display!!.value)
+        assertEquals("targetSystem-1", mapping1.codeableConcept.coding[1].system!!.value)
+        assertEquals("targetValueBBB", mapping1.codeableConcept.coding[1].code!!.value)
+        assertEquals("targetDisplayBBB", mapping1.codeableConcept.coding[1].display!!.value)
+        assertEquals("ObservationCode-1", mapping1.extension.url!!.value)
+        assertEquals(concept1, mapping1.extension.value!!.value)
         val coding2 = Coding(
             code = Code(value = "sourceValueXYZ"),
             system = Uri(value = "system-AllVitals-2")
@@ -2121,19 +2116,19 @@ class NormalizationRegistryClientTest {
             concept2,
             mockk<Observation>()
         )!!
-        Assertions.assertEquals("targetTextXYZ", mapping2.codeableConcept.text!!.value)
-        Assertions.assertEquals(3, mapping2.codeableConcept.coding.size)
-        Assertions.assertEquals("targetSystem-2", mapping2.codeableConcept.coding[0].system!!.value)
-        Assertions.assertEquals("targetValueXXX", mapping2.codeableConcept.coding[0].code!!.value)
-        Assertions.assertEquals("targetDisplayXXX", mapping2.codeableConcept.coding[0].display!!.value)
-        Assertions.assertEquals("targetSystem-2", mapping2.codeableConcept.coding[1].system!!.value)
-        Assertions.assertEquals("targetValueYYY", mapping2.codeableConcept.coding[1].code!!.value)
-        Assertions.assertEquals("targetDisplayYYY", mapping2.codeableConcept.coding[1].display!!.value)
-        Assertions.assertEquals("targetSystem-2", mapping2.codeableConcept.coding[2].system!!.value)
-        Assertions.assertEquals("targetValueZZZ", mapping2.codeableConcept.coding[2].code!!.value)
-        Assertions.assertEquals("targetDisplayZZZ", mapping2.codeableConcept.coding[2].display!!.value)
-        Assertions.assertEquals("ObservationCode-1", mapping2.extension.url!!.value)
-        Assertions.assertEquals(concept2, mapping2.extension.value!!.value)
+        assertEquals("targetTextXYZ", mapping2.codeableConcept.text!!.value)
+        assertEquals(3, mapping2.codeableConcept.coding.size)
+        assertEquals("targetSystem-2", mapping2.codeableConcept.coding[0].system!!.value)
+        assertEquals("targetValueXXX", mapping2.codeableConcept.coding[0].code!!.value)
+        assertEquals("targetDisplayXXX", mapping2.codeableConcept.coding[0].display!!.value)
+        assertEquals("targetSystem-2", mapping2.codeableConcept.coding[1].system!!.value)
+        assertEquals("targetValueYYY", mapping2.codeableConcept.coding[1].code!!.value)
+        assertEquals("targetDisplayYYY", mapping2.codeableConcept.coding[1].display!!.value)
+        assertEquals("targetSystem-2", mapping2.codeableConcept.coding[2].system!!.value)
+        assertEquals("targetValueZZZ", mapping2.codeableConcept.coding[2].code!!.value)
+        assertEquals("targetDisplayZZZ", mapping2.codeableConcept.coding[2].display!!.value)
+        assertEquals("ObservationCode-1", mapping2.extension.url!!.value)
+        assertEquals(concept2, mapping2.extension.value!!.value)
         val coding3 = Coding(
             code = Code(value = "sourceValueCD"),
             system = Uri(value = "system-HeartRate-3")
@@ -2148,16 +2143,16 @@ class NormalizationRegistryClientTest {
             concept3,
             mockk<Observation>()
         )!!
-        Assertions.assertEquals("targetTextCD", mapping3.codeableConcept.text!!.value)
-        Assertions.assertEquals(2, mapping3.codeableConcept.coding.size)
-        Assertions.assertEquals("targetSystem-3", mapping3.codeableConcept.coding[0].system!!.value)
-        Assertions.assertEquals("targetValueCCC", mapping3.codeableConcept.coding[0].code!!.value)
-        Assertions.assertEquals("targetDisplayCCC", mapping3.codeableConcept.coding[0].display!!.value)
-        Assertions.assertEquals("targetSystem-3", mapping3.codeableConcept.coding[1].system!!.value)
-        Assertions.assertEquals("targetValueDDD", mapping3.codeableConcept.coding[1].code!!.value)
-        Assertions.assertEquals("targetDisplayDDD", mapping3.codeableConcept.coding[1].display!!.value)
-        Assertions.assertEquals("ObservationCode-1", mapping3.extension.url!!.value)
-        Assertions.assertEquals(concept3, mapping3.extension.value!!.value)
+        assertEquals("targetTextCD", mapping3.codeableConcept.text!!.value)
+        assertEquals(2, mapping3.codeableConcept.coding.size)
+        assertEquals("targetSystem-3", mapping3.codeableConcept.coding[0].system!!.value)
+        assertEquals("targetValueCCC", mapping3.codeableConcept.coding[0].code!!.value)
+        assertEquals("targetDisplayCCC", mapping3.codeableConcept.coding[0].display!!.value)
+        assertEquals("targetSystem-3", mapping3.codeableConcept.coding[1].system!!.value)
+        assertEquals("targetValueDDD", mapping3.codeableConcept.coding[1].code!!.value)
+        assertEquals("targetDisplayDDD", mapping3.codeableConcept.coding[1].display!!.value)
+        assertEquals("ObservationCode-1", mapping3.extension.url!!.value)
+        assertEquals(concept3, mapping3.extension.value!!.value)
     }
 
     @Test
@@ -2165,16 +2160,16 @@ class NormalizationRegistryClientTest {
         val sourceUrl = "tenant-sourceObservationCode"
         val cmTestRegistry = listOf(
             NormalizationRegistryItem(
-                data_element = "Observation.code",
-                registry_uuid = "registry-uuid",
+                dataElement = "Observation.code",
+                registryUuid = "registry-uuid",
                 filename = "file1.json",
-                concept_map_name = "TestObservationsMashup",
-                concept_map_uuid = "TestObservationsMashup-uuid",
-                registry_entry_type = "concept_map",
+                conceptMapName = "TestObservationsMashup",
+                conceptMapUuid = "TestObservationsMashup-uuid",
+                registryEntryType = RegistryType.CONCEPT_MAP,
                 version = "1",
-                source_extension_url = sourceUrl,
-                resource_type = "Observation",
-                tenant_id = "test"
+                sourceExtensionUrl = sourceUrl,
+                resourceType = "Observation",
+                tenantId = "test"
             )
         )
         mockkObject(JacksonUtil)
@@ -2196,7 +2191,7 @@ class NormalizationRegistryClientTest {
             concept,
             mockk<Observation>()
         )!!
-        Assertions.assertEquals(
+        assertEquals(
             CodeableConcept(
                 coding = listOf(
                     Coding(
@@ -2210,7 +2205,7 @@ class NormalizationRegistryClientTest {
             ),
             mapping.codeableConcept
         )
-        Assertions.assertEquals(
+        assertEquals(
             Extension(
                 url = Uri(sourceUrl),
                 value = DynamicValue(type = DynamicValueType.CODEABLE_CONCEPT, value = concept)
@@ -2224,16 +2219,16 @@ class NormalizationRegistryClientTest {
         val sourceUrl = "tenant-sourceObservationCode"
         val cmTestRegistry = listOf(
             NormalizationRegistryItem(
-                data_element = "Observation.code",
-                registry_uuid = "registry-uuid",
+                dataElement = "Observation.code",
+                registryUuid = "registry-uuid",
                 filename = "file1.json",
-                concept_map_name = "TestObservationsMashup",
-                concept_map_uuid = "TestObservationsMashup-uuid",
-                registry_entry_type = "concept_map",
+                conceptMapName = "TestObservationsMashup",
+                conceptMapUuid = "TestObservationsMashup-uuid",
+                registryEntryType = RegistryType.CONCEPT_MAP,
                 version = "1",
-                source_extension_url = sourceUrl,
-                resource_type = "Observation",
-                tenant_id = "test"
+                sourceExtensionUrl = sourceUrl,
+                resourceType = "Observation",
+                tenantId = "test"
             )
         )
         mockkObject(JacksonUtil)
@@ -2259,7 +2254,7 @@ class NormalizationRegistryClientTest {
             concept,
             mockk<Observation>()
         )!!
-        Assertions.assertEquals(
+        assertEquals(
             CodeableConcept(
                 coding = listOf(
                     Coding(
@@ -2273,7 +2268,7 @@ class NormalizationRegistryClientTest {
             ),
             mapping.codeableConcept
         )
-        Assertions.assertEquals(
+        assertEquals(
             Extension(
                 url = Uri(sourceUrl),
                 value = DynamicValue(type = DynamicValueType.CODEABLE_CONCEPT, value = concept)
@@ -2287,16 +2282,16 @@ class NormalizationRegistryClientTest {
         val sourceUrl = "tenant-sourceObservationCode"
         val cmTestRegistry = listOf(
             NormalizationRegistryItem(
-                data_element = "Observation.code",
-                registry_uuid = "c4a396d7-1fa1-41e5-9184-85c25eec47a4",
+                dataElement = "Observation.code",
+                registryUuid = "c4a396d7-1fa1-41e5-9184-85c25eec47a4",
                 filename = "file1.json",
-                concept_map_name = "TestObservationsMashup",
-                concept_map_uuid = "TestObservationsMashup-uuid",
-                registry_entry_type = "concept_map",
+                conceptMapName = "TestObservationsMashup",
+                conceptMapUuid = "TestObservationsMashup-uuid",
+                registryEntryType = RegistryType.CONCEPT_MAP,
                 version = "1",
-                source_extension_url = sourceUrl,
-                resource_type = "Observation",
-                tenant_id = "test"
+                sourceExtensionUrl = sourceUrl,
+                resourceType = "Observation",
+                tenantId = "test"
             )
         )
         mockkObject(JacksonUtil)
@@ -2326,7 +2321,7 @@ class NormalizationRegistryClientTest {
             concept,
             mockk<Observation>()
         )!!
-        Assertions.assertEquals(
+        assertEquals(
             CodeableConcept(
                 coding = listOf(
                     Coding(
@@ -2340,7 +2335,7 @@ class NormalizationRegistryClientTest {
             ),
             mapping.codeableConcept
         )
-        Assertions.assertEquals(
+        assertEquals(
             Extension(
                 url = Uri(sourceUrl),
                 value = DynamicValue(type = DynamicValueType.CODEABLE_CONCEPT, value = concept)
@@ -2354,16 +2349,16 @@ class NormalizationRegistryClientTest {
         val sourceUrl = "tenant-sourceObservationCode"
         val cmTestRegistry = listOf(
             NormalizationRegistryItem(
-                data_element = "Observation.code",
-                registry_uuid = "c4a396d7-1fa1-41e5-9184-85c25eec47a4",
+                dataElement = "Observation.code",
+                registryUuid = "c4a396d7-1fa1-41e5-9184-85c25eec47a4",
                 filename = "file1.json",
-                concept_map_name = "Cerncodeobservationstoloinc",
-                concept_map_uuid = "ef731708-e333-4933-af74-6bf97cb4077e",
-                registry_entry_type = "concept_map",
+                conceptMapName = "Cerncodeobservationstoloinc",
+                conceptMapUuid = "ef731708-e333-4933-af74-6bf97cb4077e",
+                registryEntryType = RegistryType.CONCEPT_MAP,
                 version = "1",
-                source_extension_url = sourceUrl,
-                resource_type = "Observation",
-                tenant_id = "test"
+                sourceExtensionUrl = sourceUrl,
+                resourceType = "Observation",
+                tenantId = "test"
             )
         )
         mockkObject(JacksonUtil)
@@ -2393,7 +2388,7 @@ class NormalizationRegistryClientTest {
             concept,
             mockk<Observation>()
         )!!
-        Assertions.assertEquals(
+        assertEquals(
             CodeableConcept(
                 coding = listOf(
                     Coding(
@@ -2407,7 +2402,7 @@ class NormalizationRegistryClientTest {
             ),
             mapping.codeableConcept
         )
-        Assertions.assertEquals(
+        assertEquals(
             Extension(
                 url = Uri(sourceUrl),
                 value = DynamicValue(type = DynamicValueType.CODEABLE_CONCEPT, value = concept)
@@ -2421,16 +2416,16 @@ class NormalizationRegistryClientTest {
         val sourceUrl = "tenant-sourceObservationCode"
         val cmTestRegistry = listOf(
             NormalizationRegistryItem(
-                data_element = "Observation.code",
-                registry_uuid = "c4a396d7-1fa1-41e5-9184-85c25eec47a4",
+                dataElement = "Observation.code",
+                registryUuid = "c4a396d7-1fa1-41e5-9184-85c25eec47a4",
                 filename = "file1.json",
-                concept_map_name = "TestObservationsMashup",
-                concept_map_uuid = "TestObservationsMashup-uuid",
-                registry_entry_type = "concept_map",
+                conceptMapName = "TestObservationsMashup",
+                conceptMapUuid = "TestObservationsMashup-uuid",
+                registryEntryType = RegistryType.CONCEPT_MAP,
                 version = "1",
-                source_extension_url = sourceUrl,
-                resource_type = "Observation",
-                tenant_id = "test"
+                sourceExtensionUrl = sourceUrl,
+                resourceType = "Observation",
+                tenantId = "test"
             )
         )
         mockkObject(JacksonUtil)
@@ -2456,7 +2451,7 @@ class NormalizationRegistryClientTest {
             concept,
             mockk<Observation>()
         )
-        Assertions.assertNull(mapping)
+        assertNull(mapping)
     }
 
     @Test
@@ -2464,16 +2459,16 @@ class NormalizationRegistryClientTest {
         val sourceUrl = "tenant-sourceObservationCode"
         val cmTestRegistry = listOf(
             NormalizationRegistryItem(
-                data_element = "Observation.code",
-                registry_uuid = "c4a396d7-1fa1-41e5-9184-85c25eec47a4",
+                dataElement = "Observation.code",
+                registryUuid = "c4a396d7-1fa1-41e5-9184-85c25eec47a4",
                 filename = "file1.json",
-                concept_map_name = "TestObservationsMashup",
-                concept_map_uuid = "TestObservationsMashup-uuid",
-                registry_entry_type = "concept_map",
+                conceptMapName = "TestObservationsMashup",
+                conceptMapUuid = "TestObservationsMashup-uuid",
+                registryEntryType = RegistryType.CONCEPT_MAP,
                 version = "1",
-                source_extension_url = sourceUrl,
-                resource_type = "Observation",
-                tenant_id = "test"
+                sourceExtensionUrl = sourceUrl,
+                resourceType = "Observation",
+                tenantId = "test"
             )
         )
         mockkObject(JacksonUtil)
@@ -2507,7 +2502,7 @@ class NormalizationRegistryClientTest {
             concept,
             mockk<Observation>()
         )
-        Assertions.assertNull(mapping)
+        assertNull(mapping)
     }
 
     @Test
@@ -2515,16 +2510,16 @@ class NormalizationRegistryClientTest {
         val sourceUrl = "tenant-sourceObservationCode"
         val cmTestRegistry = listOf(
             NormalizationRegistryItem(
-                data_element = "Observation.code",
-                registry_uuid = "registry-uuid",
+                dataElement = "Observation.code",
+                registryUuid = "registry-uuid",
                 filename = "file1.json",
-                concept_map_name = "TestObservationsMashup",
-                concept_map_uuid = "TestObservationsMashup-uuid",
-                registry_entry_type = "concept_map",
+                conceptMapName = "TestObservationsMashup",
+                conceptMapUuid = "TestObservationsMashup-uuid",
+                registryEntryType = RegistryType.CONCEPT_MAP,
                 version = "1",
-                source_extension_url = sourceUrl,
-                resource_type = "Observation",
-                tenant_id = "test"
+                sourceExtensionUrl = sourceUrl,
+                resourceType = "Observation",
+                tenantId = "test"
             )
         )
         mockkObject(JacksonUtil)
@@ -2550,7 +2545,7 @@ class NormalizationRegistryClientTest {
             concept,
             mockk<Observation>()
         )!!
-        Assertions.assertEquals(
+        assertEquals(
             CodeableConcept(
                 coding = listOf(
                     Coding(
@@ -2576,7 +2571,7 @@ class NormalizationRegistryClientTest {
             ),
             mapping.codeableConcept
         )
-        Assertions.assertEquals(
+        assertEquals(
             Extension(
                 url = Uri(sourceUrl),
                 value = DynamicValue(type = DynamicValueType.CODEABLE_CONCEPT, value = concept)
@@ -2590,16 +2585,16 @@ class NormalizationRegistryClientTest {
         val sourceUrl = "tenant-sourceObservationCode"
         val cmTestRegistry = listOf(
             NormalizationRegistryItem(
-                data_element = "Observation.code",
-                registry_uuid = "registry-uuid",
+                dataElement = "Observation.code",
+                registryUuid = "registry-uuid",
                 filename = "file1.json",
-                concept_map_name = "TestObservationsStaging",
-                concept_map_uuid = "TestObservationsStaging-uuid",
-                registry_entry_type = "concept_map",
+                conceptMapName = "TestObservationsStaging",
+                conceptMapUuid = "TestObservationsStaging-uuid",
+                registryEntryType = RegistryType.CONCEPT_MAP,
                 version = "1",
-                source_extension_url = sourceUrl,
-                resource_type = "Observation",
-                tenant_id = "test"
+                sourceExtensionUrl = sourceUrl,
+                resourceType = "Observation",
+                tenantId = "test"
             )
         )
         mockkObject(JacksonUtil)
@@ -2628,7 +2623,7 @@ class NormalizationRegistryClientTest {
             concept,
             mockk<Observation>()
         )!!
-        Assertions.assertEquals(
+        assertEquals(
             CodeableConcept(
                 coding = listOf(
                     Coding(
@@ -2642,7 +2637,7 @@ class NormalizationRegistryClientTest {
             ),
             mapping.codeableConcept
         )
-        Assertions.assertEquals(
+        assertEquals(
             Extension(
                 url = Uri(sourceUrl),
                 value = DynamicValue(type = DynamicValueType.CODEABLE_CONCEPT, value = concept)
@@ -2656,16 +2651,16 @@ class NormalizationRegistryClientTest {
         val sourceUrl = "tenant-sourceObservationCode"
         val cmTestRegistry = listOf(
             NormalizationRegistryItem(
-                data_element = "Observation.code",
-                registry_uuid = "c4a396d7-1fa1-41e5-9184-85c25eec47a4",
+                dataElement = "Observation.code",
+                registryUuid = "c4a396d7-1fa1-41e5-9184-85c25eec47a4",
                 filename = "file1.json",
-                concept_map_name = "TestObservationsStaging",
-                concept_map_uuid = "TestObservationsStaging-uuid",
-                registry_entry_type = "concept_map",
+                conceptMapName = "TestObservationsStaging",
+                conceptMapUuid = "TestObservationsStaging-uuid",
+                registryEntryType = RegistryType.CONCEPT_MAP,
                 version = "1",
-                source_extension_url = sourceUrl,
-                resource_type = "Observation",
-                tenant_id = "test"
+                sourceExtensionUrl = sourceUrl,
+                resourceType = "Observation",
+                tenantId = "test"
             )
         )
         mockkObject(JacksonUtil)
@@ -2698,7 +2693,7 @@ class NormalizationRegistryClientTest {
             concept,
             mockk<Observation>()
         )!!
-        Assertions.assertEquals(
+        assertEquals(
             CodeableConcept(
                 coding = listOf(
                     Coding(
@@ -2712,7 +2707,7 @@ class NormalizationRegistryClientTest {
             ),
             mapping.codeableConcept
         )
-        Assertions.assertEquals(
+        assertEquals(
             Extension(
                 url = Uri(sourceUrl),
                 value = DynamicValue(type = DynamicValueType.CODEABLE_CONCEPT, value = concept)
@@ -2726,16 +2721,16 @@ class NormalizationRegistryClientTest {
         val sourceUrl = "tenant-sourceObservationCode"
         val cmTestRegistry = listOf(
             NormalizationRegistryItem(
-                data_element = "Observation.code",
-                registry_uuid = "c4a396d7-1fa1-41e5-9184-85c25eec47a4",
+                dataElement = "Observation.code",
+                registryUuid = "c4a396d7-1fa1-41e5-9184-85c25eec47a4",
                 filename = "file1.json",
-                concept_map_name = "TestObservationsStaging",
-                concept_map_uuid = "TestObservationsStaging-uuid",
-                registry_entry_type = "concept_map",
+                conceptMapName = "TestObservationsStaging",
+                conceptMapUuid = "TestObservationsStaging-uuid",
+                registryEntryType = RegistryType.CONCEPT_MAP,
                 version = "1",
-                source_extension_url = sourceUrl,
-                resource_type = "Observation",
-                tenant_id = "test"
+                sourceExtensionUrl = sourceUrl,
+                resourceType = "Observation",
+                tenantId = "test"
             )
         )
         mockkObject(JacksonUtil)
@@ -2768,7 +2763,7 @@ class NormalizationRegistryClientTest {
             concept,
             mockk<Observation>()
         )!!
-        Assertions.assertEquals(
+        assertEquals(
             CodeableConcept(
                 coding = listOf(
                     Coding(
@@ -2782,7 +2777,7 @@ class NormalizationRegistryClientTest {
             ),
             mapping.codeableConcept
         )
-        Assertions.assertEquals(
+        assertEquals(
             Extension(
                 url = Uri(sourceUrl),
                 value = DynamicValue(type = DynamicValueType.CODEABLE_CONCEPT, value = concept)
@@ -2796,16 +2791,16 @@ class NormalizationRegistryClientTest {
         val sourceUrl = "tenant-sourceObservationCode"
         val cmTestRegistry = listOf(
             NormalizationRegistryItem(
-                data_element = "Observation.code",
-                registry_uuid = "c4a396d7-1fa1-41e5-9184-85c25eec47a4",
+                dataElement = "Observation.code",
+                registryUuid = "c4a396d7-1fa1-41e5-9184-85c25eec47a4",
                 filename = "file1.json",
-                concept_map_name = "TestObservationsStaging",
-                concept_map_uuid = "TestObservationsStaging-uuid",
-                registry_entry_type = "concept_map",
+                conceptMapName = "TestObservationsStaging",
+                conceptMapUuid = "TestObservationsStaging-uuid",
+                registryEntryType = RegistryType.CONCEPT_MAP,
                 version = "1",
-                source_extension_url = sourceUrl,
-                resource_type = "Observation",
-                tenant_id = "test"
+                sourceExtensionUrl = sourceUrl,
+                resourceType = "Observation",
+                tenantId = "test"
             )
         )
         mockkObject(JacksonUtil)
@@ -2834,7 +2829,7 @@ class NormalizationRegistryClientTest {
             concept1,
             mockk<Observation>()
         )!!
-        Assertions.assertEquals(
+        assertEquals(
             CodeableConcept(
                 coding = listOf(
                     Coding(
@@ -2848,7 +2843,7 @@ class NormalizationRegistryClientTest {
             ),
             mapping1.codeableConcept
         )
-        Assertions.assertEquals(
+        assertEquals(
             Extension(
                 url = Uri(sourceUrl),
                 value = DynamicValue(type = DynamicValueType.CODEABLE_CONCEPT, value = concept1)
@@ -2872,7 +2867,7 @@ class NormalizationRegistryClientTest {
             concept2,
             mockk<Observation>()
         )!!
-        Assertions.assertEquals(
+        assertEquals(
             CodeableConcept(
                 coding = listOf(
                     Coding(
@@ -2886,7 +2881,7 @@ class NormalizationRegistryClientTest {
             ),
             mapping2.codeableConcept
         )
-        Assertions.assertEquals(
+        assertEquals(
             Extension(
                 url = Uri(sourceUrl),
                 value = DynamicValue(type = DynamicValueType.CODEABLE_CONCEPT, value = concept2)
@@ -2916,7 +2911,7 @@ class NormalizationRegistryClientTest {
             concept3,
             mockk<Observation>()
         )!!
-        Assertions.assertEquals(
+        assertEquals(
             CodeableConcept(
                 coding = listOf(
                     Coding(
@@ -2931,7 +2926,7 @@ class NormalizationRegistryClientTest {
             ),
             mapping3.codeableConcept
         )
-        Assertions.assertEquals(
+        assertEquals(
             Extension(
                 url = Uri(sourceUrl),
                 value = DynamicValue(type = DynamicValueType.CODEABLE_CONCEPT, value = concept3)
@@ -2945,16 +2940,16 @@ class NormalizationRegistryClientTest {
         val sourceUrl = "tenant-sourceObservationCode"
         val cmTestRegistry = listOf(
             NormalizationRegistryItem(
-                data_element = "Observation.code",
-                registry_uuid = "c4a396d7-1fa1-41e5-9184-85c25eec47a4",
+                dataElement = "Observation.code",
+                registryUuid = "c4a396d7-1fa1-41e5-9184-85c25eec47a4",
                 filename = "file1.json",
-                concept_map_name = "TestObservationsStaging",
-                concept_map_uuid = "TestObservationsStaging-uuid",
-                registry_entry_type = "concept_map",
+                conceptMapName = "TestObservationsStaging",
+                conceptMapUuid = "TestObservationsStaging-uuid",
+                registryEntryType = RegistryType.CONCEPT_MAP,
                 version = "1",
-                source_extension_url = sourceUrl,
-                resource_type = "Observation",
-                tenant_id = "test"
+                sourceExtensionUrl = sourceUrl,
+                resourceType = "Observation",
+                tenantId = "test"
             )
         )
         mockkObject(JacksonUtil)
@@ -2988,47 +2983,47 @@ class NormalizationRegistryClientTest {
             concept,
             mockk<Observation>()
         )
-        Assertions.assertNull(mapping)
+        assertNull(mapping)
     }
 
     @Test
     fun `getConceptMapping for CodeableConcept concatenates multiple matching concept maps - errors if URLs do not agree`() {
         val cmTestRegistry = listOf(
             NormalizationRegistryItem(
-                data_element = "Observation.code",
-                registry_uuid = "11111",
+                dataElement = "Observation.code",
+                registryUuid = "11111",
                 filename = "file1.json",
-                concept_map_name = "Staging-test-1",
-                concept_map_uuid = "cm-111",
-                registry_entry_type = "concept_map",
+                conceptMapName = "Staging-test-1",
+                conceptMapUuid = "cm-111",
+                registryEntryType = RegistryType.CONCEPT_MAP,
                 version = "1",
-                source_extension_url = "ObservationCode-1",
-                resource_type = "Observation",
-                tenant_id = "test"
+                sourceExtensionUrl = "ObservationCode-1",
+                resourceType = "Observation",
+                tenantId = "test"
             ),
             NormalizationRegistryItem(
-                data_element = "Observation.code",
-                registry_uuid = "22222",
+                dataElement = "Observation.code",
+                registryUuid = "22222",
                 filename = "file2.json",
-                concept_map_name = "AllVitals-test-2",
-                concept_map_uuid = "cm-222",
-                registry_entry_type = "concept_map",
+                conceptMapName = "AllVitals-test-2",
+                conceptMapUuid = "cm-222",
+                registryEntryType = RegistryType.CONCEPT_MAP,
                 version = "1",
-                source_extension_url = "ObservationCode-2",
-                resource_type = "Observation",
-                tenant_id = "test"
+                sourceExtensionUrl = "ObservationCode-2",
+                resourceType = "Observation",
+                tenantId = "test"
             ),
             NormalizationRegistryItem(
-                data_element = "Observation.code",
-                registry_uuid = "33333",
+                dataElement = "Observation.code",
+                registryUuid = "33333",
                 filename = "file3.json",
-                concept_map_name = "HeartRate-test-3",
-                concept_map_uuid = "cm-333",
-                registry_entry_type = "concept_map",
+                conceptMapName = "HeartRate-test-3",
+                conceptMapUuid = "cm-333",
+                registryEntryType = RegistryType.CONCEPT_MAP,
                 version = "1",
-                source_extension_url = "ObservationCode-3",
-                resource_type = "Observation",
-                tenant_id = "test"
+                sourceExtensionUrl = "ObservationCode-3",
+                resourceType = "Observation",
+                tenantId = "test"
             )
         )
         val mockkMap1 = mockk<ConceptMap> {
@@ -3173,7 +3168,7 @@ class NormalizationRegistryClientTest {
                 )
             }
 
-        Assertions.assertEquals(
+        assertEquals(
             "Concept map(s) for tenant 'test' and Observation.code have missing or inconsistent source extension URLs",
             exception.message
         )
@@ -3184,16 +3179,16 @@ class NormalizationRegistryClientTest {
         val sourceUrl = "tenant-sourceObservationCode"
         val cmTestRegistry = listOf(
             NormalizationRegistryItem(
-                data_element = "Observation.code",
-                registry_uuid = "registry-uuid",
+                dataElement = "Observation.code",
+                registryUuid = "registry-uuid",
                 filename = "file1.json",
-                concept_map_name = "TestObservationsMashup",
-                concept_map_uuid = "TestObservationsMashup-uuid",
-                registry_entry_type = "concept_map",
+                conceptMapName = "TestObservationsMashup",
+                conceptMapUuid = "TestObservationsMashup-uuid",
+                registryEntryType = RegistryType.CONCEPT_MAP,
                 version = "1",
-                source_extension_url = sourceUrl,
-                resource_type = "Observation",
-                tenant_id = "test"
+                sourceExtensionUrl = sourceUrl,
+                resourceType = "Observation",
+                tenantId = "test"
             )
         )
         mockkObject(JacksonUtil)
@@ -3274,7 +3269,7 @@ class NormalizationRegistryClientTest {
                     mockk<Observation>()
                 )
             }
-        Assertions.assertEquals(
+        assertEquals(
             """Could not create SourceConcept from {"valueCodeableConcept": {"coding": [{"code": "72166-2", "display": null, "system": null}]}}""",
             exception.message
         )
@@ -3285,16 +3280,16 @@ class NormalizationRegistryClientTest {
         val sourceUrl = "tenant-sourceObservationCode"
         val cmTestRegistry = listOf(
             NormalizationRegistryItem(
-                data_element = "Observation.code",
-                registry_uuid = "registry-uuid",
+                dataElement = "Observation.code",
+                registryUuid = "registry-uuid",
                 filename = "file1.json",
-                concept_map_name = "TestObservationsMashup",
-                concept_map_uuid = "TestObservationsMashup-uuid",
-                registry_entry_type = "concept_map",
+                conceptMapName = "TestObservationsMashup",
+                conceptMapUuid = "TestObservationsMashup-uuid",
+                registryEntryType = RegistryType.CONCEPT_MAP,
                 version = "1",
-                source_extension_url = sourceUrl,
-                resource_type = "Observation",
-                tenant_id = "test"
+                sourceExtensionUrl = sourceUrl,
+                resourceType = "Observation",
+                tenantId = "test"
             )
         )
         mockkObject(JacksonUtil)
@@ -3375,7 +3370,7 @@ class NormalizationRegistryClientTest {
                     mockk<Observation>()
                 )
             }
-        Assertions.assertEquals(
+        assertEquals(
             """Could not create SourceConcept from {"valueCodeableConcept": {"coding": [{"code": null, "display": null, "system": "system"}]}}""",
             exception.message
         )
@@ -3386,16 +3381,16 @@ class NormalizationRegistryClientTest {
         val sourceUrl = "tenant-sourceObservationCode"
         val cmTestRegistry = listOf(
             NormalizationRegistryItem(
-                data_element = "Observation.code",
-                registry_uuid = "registry-uuid",
+                dataElement = "Observation.code",
+                registryUuid = "registry-uuid",
                 filename = "file1.json",
-                concept_map_name = "TestObservationsMashup",
-                concept_map_uuid = "TestObservationsMashup-uuid",
-                registry_entry_type = "concept_map",
+                conceptMapName = "TestObservationsMashup",
+                conceptMapUuid = "TestObservationsMashup-uuid",
+                registryEntryType = RegistryType.CONCEPT_MAP,
                 version = "1",
-                source_extension_url = sourceUrl,
-                resource_type = "Observation",
-                tenant_id = "test"
+                sourceExtensionUrl = sourceUrl,
+                resourceType = "Observation",
+                tenantId = "test"
             )
         )
         mockkObject(JacksonUtil)
@@ -3469,164 +3464,8 @@ class NormalizationRegistryClientTest {
         )
 
         val mapping = client.getConceptMapping(tenant, "Observation.code", concept, mockk<Observation>())
-        Assertions.assertNotNull(mapping)
-        Assertions.assertEquals("72166-2", mapping?.codeableConcept?.coding?.first()?.code?.value)
-    }
-
-    @Test
-    fun `getConceptMapping for Coding pulls new registry and maps when a single map is out-of-date`() {
-        val cmTestRegistry = listOf(
-            NormalizationRegistryItem(
-                data_element = "Appointment.status",
-                registry_uuid = "12345",
-                filename = "file1.json",
-                concept_map_name = "AppointmentStatus-tenant",
-                concept_map_uuid = "cm-111",
-                registry_entry_type = "concept_map",
-                version = "1",
-                source_extension_url = "ext1",
-                resource_type = "Appointment",
-                tenant_id = "test"
-            ),
-            NormalizationRegistryItem(
-                data_element = "Patient.telecom.use",
-                registry_uuid = "67890",
-                filename = "file2.json",
-                concept_map_name = "PatientTelecomUse-tenant",
-                concept_map_uuid = "cm-222",
-                registry_entry_type = "concept_map",
-                version = "1",
-                source_extension_url = "ext2",
-                resource_type = "Patient",
-                tenant_id = "test"
-            )
-        )
-        val mockkMap1 = mockk<ConceptMap> {
-            every { group } returns listOf(
-                mockk {
-                    every { target?.value } returns "targetSystemAAA"
-                    every { targetVersion?.value } returns "targetVersionAAA"
-                    every { source?.value } returns "sourceSystemA"
-                    every { element } returns listOf(
-                        mockk {
-                            every { code?.value } returns "sourceValueA"
-                            every { display?.value } returns "targetTextAAA"
-                            every { target } returns listOf(
-                                mockk {
-                                    every { code?.value } returns "targetValueAAA"
-                                    every { display?.value } returns "targetDisplayAAA"
-                                    every { dependsOn } returns emptyList()
-                                }
-                            )
-                        },
-                        mockk {
-                            every { code?.value } returns "sourceValueB"
-                            every { display?.value } returns "targetTextBBB"
-                            every { target } returns listOf(
-                                mockk {
-                                    every { code?.value } returns "targetValueBBB"
-                                    every { display?.value } returns "targetDisplayBBB"
-                                    every { dependsOn } returns emptyList()
-                                }
-                            )
-                        }
-                    )
-                }
-            )
-        }
-        val mockkMap2 = mockk<ConceptMap> {
-            every { group } returns listOf(
-                mockk {
-                    every { target?.value } returns "targetSystem222"
-                    every { targetVersion?.value } returns "targetVersion222"
-                    every { source?.value } returns "sourceSystem2"
-                    every { element } returns listOf(
-                        mockk {
-                            every { code?.value } returns "sourceValue2"
-                            every { display?.value } returns "targetText222"
-                            every { target } returns listOf(
-                                mockk {
-                                    every { code?.value } returns "targetValue222"
-                                    every { display?.value } returns "targetDisplay222"
-                                    every { dependsOn } returns emptyList()
-                                }
-                            )
-                        }
-                    )
-                }
-            )
-        }
-        mockkObject(JacksonUtil)
-        every { ociClient.getObjectFromINFX(registryPath) } returns "registryJson"
-        every {
-            JacksonUtil.readJsonList(
-                "registryJson",
-                NormalizationRegistryItem::class
-            )
-        } returns cmTestRegistry
-        every { ociClient.getObjectFromINFX("file1.json") } returns "mapJson1"
-        every { JacksonUtil.readJsonObject("mapJson1", ConceptMap::class) } returns mockkMap1
-        every { ociClient.getObjectFromINFX("file2.json") } returns "mapJson2"
-        every { JacksonUtil.readJsonObject("mapJson2", ConceptMap::class) } returns mockkMap2
-        val key1 = CacheKey(
-            NormalizationRegistryItem.RegistryType.ConceptMap,
-            "Appointment.status",
-            "test"
-        )
-        client.conceptMapCache.put(key1, mockk(relaxed = true))
-        val key1LastUpdated = LocalDateTime.now().minusMinutes(25)
-        client.itemLastUpdated[key1] = key1LastUpdated
-
-        val key2 = CacheKey(
-            NormalizationRegistryItem.RegistryType.ConceptMap,
-            "Patient.telecom.use",
-            "test"
-        )
-        client.conceptMapCache.put(key2, mockk(relaxed = true))
-        val key2LastUpdated = LocalDateTime.now().minusDays(2)
-        client.itemLastUpdated[key2] = key2LastUpdated
-
-        val registryLastUpdated = LocalDateTime.now().minusHours(1)
-        client.registryLastUpdated = registryLastUpdated
-
-        val coding1 = Coding(
-            code = Code(value = "sourceValueA"),
-            system = Uri(value = "sourceSystemA")
-        )
-
-        // We don't care about the mapping for this test -- really this is because we're using a mock registry, and thus nothing of actual value is present.
-        client.getConceptMapping(
-            tenant,
-            "Appointment.status",
-            coding1,
-            mockk<Appointment>()
-        )
-
-        // Appointment.status did not trigger an item reload.
-        Assertions.assertEquals(key1LastUpdated, client.itemLastUpdated[key1])
-        Assertions.assertEquals(key2LastUpdated, client.itemLastUpdated[key2])
-        Assertions.assertEquals(registryLastUpdated, client.registryLastUpdated)
-
-        val coding2 = Coding(
-            code = Code(value = "sourceValue2"),
-            system = Uri(value = "sourceSystem2")
-        )
-        val mapping2 =
-            client.getConceptMapping(
-                tenant,
-                "Patient.telecom.use",
-                coding2,
-                mockk<Patient>()
-            )!!
-        Assertions.assertEquals(mapping2.coding.code!!.value, "targetValue222")
-        Assertions.assertEquals(mapping2.coding.system!!.value, "targetSystem222")
-        Assertions.assertEquals(mapping2.extension.url!!.value, "ext2")
-        Assertions.assertEquals(mapping2.extension.value!!.value, coding2)
-
-        // Patient.telecom.use did trigger an item reload.
-        Assertions.assertNull(client.itemLastUpdated[key1])
-        Assertions.assertTrue(client.itemLastUpdated[key2]!!.isAfter(key2LastUpdated))
-        Assertions.assertTrue(client.registryLastUpdated.isAfter(registryLastUpdated))
+        assertNotNull(mapping)
+        assertEquals("72166-2", mapping?.codeableConcept?.coding?.first()?.code?.value)
     }
 
     private val dependsOn = ConceptMapDependsOn(
@@ -3675,18 +3514,17 @@ class NormalizationRegistryClientTest {
     @Test
     fun `dependsOnEvaluator not found for target with no dependsOn data`() {
         val registry = ConceptMapItem(
-            source_extension_url = "ext-AB",
+            sourceExtensionUrl = "ext-AB",
             map = mapAB,
             metadata = listOf(conceptMapMetadata)
         )
         val key = CacheKey(
-            NormalizationRegistryItem.RegistryType.ConceptMap,
+            RegistryType.CONCEPT_MAP,
             "Observation.code",
             tenant
         )
         client.conceptMapCache.put(key, registry)
         client.registryLastUpdated = LocalDateTime.now()
-        client.itemLastUpdated[key] = LocalDateTime.now()
 
         val sourceCoding = Coding(
             system = Uri("systemA"),
@@ -3711,11 +3549,11 @@ class NormalizationRegistryClientTest {
             sourceCoding,
             mockk<Observation>()
         )
-        Assertions.assertEquals(
+        assertEquals(
             targetCoding,
             mappedResult?.coding
         )
-        Assertions.assertEquals(
+        assertEquals(
             targetSourceExtension,
             mappedResult?.extension
         )
@@ -3726,18 +3564,17 @@ class NormalizationRegistryClientTest {
     @Test
     fun `dependsOnEvaluator found for target with no dependsOn data`() {
         val registry = ConceptMapItem(
-            source_extension_url = "ext-AB",
+            sourceExtensionUrl = "ext-AB",
             map = mapAB,
             metadata = listOf(conceptMapMetadata)
         )
         val key = CacheKey(
-            NormalizationRegistryItem.RegistryType.ConceptMap,
+            RegistryType.CONCEPT_MAP,
             "Medication.code",
             tenant
         )
         client.conceptMapCache.put(key, registry)
         client.registryLastUpdated = LocalDateTime.now()
-        client.itemLastUpdated[key] = LocalDateTime.now()
 
         val sourceCoding = Coding(
             system = Uri("systemA"),
@@ -3762,11 +3599,11 @@ class NormalizationRegistryClientTest {
             sourceCoding,
             mockk<Medication>()
         )
-        Assertions.assertEquals(
+        assertEquals(
             targetCoding,
             mappedResult?.coding
         )
-        Assertions.assertEquals(
+        assertEquals(
             targetSourceExtension,
             mappedResult?.extension
         )
@@ -3777,18 +3614,17 @@ class NormalizationRegistryClientTest {
     @Test
     fun `dependsOnEvaluator not found for target with dependsOn data`() {
         val registry = ConceptMapItem(
-            source_extension_url = "ext-AB",
+            sourceExtensionUrl = "ext-AB",
             map = mapOf(mappingWithDependsOnTargets),
             metadata = listOf(conceptMapMetadata)
         )
         val key = CacheKey(
-            NormalizationRegistryItem.RegistryType.ConceptMap,
+            RegistryType.CONCEPT_MAP,
             "Observation.code",
             tenant
         )
         client.conceptMapCache.put(key, registry)
         client.registryLastUpdated = LocalDateTime.now()
-        client.itemLastUpdated[key] = LocalDateTime.now()
 
         val sourceCoding = Coding(
             system = Uri("systemA"),
@@ -3800,7 +3636,7 @@ class NormalizationRegistryClientTest {
             sourceCoding,
             mockk<Observation>()
         )
-        Assertions.assertNull(mappedResult)
+        assertNull(mappedResult)
 
         verify(exactly = 0) { medicationDependsOnEvaluator.meetsDependsOn(any(), any()) }
     }
@@ -3808,18 +3644,17 @@ class NormalizationRegistryClientTest {
     @Test
     fun `dependsOnEvaluator found and no target dependsOn is met`() {
         val registry = ConceptMapItem(
-            source_extension_url = "ext-AB",
+            sourceExtensionUrl = "ext-AB",
             map = mapOf(mappingWithDependsOnTargets),
             metadata = listOf(conceptMapMetadata)
         )
         val key = CacheKey(
-            NormalizationRegistryItem.RegistryType.ConceptMap,
+            RegistryType.CONCEPT_MAP,
             "Observation.code",
             tenant
         )
         client.conceptMapCache.put(key, registry)
         client.registryLastUpdated = LocalDateTime.now()
-        client.itemLastUpdated[key] = LocalDateTime.now()
 
         val medication = mockk<Medication>()
 
@@ -3836,7 +3671,7 @@ class NormalizationRegistryClientTest {
             sourceCoding,
             medication
         )
-        Assertions.assertNull(mappedResult)
+        assertNull(mappedResult)
 
         verify(exactly = 1) { medicationDependsOnEvaluator.meetsDependsOn(medication, listOf(dependsOn)) }
         verify(exactly = 1) { medicationDependsOnEvaluator.meetsDependsOn(medication, listOf(dependsOn2)) }
@@ -3845,18 +3680,17 @@ class NormalizationRegistryClientTest {
     @Test
     fun `dependsOnEvaluator found and single target dependsOn is met`() {
         val registry = ConceptMapItem(
-            source_extension_url = "ext-AB",
+            sourceExtensionUrl = "ext-AB",
             map = mapOf(mappingWithDependsOnTargets),
             metadata = listOf(conceptMapMetadata)
         )
         val key = CacheKey(
-            NormalizationRegistryItem.RegistryType.ConceptMap,
+            RegistryType.CONCEPT_MAP,
             "Observation.code",
             tenant
         )
         client.conceptMapCache.put(key, registry)
         client.registryLastUpdated = LocalDateTime.now()
-        client.itemLastUpdated[key] = LocalDateTime.now()
 
         val medication = mockk<Medication>()
 
@@ -3886,11 +3720,11 @@ class NormalizationRegistryClientTest {
             sourceCoding,
             medication
         )
-        Assertions.assertEquals(
+        assertEquals(
             targetCoding,
             mappedResult?.coding
         )
-        Assertions.assertEquals(
+        assertEquals(
             targetSourceExtension,
             mappedResult?.extension
         )
@@ -3902,18 +3736,17 @@ class NormalizationRegistryClientTest {
     @Test
     fun `dependsOnEvaluator found and multiple target dependsOn are met`() {
         val registry = ConceptMapItem(
-            source_extension_url = "ext-AB",
+            sourceExtensionUrl = "ext-AB",
             map = mapOf(mappingWithDependsOnTargets),
             metadata = listOf(conceptMapMetadata)
         )
         val key = CacheKey(
-            NormalizationRegistryItem.RegistryType.ConceptMap,
+            RegistryType.CONCEPT_MAP,
             "Observation.code",
             tenant
         )
         client.conceptMapCache.put(key, registry)
         client.registryLastUpdated = LocalDateTime.now()
-        client.itemLastUpdated[key] = LocalDateTime.now()
 
         val medication = mockk<Medication>()
 
@@ -3945,10 +3778,368 @@ class NormalizationRegistryClientTest {
                 medication
             )
         }
-        Assertions.assertTrue(exception.message?.startsWith("Multiple qualified TargetConcepts found for") ?: false)
+        assertTrue(exception.message?.startsWith("Multiple qualified TargetConcepts found for") ?: false)
 
         verify(exactly = 1) { medicationDependsOnEvaluator.meetsDependsOn(medication, listOf(dependsOn)) }
         verify(exactly = 1) { medicationDependsOnEvaluator.meetsDependsOn(medication, listOf(dependsOn2)) }
+    }
+
+    @Test
+    fun `registry invalidates cache item missing from new registry`() {
+        val registryItem1 = NormalizationRegistryItem(
+            dataElement = "Patient.telecom.system",
+            registryUuid = "12345",
+            filename = "file1.json",
+            conceptMapName = "PatientTelecomSystem-tenant",
+            conceptMapUuid = "cm-111",
+            registryEntryType = RegistryType.CONCEPT_MAP,
+            version = "1",
+            sourceExtensionUrl = "ext1",
+            resourceType = "Patient",
+            tenantId = "test"
+        )
+        val key1 = CacheKey(
+            RegistryType.CONCEPT_MAP,
+            "Patient.telecom.system",
+            "test"
+        )
+
+        val key2 = CacheKey(
+            RegistryType.CONCEPT_MAP,
+            "Patient.telecom.use",
+            "test"
+        )
+        val registryItem2 = NormalizationRegistryItem(
+            dataElement = "Patient.telecom.use",
+            registryUuid = "67890",
+            filename = "file2.json",
+            conceptMapName = "PatientTelecomUse-tenant",
+            conceptMapUuid = "cm-222",
+            registryEntryType = RegistryType.CONCEPT_MAP,
+            version = "1",
+            sourceExtensionUrl = "ext2",
+            resourceType = "Patient",
+            tenantId = "test"
+        )
+
+        client.registry = mapOf(key1 to listOf(registryItem1), key2 to listOf(registryItem2))
+        client.registryLastUpdated = LocalDateTime.MIN
+
+        val registry1 = ConceptMapItem(
+            sourceExtensionUrl = "ext1",
+            map = mapOf(
+                SourceConcept(
+                    element = setOf(
+                        SourceKey(
+                            value = "MyPhone",
+                            system = "http://projectronin.io/fhir/CodeSystem/ContactPointSystem"
+                        )
+                    )
+                ) to listOf(
+                    TargetConcept(
+                        element = listOf(
+                            TargetValue(
+                                "good-or-bad-for-enum",
+                                "good-or-bad-for-enum",
+                                "good-or-bad-for-enum",
+                                "1"
+                            )
+                        ),
+                        text = "good-or-bad-for-enum, not validated here"
+                    )
+                )
+            ),
+            metadata = listOf(conceptMapMetadata)
+        )
+        client.conceptMapCache.put(key1, registry1)
+
+        val registry2 = ConceptMapItem(
+            sourceExtensionUrl = "ext1",
+            map = mapOf(
+                SourceConcept(
+                    element = setOf(
+                        SourceKey(
+                            value = "MyPhone",
+                            system = "http://projectronin.io/fhir/CodeSystem/ContactPointUse"
+                        )
+                    )
+                ) to listOf(
+                    TargetConcept(
+                        element = listOf(
+                            TargetValue(
+                                "good-or-bad-for-enum",
+                                "good-or-bad-for-enum",
+                                "good-or-bad-for-enum",
+                                "1"
+                            )
+                        ),
+                        text = "good-or-bad-for-enum, not validated here"
+                    )
+                )
+            ),
+            metadata = listOf(conceptMapMetadata)
+        )
+        client.conceptMapCache.put(key2, registry2)
+
+        val newRegistry = listOf(registryItem1)
+        mockkObject(JacksonUtil)
+        every { ociClient.getObjectFromINFX(registryPath) } returns "registryJson"
+        every {
+            JacksonUtil.readJsonList(
+                "registryJson",
+                NormalizationRegistryItem::class
+            )
+        } returns newRegistry
+
+        client.checkRegistryStatus(LocalDateTime.now())
+
+        assertNotEquals(LocalDateTime.MIN, client.registryLastUpdated)
+        assertEquals(mapOf(key1 to listOf(registryItem1)), client.registry)
+        assertEquals(registry1, client.conceptMapCache.getIfPresent(key1))
+        assertNull(client.conceptMapCache.getIfPresent(key2))
+    }
+
+    @Test
+    fun `registry invalidates cache item that has changed in new registry`() {
+        val registryItem1 = NormalizationRegistryItem(
+            dataElement = "Patient.telecom.system",
+            registryUuid = "12345",
+            filename = "file1.json",
+            conceptMapName = "PatientTelecomSystem-tenant",
+            conceptMapUuid = "cm-111",
+            registryEntryType = RegistryType.CONCEPT_MAP,
+            version = "1",
+            sourceExtensionUrl = "ext1",
+            resourceType = "Patient",
+            tenantId = "test"
+        )
+        val key1 = CacheKey(
+            RegistryType.CONCEPT_MAP,
+            "Patient.telecom.system",
+            "test"
+        )
+
+        val key2 = CacheKey(
+            RegistryType.CONCEPT_MAP,
+            "Patient.telecom.use",
+            "test"
+        )
+        val registryItem2 = NormalizationRegistryItem(
+            dataElement = "Patient.telecom.use",
+            registryUuid = "67890",
+            filename = "file2.json",
+            conceptMapName = "PatientTelecomUse-tenant",
+            conceptMapUuid = "cm-222",
+            registryEntryType = RegistryType.CONCEPT_MAP,
+            version = "1",
+            sourceExtensionUrl = "ext2",
+            resourceType = "Patient",
+            tenantId = "test"
+        )
+
+        client.registry = mapOf(key1 to listOf(registryItem1), key2 to listOf(registryItem2))
+        client.registryLastUpdated = LocalDateTime.MIN
+
+        val registry1 = ConceptMapItem(
+            sourceExtensionUrl = "ext1",
+            map = mapOf(
+                SourceConcept(
+                    element = setOf(
+                        SourceKey(
+                            value = "MyPhone",
+                            system = "http://projectronin.io/fhir/CodeSystem/ContactPointSystem"
+                        )
+                    )
+                ) to listOf(
+                    TargetConcept(
+                        element = listOf(
+                            TargetValue(
+                                "good-or-bad-for-enum",
+                                "good-or-bad-for-enum",
+                                "good-or-bad-for-enum",
+                                "1"
+                            )
+                        ),
+                        text = "good-or-bad-for-enum, not validated here"
+                    )
+                )
+            ),
+            metadata = listOf(conceptMapMetadata)
+        )
+        client.conceptMapCache.put(key1, registry1)
+
+        val registry2 = ConceptMapItem(
+            sourceExtensionUrl = "ext1",
+            map = mapOf(
+                SourceConcept(
+                    element = setOf(
+                        SourceKey(
+                            value = "MyPhone",
+                            system = "http://projectronin.io/fhir/CodeSystem/ContactPointUse"
+                        )
+                    )
+                ) to listOf(
+                    TargetConcept(
+                        element = listOf(
+                            TargetValue(
+                                "good-or-bad-for-enum",
+                                "good-or-bad-for-enum",
+                                "good-or-bad-for-enum",
+                                "1"
+                            )
+                        ),
+                        text = "good-or-bad-for-enum, not validated here"
+                    )
+                )
+            ),
+            metadata = listOf(conceptMapMetadata)
+        )
+        client.conceptMapCache.put(key2, registry2)
+
+        val registryItem3 = NormalizationRegistryItem(
+            dataElement = "Patient.telecom.use",
+            registryUuid = "67890",
+            filename = "file2.json",
+            conceptMapName = "PatientTelecomUse-tenant",
+            conceptMapUuid = "cm-222",
+            registryEntryType = RegistryType.CONCEPT_MAP,
+            version = "2",
+            sourceExtensionUrl = "ext2",
+            resourceType = "Patient",
+            tenantId = "test"
+        )
+
+        val newRegistry = listOf(registryItem1, registryItem3)
+        mockkObject(JacksonUtil)
+        every { ociClient.getObjectFromINFX(registryPath) } returns "registryJson"
+        every {
+            JacksonUtil.readJsonList(
+                "registryJson",
+                NormalizationRegistryItem::class
+            )
+        } returns newRegistry
+
+        client.checkRegistryStatus(LocalDateTime.now())
+
+        assertNotEquals(LocalDateTime.MIN, client.registryLastUpdated)
+        assertEquals(mapOf(key1 to listOf(registryItem1), key2 to listOf(registryItem3)), client.registry)
+        assertEquals(registry1, client.conceptMapCache.getIfPresent(key1))
+        assertNull(client.conceptMapCache.getIfPresent(key2))
+    }
+
+    @Test
+    fun `registry does not invalidate cache item that has not changed in new registry`() {
+        val registryItem1 = NormalizationRegistryItem(
+            dataElement = "Patient.telecom.system",
+            registryUuid = "12345",
+            filename = "file1.json",
+            conceptMapName = "PatientTelecomSystem-tenant",
+            conceptMapUuid = "cm-111",
+            registryEntryType = RegistryType.CONCEPT_MAP,
+            version = "1",
+            sourceExtensionUrl = "ext1",
+            resourceType = "Patient",
+            tenantId = "test"
+        )
+        val key1 = CacheKey(
+            RegistryType.CONCEPT_MAP,
+            "Patient.telecom.system",
+            "test"
+        )
+
+        val key2 = CacheKey(
+            RegistryType.CONCEPT_MAP,
+            "Patient.telecom.use",
+            "test"
+        )
+        val registryItem2 = NormalizationRegistryItem(
+            dataElement = "Patient.telecom.use",
+            registryUuid = "67890",
+            filename = "file2.json",
+            conceptMapName = "PatientTelecomUse-tenant",
+            conceptMapUuid = "cm-222",
+            registryEntryType = RegistryType.CONCEPT_MAP,
+            version = "1",
+            sourceExtensionUrl = "ext2",
+            resourceType = "Patient",
+            tenantId = "test"
+        )
+
+        client.registry = mapOf(key1 to listOf(registryItem1), key2 to listOf(registryItem2))
+        client.registryLastUpdated = LocalDateTime.MIN
+
+        val registry1 = ConceptMapItem(
+            sourceExtensionUrl = "ext1",
+            map = mapOf(
+                SourceConcept(
+                    element = setOf(
+                        SourceKey(
+                            value = "MyPhone",
+                            system = "http://projectronin.io/fhir/CodeSystem/ContactPointSystem"
+                        )
+                    )
+                ) to listOf(
+                    TargetConcept(
+                        element = listOf(
+                            TargetValue(
+                                "good-or-bad-for-enum",
+                                "good-or-bad-for-enum",
+                                "good-or-bad-for-enum",
+                                "1"
+                            )
+                        ),
+                        text = "good-or-bad-for-enum, not validated here"
+                    )
+                )
+            ),
+            metadata = listOf(conceptMapMetadata)
+        )
+        client.conceptMapCache.put(key1, registry1)
+
+        val registry2 = ConceptMapItem(
+            sourceExtensionUrl = "ext1",
+            map = mapOf(
+                SourceConcept(
+                    element = setOf(
+                        SourceKey(
+                            value = "MyPhone",
+                            system = "http://projectronin.io/fhir/CodeSystem/ContactPointUse"
+                        )
+                    )
+                ) to listOf(
+                    TargetConcept(
+                        element = listOf(
+                            TargetValue(
+                                "good-or-bad-for-enum",
+                                "good-or-bad-for-enum",
+                                "good-or-bad-for-enum",
+                                "1"
+                            )
+                        ),
+                        text = "good-or-bad-for-enum, not validated here"
+                    )
+                )
+            ),
+            metadata = listOf(conceptMapMetadata)
+        )
+        client.conceptMapCache.put(key2, registry2)
+
+        val newRegistry = listOf(registryItem1, registryItem2)
+        mockkObject(JacksonUtil)
+        every { ociClient.getObjectFromINFX(registryPath) } returns "registryJson"
+        every {
+            JacksonUtil.readJsonList(
+                "registryJson",
+                NormalizationRegistryItem::class
+            )
+        } returns newRegistry
+
+        client.checkRegistryStatus(LocalDateTime.now())
+
+        assertNotEquals(LocalDateTime.MIN, client.registryLastUpdated)
+        assertEquals(mapOf(key1 to listOf(registryItem1), key2 to listOf(registryItem2)), client.registry)
+        assertEquals(registry1, client.conceptMapCache.getIfPresent(key1))
+        assertEquals(registry2, client.conceptMapCache.getIfPresent(key2))
     }
 }
 

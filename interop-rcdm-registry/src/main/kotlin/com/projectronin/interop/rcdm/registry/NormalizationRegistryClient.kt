@@ -1,6 +1,8 @@
 package com.projectronin.interop.rcdm.registry
 
+import com.fasterxml.jackson.annotation.JsonValue
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.github.benmanes.caffeine.cache.Cache
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.projectronin.interop.common.enums.CodedEnum
 import com.projectronin.interop.common.jackson.JacksonManager
@@ -32,7 +34,6 @@ import kotlinx.coroutines.sync.withLock
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
-import java.time.Duration
 import java.time.LocalDateTime
 import kotlin.reflect.KClass
 
@@ -49,12 +50,10 @@ class NormalizationRegistryClient(
 
     private val dependsOnEvaluatorByType = dependsOnEvaluators.associateBy { it.resourceType }
 
-    internal var conceptMapCache = Caffeine.newBuilder().expireAfterWrite(Duration.ofHours(defaultReloadHours.toLong()))
-        .build<CacheKey, ConceptMapItem>()
-    internal var valueSetCache = Caffeine.newBuilder().expireAfterWrite(Duration.ofHours(defaultReloadHours.toLong()))
-        .build<CacheKey, ValueSetItem>()
-    internal val itemLastUpdated = mutableMapOf<CacheKey, LocalDateTime>()
-    private var registry = listOf<NormalizationRegistryItem>()
+    internal var conceptMapCache = Caffeine.newBuilder().build<CacheKey, ConceptMapItem>()
+    internal var valueSetCache = Caffeine.newBuilder().build<CacheKey, ValueSetItem>()
+
+    internal var registry = mapOf<CacheKey, List<NormalizationRegistryItem>>()
     internal var registryLastUpdated = LocalDateTime.MIN
 
     private var registryMutex = Mutex()
@@ -74,7 +73,7 @@ class NormalizationRegistryClient(
         forceCacheReloadTS: LocalDateTime? = null
     ): ConceptMapCodeableConcept? {
         val cacheKey = CacheKey(
-            registryType = NormalizationRegistryItem.RegistryType.ConceptMap,
+            registryType = RegistryType.CONCEPT_MAP,
             elementName = elementName,
             tenantId = tenantMnemonic
         )
@@ -97,7 +96,7 @@ class NormalizationRegistryClient(
         forceCacheReloadTS: LocalDateTime? = null
     ): ConceptMapCoding? {
         val cacheKey = CacheKey(
-            registryType = NormalizationRegistryItem.RegistryType.ConceptMap,
+            registryType = RegistryType.CONCEPT_MAP,
             elementName = elementName,
             tenantId = tenantMnemonic
         )
@@ -124,7 +123,7 @@ class NormalizationRegistryClient(
         forceCacheReloadTS: LocalDateTime? = null
     ): ConceptMapCoding? {
         val cacheKey = CacheKey(
-            registryType = NormalizationRegistryItem.RegistryType.ConceptMap,
+            registryType = RegistryType.CONCEPT_MAP,
             elementName = elementName,
             tenantId = tenantMnemonic
         )
@@ -148,7 +147,7 @@ class NormalizationRegistryClient(
         forceCacheReloadTS: LocalDateTime? = null
     ): ValueSetList {
         val cacheKey = CacheKey(
-            registryType = NormalizationRegistryItem.RegistryType.ValueSet,
+            registryType = RegistryType.VALUE_SET,
             elementName = elementName,
             profileUrl = profileUrl
         )
@@ -297,12 +296,12 @@ class NormalizationRegistryClient(
 
     private fun createCodeableConceptExtension(conceptMapItem: ConceptMapItem, codeableConcept: CodeableConcept) =
         Extension(
-            url = Uri(conceptMapItem.source_extension_url),
+            url = Uri(conceptMapItem.sourceExtensionUrl),
             value = DynamicValue(type = DynamicValueType.CODEABLE_CONCEPT, value = codeableConcept)
         )
 
     private fun createCodingExtension(conceptMapItem: ConceptMapItem, coding: Coding) = Extension(
-        url = Uri(conceptMapItem.source_extension_url),
+        url = Uri(conceptMapItem.sourceExtensionUrl),
         value = DynamicValue(type = DynamicValueType.CODING, value = coding)
     )
 
@@ -317,42 +316,29 @@ class NormalizationRegistryClient(
     ): ConceptMapItem? {
         return runBlocking {
             registryMutex.withLock {
-                checkRegistryStatus(key, forceCacheReloadTS)
+                checkRegistryStatus(forceCacheReloadTS)
 
-                val cachedItem = conceptMapCache.getIfPresent(key)
-                if (cachedItem == null) {
-                    val matchingItems = registry.filter {
-                        it.getRegistryItemType() == key.registryType &&
-                            it.data_element == key.elementName &&
-                            it.tenant_id == key.tenantId
-                    }
-                    if (matchingItems.isEmpty()) {
-                        null
-                    } else {
-                        val concatenated = ConceptMapItem(
-                            matchingItems.map { item ->
+                conceptMapCache.get(key) {
+                    registry[key]?.let { registryItems ->
+                        ConceptMapItem(
+                            registryItems.map { item ->
                                 getConceptMapData(item.filename).entries
                             }.flatten().associate { it.toPair() },
-                            matchingItems.map { it.source_extension_url }
+                            registryItems.map { it.sourceExtensionUrl }
                                 .distinct().singleOrNull()
                                 ?: throw MissingNormalizationContentException(
-                                    "Concept map(s) for tenant '${matchingItems.first().tenant_id}' and ${matchingItems.first().data_element} have missing or inconsistent source extension URLs"
+                                    "Concept map(s) for tenant '${registryItems.first().tenantId}' and ${registryItems.first().dataElement} have missing or inconsistent source extension URLs"
                                 ),
-                            matchingItems.map { item ->
+                            registryItems.map { item ->
                                 ConceptMapMetadata(
-                                    registryEntryType = item.registry_entry_type ?: "concept_map",
-                                    conceptMapName = item.concept_map_name ?: "N/A",
-                                    conceptMapUuid = item.concept_map_uuid ?: "N/A",
+                                    registryEntryType = item.registryEntryType.value,
+                                    conceptMapName = item.conceptMapName ?: "N/A",
+                                    conceptMapUuid = item.conceptMapUuid ?: "N/A",
                                     version = item.version ?: "N/A"
                                 )
                             }
                         )
-                        itemLastUpdated[key] = LocalDateTime.now()
-                        conceptMapCache.put(key, concatenated)
-                        concatenated
                     }
-                } else {
-                    cachedItem
                 }
             }
         }
@@ -400,24 +386,19 @@ class NormalizationRegistryClient(
     ): ValueSetItem? {
         return runBlocking {
             registryMutex.withLock {
-                checkRegistryStatus(key, forceCacheReloadTS)
+                checkRegistryStatus(forceCacheReloadTS)
 
                 valueSetCache.get(key) {
                     // if not found in cache, calculate and store
-                    registry.find {
-                        it.getRegistryItemType() == key.registryType &&
-                            it.data_element == key.elementName &&
-                            it.profile_url == key.profileUrl
-                    }?.let { item ->
+                    registry[key]?.let { registryItems ->
+                        val item = registryItems.single()
                         val metadata = ValueSetMetadata(
-                            registryEntryType = item.registry_entry_type ?: "value_set",
-                            valueSetName = item.value_set_name ?: "N/A",
-                            valueSetUuid = item.value_set_uuid ?: "N/A",
+                            registryEntryType = item.registryEntryType.value,
+                            valueSetName = item.valueSetName ?: "N/A",
+                            valueSetUuid = item.valueSetUuid ?: "N/A",
                             version = item.version ?: "N/A"
                         )
-                        val valueSetItem = ValueSetItem(set = getValueSetData(item.filename), metadata)
-                        itemLastUpdated[key] = LocalDateTime.now()
-                        valueSetItem
+                        ValueSetItem(set = getValueSetData(item.filename), metadata)
                     }
                 }
             }
@@ -441,18 +422,11 @@ class NormalizationRegistryClient(
     /**
      * Checks the registry status and forces a reload, including cache invalidation, as needed.
      */
-    private fun checkRegistryStatus(key: CacheKey, forceCacheReloadTS: LocalDateTime?) {
+    internal fun checkRegistryStatus(forceCacheReloadTS: LocalDateTime?) {
         val cacheReloadTime = forceCacheReloadTS ?: LocalDateTime.now().minusHours(defaultReloadHours.toLong())
 
         if (registryLastUpdated.isBefore(cacheReloadTime)) {
             reloadRegistry()
-        } else {
-            itemLastUpdated[key]?.let { lastUpdateDtTm ->
-                if (lastUpdateDtTm.isBefore(cacheReloadTime)) {
-                    // If we need to update the item, we need to update the registry too to ensure we get the proper data.
-                    reloadRegistry()
-                }
-            }
         }
     }
 
@@ -460,13 +434,32 @@ class NormalizationRegistryClient(
      * Reloads the registry. As a consequence of reloading the registry
      */
     private fun reloadRegistry() {
-        registry = getNewRegistry()
-        itemLastUpdated.clear()
-        conceptMapCache.invalidateAll()
-        valueSetCache.invalidateAll()
+        val newRegistry = getNewRegistry()
+        if (newRegistry == null) {
+            // Continue using the registry, but reset the time to force another attempt next time.
+            registryLastUpdated = LocalDateTime.MIN
+            return
+        }
+
+        purgeCache(conceptMapCache, registry, newRegistry)
+        purgeCache(valueSetCache, registry, newRegistry)
+
+        registry = newRegistry
+        registryLastUpdated = LocalDateTime.now()
     }
 
-    internal fun getNewRegistry(): List<NormalizationRegistryItem> {
+    private fun getNewRegistry(): Map<CacheKey, List<NormalizationRegistryItem>>? {
+        return loadRegistry()?.groupBy { item ->
+            CacheKey(
+                registryType = item.registryEntryType,
+                elementName = item.dataElement,
+                tenantId = item.tenantId,
+                profileUrl = item.profileUrl
+            )
+        }
+    }
+
+    private fun loadRegistry(): List<NormalizationRegistryItem>? {
         return try {
             registryLastUpdated = LocalDateTime.now()
             JacksonUtil.readJsonList(
@@ -475,12 +468,30 @@ class NormalizationRegistryClient(
             )
         } catch (e: Exception) {
             logger.error { "Failed to load normalization registry: ${e.message}" }
-            registryLastUpdated = LocalDateTime.MIN // reset
-            registry // keep the 'old' registry in place
+            null // keep the 'old' registry in place
         }
     }
 
-    internal fun getConceptMapData(filename: String): Map<SourceConcept, List<TargetConcept>> {
+    private fun <T> purgeCache(
+        cache: Cache<CacheKey, T>,
+        oldRegistry: Map<CacheKey, List<NormalizationRegistryItem>>,
+        newRegistry: Map<CacheKey, List<NormalizationRegistryItem>>
+    ) {
+        val keysToInvalidate = cache.asMap().keys.mapNotNull { key ->
+            val newItems = newRegistry[key]
+            val oldItems = oldRegistry[key]
+
+            if (newItems == null || oldItems != newItems) {
+                // If the key is not in the new registry, or its items have changed in any way, we want to keep the key for invalidation
+                key
+            } else {
+                null
+            }
+        }
+        cache.invalidateAll(keysToInvalidate)
+    }
+
+    private fun getConceptMapData(filename: String): Map<SourceConcept, List<TargetConcept>> {
         val conceptMap = try {
             JacksonUtil.readJsonObject(
                 ociClient.getObjectFromINFX(filename)!!,
@@ -522,7 +533,7 @@ class NormalizationRegistryClient(
         return mutableMap
     }
 
-    internal fun getValueSetData(filename: String): List<TargetValue> {
+    private fun getValueSetData(filename: String): List<TargetValue> {
         val valueSet = try {
             JacksonUtil.readJsonObject(ociClient.getObjectFromINFX(filename)!!, ValueSet::class)
         } catch (e: Exception) {
@@ -545,44 +556,36 @@ class NormalizationRegistryClient(
 }
 
 internal data class CacheKey(
-    val registryType: NormalizationRegistryItem.RegistryType,
+    val registryType: RegistryType,
     val elementName: String,
     val tenantId: String? = null, // non-null for ConceptMap
     val profileUrl: String? = null // null for ConceptMap
 )
 
 internal data class NormalizationRegistryItem(
-    val registry_uuid: String,
-    val data_element: String, // i.e. 'Appointment.status'
+    val registryUuid: String,
+    val dataElement: String, // i.e. 'Appointment.status'
     val filename: String,
     val version: String? = null,
-    val source_extension_url: String? = null, // non-null for ConceptMap
-    val resource_type: String, // i.e. 'Appointment' - repeated in data_element
-    val tenant_id: String? = null, // null applies to all tenants
-    val profile_url: String? = null,
-    val concept_map_name: String? = null,
-    val concept_map_uuid: String? = null,
-    val value_set_name: String? = null,
-    val value_set_uuid: String? = null,
-    val registry_entry_type: String? = null
-) {
-    enum class RegistryType {
-        ConceptMap,
-        ValueSet
-    }
+    val sourceExtensionUrl: String? = null, // non-null for ConceptMap
+    val resourceType: String, // i.e. 'Appointment' - repeated in data_element
+    val tenantId: String? = null, // null applies to all tenants
+    val profileUrl: String? = null,
+    val conceptMapName: String? = null,
+    val conceptMapUuid: String? = null,
+    val valueSetName: String? = null,
+    val valueSetUuid: String? = null,
+    val registryEntryType: RegistryType
+)
 
-    fun getRegistryItemType(): RegistryType {
-        return if (registry_entry_type == "concept_map") {
-            RegistryType.ConceptMap
-        } else {
-            RegistryType.ValueSet
-        }
-    }
+enum class RegistryType(@JsonValue val value: String) {
+    CONCEPT_MAP("concept_map"),
+    VALUE_SET("value_set")
 }
 
 internal data class ConceptMapItem(
     val map: Map<SourceConcept, List<TargetConcept>>,
-    val source_extension_url: String, // non-null for ConceptMap
+    val sourceExtensionUrl: String, // non-null for ConceptMap
     val metadata: List<ConceptMapMetadata>
 )
 
