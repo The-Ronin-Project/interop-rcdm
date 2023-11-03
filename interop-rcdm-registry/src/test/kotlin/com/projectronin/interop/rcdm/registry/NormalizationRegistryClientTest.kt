@@ -20,12 +20,12 @@ import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.fhir.r4.resource.ValueSet
 import com.projectronin.interop.fhir.r4.valueset.ContactPointSystem
 import com.projectronin.interop.rcdm.common.enums.RoninExtension
+import com.projectronin.interop.rcdm.common.metadata.ConceptMapMetadata
+import com.projectronin.interop.rcdm.common.metadata.ValueSetMetadata
 import com.projectronin.interop.rcdm.registry.dependson.DependsOnEvaluator
 import com.projectronin.interop.rcdm.registry.exception.MissingNormalizationContentException
-import com.projectronin.interop.rcdm.registry.model.ConceptMapMetadata
 import com.projectronin.interop.rcdm.registry.model.RoninConceptMap
 import com.projectronin.interop.rcdm.registry.model.ValueSetList
-import com.projectronin.interop.rcdm.registry.model.ValueSetMetadata
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject

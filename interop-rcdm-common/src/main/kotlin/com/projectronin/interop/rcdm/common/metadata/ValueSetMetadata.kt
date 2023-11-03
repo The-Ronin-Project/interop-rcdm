@@ -1,4 +1,4 @@
-package com.projectronin.interop.rcdm.registry.model
+package com.projectronin.interop.rcdm.common.metadata
 
 import com.projectronin.interop.fhir.validate.IssueMetadata
 

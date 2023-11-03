@@ -7,6 +7,7 @@ import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
+import com.projectronin.interop.rcdm.common.metadata.ValueSetMetadata
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 

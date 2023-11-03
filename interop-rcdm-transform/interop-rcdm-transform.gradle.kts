@@ -5,13 +5,12 @@ plugins {
 
 dependencies {
     implementation(project(":interop-rcdm-common"))
+    implementation(project(":interop-rcdm-registry"))
 
-    implementation(libs.caffeine)
     implementation(libs.interop.common)
-    implementation(libs.interop.commonJackson)
-    implementation(libs.interop.datalake)
+    implementation(libs.interop.ehr.tenant)
     implementation(libs.interop.fhir)
-    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.interop.validation.client)
 
     testImplementation(libs.mockk)
 }

@@ -11,6 +11,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
+import com.projectronin.interop.rcdm.common.metadata.ConceptMapMetadata
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
