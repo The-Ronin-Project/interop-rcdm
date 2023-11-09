@@ -1,4 +1,4 @@
-package com.projectronin.interop.rcdm.transform.localization.map
+package com.projectronin.interop.rcdm.transform.map.resource
 
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Coding
@@ -14,7 +14,6 @@ import com.projectronin.interop.rcdm.common.enums.RoninExtension
 import com.projectronin.interop.rcdm.common.util.dataAuthorityIdentifier
 import com.projectronin.interop.rcdm.registry.NormalizationRegistryClient
 import com.projectronin.interop.rcdm.registry.model.ConceptMapCodeableConcept
-import com.projectronin.interop.rcdm.transform.map.ConditionMapper
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
 import io.mockk.mockk

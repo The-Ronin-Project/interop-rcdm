@@ -1,11 +1,13 @@
-package com.projectronin.interop.rcdm.transform.map
+package com.projectronin.interop.rcdm.transform.map.resource
 
 import com.projectronin.interop.fhir.r4.resource.Condition
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.rcdm.common.enums.RoninExtension
 import com.projectronin.interop.rcdm.registry.NormalizationRegistryClient
-import com.projectronin.interop.rcdm.transform.map.validation.FailedConceptMapLookupError
+import com.projectronin.interop.rcdm.transform.map.BaseMapper
+import com.projectronin.interop.rcdm.transform.map.MapResponse
+import com.projectronin.interop.rcdm.transform.map.ResourceMapper
 import com.projectronin.interop.rcdm.transform.util.getExtensionOrEmptyList
 import com.projectronin.interop.tenant.config.model.Tenant
 import org.springframework.beans.factory.annotation.Value
@@ -18,10 +20,10 @@ import kotlin.reflect.KClass
  */
 @Component
 class ConditionMapper(
-    private val registryClient: NormalizationRegistryClient,
+    registryClient: NormalizationRegistryClient,
     @Value("\${ronin.fhir.conditions.tenantsNotConditionMapped:mdaoc,1xrekpx5}")
     tenantsNotConditionMappedString: String
-) : ResourceMapper<Condition> {
+) : ResourceMapper<Condition>, BaseMapper<Condition>(registryClient) {
     private val tenantsNotConditionMapped = tenantsNotConditionMappedString.split(",")
 
     override val supportedResource: KClass<Condition> = Condition::class
@@ -40,29 +42,8 @@ class ConditionMapper(
             return MapResponse(mapped, validation)
         }
         // Condition.code is a single CodeableConcept
-        val mappedCode = resource.code?.let { code ->
-            val conditionCode = registryClient.getConceptMapping(
-                tenant.mnemonic,
-                "Condition.code",
-                code,
-                resource,
-                forceCacheReloadTS
-            )
-            // validate the mapping we got, use code value to report issues
-            validation.apply {
-                checkNotNull(
-                    conditionCode,
-                    FailedConceptMapLookupError(
-                        LocationContext(Condition::code),
-                        code.coding.mapNotNull { it.code?.value }
-                            .joinToString(", "),
-                        "any Condition.code concept map for tenant '${tenant.mnemonic}'",
-                        conditionCode?.metadata
-                    ),
-                    parentContext
-                )
-            }
-            conditionCode
+        val mappedCode = resource.code?.let {
+            getConceptMapping(it, Condition::code, resource, tenant, parentContext, validation, forceCacheReloadTS)
         }
 
         return MapResponse(

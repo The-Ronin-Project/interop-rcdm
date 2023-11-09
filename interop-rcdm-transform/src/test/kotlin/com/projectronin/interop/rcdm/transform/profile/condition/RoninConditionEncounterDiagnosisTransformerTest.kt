@@ -12,8 +12,8 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.resource.Condition
 import com.projectronin.interop.fhir.r4.resource.Resource
+import com.projectronin.interop.rcdm.common.enums.RoninProfile
 import com.projectronin.interop.rcdm.common.util.dataAuthorityIdentifier
-import com.projectronin.interop.rcdm.transform.profile.RoninProfile
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
 import io.mockk.mockk

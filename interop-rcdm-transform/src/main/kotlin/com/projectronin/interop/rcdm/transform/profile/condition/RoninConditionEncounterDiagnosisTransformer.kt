@@ -4,7 +4,7 @@ import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.rcdm.common.enums.RCDMVersion
-import com.projectronin.interop.rcdm.transform.profile.RoninProfile
+import com.projectronin.interop.rcdm.common.enums.RoninProfile
 import org.springframework.stereotype.Component
 
 /**

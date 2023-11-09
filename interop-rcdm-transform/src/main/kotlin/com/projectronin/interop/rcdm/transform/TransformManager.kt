@@ -4,7 +4,7 @@ import com.projectronin.interop.common.logmarkers.LogMarkers
 import com.projectronin.interop.fhir.r4.resource.Resource
 import com.projectronin.interop.rcdm.common.validation.ValidationClient
 import com.projectronin.interop.rcdm.transform.localization.Localizer
-import com.projectronin.interop.rcdm.transform.map.ResourceMapper
+import com.projectronin.interop.rcdm.transform.map.MappingService
 import com.projectronin.interop.rcdm.transform.model.TransformResponse
 import com.projectronin.interop.rcdm.transform.normalization.Normalizer
 import com.projectronin.interop.rcdm.transform.profile.ProfileTransformer
@@ -16,12 +16,11 @@ import java.time.LocalDateTime
 @Service
 class TransformManager(
     private val normalizer: Normalizer,
-    resourceMappers: List<ResourceMapper<*>>,
+    private val mappingService: MappingService,
     private val validationClient: ValidationClient,
     profileTransformers: List<ProfileTransformer<*>>,
     private val localizer: Localizer
 ) {
-    private val mappersByResource = resourceMappers.associateBy { it.supportedResource }
     private val transformersByResource = profileTransformers.groupBy { it.supportedResource }
 
     private val logger = KotlinLogging.logger { }
@@ -48,15 +47,12 @@ class TransformManager(
         return TransformResponse(localizedResource, embeddedResources)
     }
 
-    @Suppress("UNCHECKED_CAST")
     private fun <R : Resource<R>> mapResource(resource: R, tenant: Tenant, forceCacheReloadTS: LocalDateTime?): R? {
-        val resourceMapper = mappersByResource[resource::class] as? ResourceMapper<R> ?: return resource
-
-        val (mappedResource, validation) = resourceMapper.map(resource, tenant, forceCacheReloadTS)
+        val (mappedResource, validation) = mappingService.map(resource, tenant, forceCacheReloadTS)
         if (validation.hasIssues()) {
             // If we did not get back a mapped resource, we need to report out against the original.
             val reportedResource = mappedResource ?: resource
-            logger.warn(LogMarkers.VALIDATION_ISSUE) { "Failed to transform ${resource.resourceType}" }
+            logger.warn(LogMarkers.VALIDATION_ISSUE) { "Failed to map ${resource.resourceType}" }
             validation.issues()
                 .forEach { logger.warn(LogMarkers.VALIDATION_ISSUE) { it } } // makes mirth debugging much easier
             validationClient.reportIssues(validation, reportedResource, tenant.mnemonic)

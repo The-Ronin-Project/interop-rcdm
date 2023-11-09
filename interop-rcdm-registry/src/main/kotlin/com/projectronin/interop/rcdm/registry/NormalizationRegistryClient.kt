@@ -113,7 +113,7 @@ class NormalizationRegistryClient(
      * If there is no concept map found, but the input Coding.code value is correct for the enumClass,
      * return the input [Coding] with a source [Extension] using the enumExtensionUrl provided by the caller.
      */
-    fun <T : CodedEnum<T>, R : Resource<R>> getConceptMappingForEnum(
+    fun <T, R : Resource<R>> getConceptMappingForEnum(
         tenantMnemonic: String,
         elementName: String,
         coding: Coding,
@@ -121,7 +121,7 @@ class NormalizationRegistryClient(
         enumExtensionUrl: String,
         resource: R,
         forceCacheReloadTS: LocalDateTime? = null
-    ): ConceptMapCoding? {
+    ): ConceptMapCoding? where T : Enum<T>, T : CodedEnum<T> {
         val cacheKey = CacheKey(
             registryType = RegistryType.CONCEPT_MAP,
             elementName = elementName,

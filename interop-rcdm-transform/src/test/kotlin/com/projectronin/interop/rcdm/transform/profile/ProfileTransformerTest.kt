@@ -6,6 +6,7 @@ import com.projectronin.interop.fhir.r4.resource.Organization
 import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.fhir.r4.resource.Resource
 import com.projectronin.interop.rcdm.common.enums.RCDMVersion
+import com.projectronin.interop.rcdm.common.enums.RoninProfile
 import com.projectronin.interop.rcdm.transform.model.TransformResponse
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.mockk
@@ -15,8 +16,8 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import kotlin.reflect.KClass
 
-class BaseProfileTransformerTest {
-    private val transformer = object : BaseProfileTransformer<Patient>() {
+class ProfileTransformerTest {
+    private val transformer = object : ProfileTransformer<Patient>() {
         var response: TransformResponse<Patient>? = null
 
         override fun transformInternal(original: Patient, tenant: Tenant): TransformResponse<Patient>? = response

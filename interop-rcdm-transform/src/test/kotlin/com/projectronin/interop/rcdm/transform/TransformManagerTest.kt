@@ -9,7 +9,7 @@ import com.projectronin.interop.fhir.validate.ValidationIssueSeverity
 import com.projectronin.interop.rcdm.common.validation.ValidationClient
 import com.projectronin.interop.rcdm.transform.localization.Localizer
 import com.projectronin.interop.rcdm.transform.map.MapResponse
-import com.projectronin.interop.rcdm.transform.map.ResourceMapper
+import com.projectronin.interop.rcdm.transform.map.MappingService
 import com.projectronin.interop.rcdm.transform.model.TransformResponse
 import com.projectronin.interop.rcdm.transform.normalization.Normalizer
 import com.projectronin.interop.rcdm.transform.profile.ProfileTransformer
@@ -27,6 +27,10 @@ import java.util.UUID
 class TransformManagerTest {
     private val tenant = mockk<Tenant> {
         every { mnemonic } returns "tenant"
+    }
+
+    private val mappingService = mockk<MappingService> {
+        every { map(any<Patient>(), tenant, any()) } answers { MapResponse(firstArg(), Validation()) }
     }
 
     private val passingValidation = mockk<Validation> {
@@ -48,43 +52,19 @@ class TransformManagerTest {
     private val localized = mockk<Patient>()
 
     @Test
-    fun `no mapper found for resource`() {
+    fun `mapping service returns validation error with no mapped resource`() {
         val normalizer = mockk<Normalizer> {
             every { normalize(original, tenant) } returns normalized
         }
-        val transformer = mockk<ProfileTransformer<Patient>> {
-            every { supportedResource } returns Patient::class
-            every { isDefault } returns true
-            every { transform(normalized, tenant) } returns TransformResponse(transformed)
-        }
 
-        val localizer = mockk<Localizer> {
-            every { localize(transformed, tenant) } returns localized
-        }
+        every { mappingService.map(normalized, tenant, null) } returns MapResponse(null, failingValidation)
 
-        val manager = TransformManager(normalizer, listOf(), validationClient, listOf(transformer), localizer)
-        val transformResponse = manager.transformResource(original, tenant)
-
-        transformResponse!!
-        assertEquals(localized, transformResponse.resource)
-        assertEquals(listOf<Resource<*>>(), transformResponse.embeddedResources)
-    }
-
-    @Test
-    fun `mapping resource returns validation error with no mapped resource`() {
-        val normalizer = mockk<Normalizer> {
-            every { normalize(original, tenant) } returns normalized
-        }
-        val mapper = mockk<ResourceMapper<Patient>> {
-            every { supportedResource } returns Patient::class
-            every { map(normalized, tenant, null) } returns MapResponse(null, failingValidation)
-        }
         val transformer = mockk<ProfileTransformer<Patient>> {
             every { supportedResource } returns Patient::class
         }
         val localizer = mockk<Localizer> { }
 
-        val manager = TransformManager(normalizer, listOf(mapper), validationClient, listOf(transformer), localizer)
+        val manager = TransformManager(normalizer, mappingService, validationClient, listOf(transformer), localizer)
         val transformResponse = manager.transformResource(original, tenant)
         assertNull(transformResponse)
 
@@ -98,10 +78,9 @@ class TransformManagerTest {
         val normalizer = mockk<Normalizer> {
             every { normalize(original, tenant) } returns normalized
         }
-        val mapper = mockk<ResourceMapper<Patient>> {
-            every { supportedResource } returns Patient::class
-            every { map(normalized, tenant, null) } returns MapResponse(mapped, failingValidation)
-        }
+
+        every { mappingService.map(normalized, tenant, null) } returns MapResponse(mapped, failingValidation)
+
         val transformer = mockk<ProfileTransformer<Patient>> {
             every { supportedResource } returns Patient::class
             every { isDefault } returns true
@@ -112,7 +91,7 @@ class TransformManagerTest {
             every { localize(transformed, tenant) } returns localized
         }
 
-        val manager = TransformManager(normalizer, listOf(mapper), validationClient, listOf(transformer), localizer)
+        val manager = TransformManager(normalizer, mappingService, validationClient, listOf(transformer), localizer)
         val transformResponse = manager.transformResource(original, tenant)
 
         transformResponse!!
@@ -129,10 +108,12 @@ class TransformManagerTest {
         val normalizer = mockk<Normalizer> {
             every { normalize(original, tenant) } returns normalized
         }
-        val mapper = mockk<ResourceMapper<Patient>> {
-            every { supportedResource } returns Patient::class
-            every { map(normalized, tenant, forceCacheReload) } returns MapResponse(mapped, passingValidation)
-        }
+
+        every { mappingService.map(normalized, tenant, forceCacheReload) } returns MapResponse(
+            mapped,
+            passingValidation
+        )
+
         val transformer = mockk<ProfileTransformer<Patient>> {
             every { supportedResource } returns Patient::class
             every { isDefault } returns true
@@ -143,7 +124,7 @@ class TransformManagerTest {
             every { localize(transformed, tenant) } returns localized
         }
 
-        val manager = TransformManager(normalizer, listOf(mapper), validationClient, listOf(transformer), localizer)
+        val manager = TransformManager(normalizer, mappingService, validationClient, listOf(transformer), localizer)
         val transformResponse = manager.transformResource(original, tenant, forceCacheReload)
 
         transformResponse!!
@@ -164,7 +145,7 @@ class TransformManagerTest {
 
         val localizer = mockk<Localizer> { }
 
-        val manager = TransformManager(normalizer, listOf(), validationClient, listOf(transformer), localizer)
+        val manager = TransformManager(normalizer, mappingService, validationClient, listOf(transformer), localizer)
         val transformResponse = manager.transformResource(original, tenant)
         assertNull(transformResponse)
 
@@ -198,7 +179,7 @@ class TransformManagerTest {
 
         val manager = TransformManager(
             normalizer,
-            listOf(),
+            mappingService,
             validationClient,
             listOf(transformer1, transformer2, transformer3),
             localizer
@@ -235,7 +216,7 @@ class TransformManagerTest {
 
         val manager = TransformManager(
             normalizer,
-            listOf(),
+            mappingService,
             validationClient,
             listOf(transformer1, transformer2, transformer3),
             localizer
@@ -273,7 +254,7 @@ class TransformManagerTest {
 
         val manager = TransformManager(
             normalizer,
-            listOf(),
+            mappingService,
             validationClient,
             listOf(transformer1, transformer2, transformer3),
             localizer
@@ -311,7 +292,7 @@ class TransformManagerTest {
 
         val manager = TransformManager(
             normalizer,
-            listOf(),
+            mappingService,
             validationClient,
             listOf(transformer1, transformer2, transformer3),
             localizer
@@ -352,7 +333,7 @@ class TransformManagerTest {
 
         val manager = TransformManager(
             normalizer,
-            listOf(),
+            mappingService,
             validationClient,
             listOf(transformer1, transformer2, transformer3),
             localizer
@@ -395,7 +376,7 @@ class TransformManagerTest {
 
         val manager = TransformManager(
             normalizer,
-            listOf(),
+            mappingService,
             validationClient,
             listOf(transformer1, transformer2, transformer3),
             localizer
@@ -439,7 +420,7 @@ class TransformManagerTest {
 
         val manager = TransformManager(
             normalizer,
-            listOf(),
+            mappingService,
             validationClient,
             listOf(transformer1, transformer2, transformer3),
             localizer

@@ -1,4 +1,4 @@
-package com.projectronin.interop.rcdm.transform.profile
+package com.projectronin.interop.rcdm.common.enums
 
 import com.projectronin.interop.fhir.r4.datatype.primitive.Canonical
 
