@@ -3,6 +3,7 @@ rootProject.name = "interop-rcdm"
 include("interop-rcdm-common")
 include("interop-rcdm-registry")
 include("interop-rcdm-transform")
+include("interop-rcdm-validate")
 
 for (project in rootProject.children) {
     project.buildFileName = "${project.name}.gradle.kts"

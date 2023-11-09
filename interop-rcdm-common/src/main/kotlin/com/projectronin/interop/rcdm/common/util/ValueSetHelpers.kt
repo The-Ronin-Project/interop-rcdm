@@ -1,4 +1,4 @@
-package com.projectronin.interop.rcdm.transform.util
+package com.projectronin.interop.rcdm.common.util
 
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Coding

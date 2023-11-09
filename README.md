@@ -9,6 +9,7 @@ This project is divided into multiple projects involved in the RCDM process.
   Normalization Registry.
 * [interop-rcdm-transform](interop-rcdm-transform) contains our Transformation logic that converts R4 resources into the
   appropriate Ronin-defined profiles.
+* [interop-rcdm-validate](interop-rcdm-validate) contains our Validation logic that enforces the RCDM profiles.
 
 ## Updating profiles
 
@@ -44,3 +45,13 @@ There are
 also [ElementMappers](interop-rcdm-transform/src/main/kotlin/com/projectronin/interop/rcdm/transform/map/ElementMapper.kt)
 that may be needed if there are common datatypes that need to be consistently mapped. One such example
 is [ContactPoint](interop-rcdm-transform/src/main/kotlin/com/projectronin/interop/rcdm/transform/map/element/ContactPointMapper.kt).
+
+### Validators
+
+You will also need to create a
+new [ProfileValidator](interop-rcdm-validate/src/main/kotlin/com/projectronin/interop/rcdm/validate/profile/ProfileValidator.kt)
+for each profile.
+
+If the profile contains an element that needs consistent validation throughout our RCDM profiles, you should create
+an [ElementValidator](interop-rcdm-validate/src/main/kotlin/com/projectronin/interop/rcdm/validate/element/ElementValidator.kt)
+for them.

@@ -7,6 +7,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.resource.Resource
 import com.projectronin.interop.fhir.util.toFhirIdentifier
 import com.projectronin.interop.rcdm.common.util.dataAuthorityIdentifier
+import com.projectronin.interop.rcdm.common.util.getIdentifiers
 import com.projectronin.interop.tenant.config.model.Tenant
 
 fun <T : Resource<T>> T.getFhirIdentifiers(): List<Identifier> =
@@ -29,13 +30,4 @@ fun <T : Resource<T>> T.getRoninIdentifiers(tenant: Tenant): List<Identifier> {
     identifierSet.add(tenant.toFhirIdentifier())
     identifierSet.add(dataAuthorityIdentifier)
     return identifierSet.toSet().toList()
-}
-
-@Suppress("UNCHECKED_CAST")
-fun <T : Resource<T>> T.getIdentifiers(): List<Identifier> {
-    return runCatching {
-        val field = this::class.java.getDeclaredField("identifier")
-        field.isAccessible = true
-        field.get(this) as List<Identifier>
-    }.getOrDefault(emptyList())
 }
