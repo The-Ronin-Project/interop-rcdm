@@ -26,10 +26,6 @@ class RoninPatientTransformer : ProfileTransformer<Patient>() {
     override val profile: RoninProfile = RoninProfile.PATIENT
     override val rcdmVersion: RCDMVersion = RCDMVersion.V3_19_0
     override val profileVersion: Int = 3
-    override val isDefault: Boolean = true
-
-    override fun qualifies(resource: Patient): Boolean = true
-
     override fun transformInternal(original: Patient, tenant: Tenant): TransformResponse<Patient>? {
         val maritalStatus = original.maritalStatus ?: CodeableConcept(
             coding = listOf(
