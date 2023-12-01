@@ -6,6 +6,7 @@ import com.projectronin.interop.fhir.r4.datatype.ContactPoint
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.Patient
+import com.projectronin.interop.fhir.r4.resource.Resource
 import com.projectronin.interop.fhir.r4.valueset.ContactPointUse
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.Validation
@@ -21,12 +22,31 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import kotlin.reflect.KProperty1
-import kotlin.reflect.full.functions
-import kotlin.reflect.jvm.isAccessible
 
 class BaseMapperTest {
     private val registryClient = mockk<NormalizationRegistryClient>()
-    private val nonReifiedMapper = object : BaseMapper<Patient>(registryClient) {}
+    private val nonReifiedMapper = object : BaseMapper<Patient>(registryClient) {
+        fun <R : Resource<R>> conceptMap(
+            codeableConcept: CodeableConcept,
+            elementProperty: KProperty1<Patient, *>,
+            resource: R,
+            tenant: Tenant,
+            parentContext: LocationContext,
+            validation: Validation,
+            forceCacheReloadTS: LocalDateTime?
+        ): ConceptMapCodeableConcept? {
+            return getConceptMapping(
+                codeableConcept,
+                elementProperty,
+                resource,
+                tenant,
+                parentContext,
+                validation,
+                forceCacheReloadTS
+            )
+        }
+    }
+
     private val contactPointMapper = object : BaseMapper<ContactPoint>(registryClient) {
         fun conceptMapUse(
             value: String,
@@ -86,7 +106,7 @@ class BaseMapperTest {
             )
         } returns mappedResult
 
-        val result = callGetConceptMapping(
+        val result = nonReifiedMapper.conceptMap(
             initialCodeableContext,
             property,
             patient,
@@ -124,7 +144,7 @@ class BaseMapperTest {
             )
         } returns null
 
-        val result = callGetConceptMapping(
+        val result = nonReifiedMapper.conceptMap(
             initialCodeableContext,
             property,
             patient,
@@ -288,30 +308,5 @@ class BaseMapperTest {
         assertEquals(conceptMapCoding, response)
 
         assertEquals(0, validation.issues().size)
-    }
-
-    private fun callGetConceptMapping(
-        codeableConcept: CodeableConcept,
-        elementProperty: KProperty1<Patient, *>,
-        resource: Patient,
-        tenant: Tenant,
-        parentContext: LocationContext,
-        validation: Validation,
-        forceCacheReloadTS: LocalDateTime?
-    ): ConceptMapCodeableConcept? {
-        val method = nonReifiedMapper::class.functions.find { it.name == "getConceptMapping" }!!
-        method.isAccessible = true
-        val result = method.call(
-            nonReifiedMapper,
-            codeableConcept,
-            elementProperty,
-            resource,
-            tenant,
-            parentContext,
-            validation,
-            forceCacheReloadTS
-        ) as? ConceptMapCodeableConcept
-        method.isAccessible = false
-        return result
     }
 }

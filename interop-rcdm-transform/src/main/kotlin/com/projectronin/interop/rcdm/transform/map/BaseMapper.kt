@@ -34,6 +34,29 @@ abstract class BaseMapper<C : Any>(protected val registryClient: NormalizationRe
         forceCacheReloadTS: LocalDateTime?
     ): ConceptMapCodeableConcept? {
         val elementContext = LocationContext(elementProperty)
+        return getConceptMapping(
+            codeableConcept,
+            elementContext,
+            resource,
+            tenant,
+            parentContext,
+            validation,
+            forceCacheReloadTS
+        )
+    }
+
+    /**
+     * Gets the concept mapping for the [codeableConcept] located at [elementContext] on [resource]. This method also reports any lookup errors to the [validation].
+     */
+    protected fun <R : Resource<R>> getConceptMapping(
+        codeableConcept: CodeableConcept,
+        elementContext: LocationContext,
+        resource: R,
+        tenant: Tenant,
+        parentContext: LocationContext,
+        validation: Validation,
+        forceCacheReloadTS: LocalDateTime?
+    ): ConceptMapCodeableConcept? {
         val mappedCodeableConcept = registryClient.getConceptMapping(
             tenant.mnemonic,
             elementContext.toString(),
