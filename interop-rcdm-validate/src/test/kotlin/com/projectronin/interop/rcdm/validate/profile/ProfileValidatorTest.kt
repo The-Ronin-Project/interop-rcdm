@@ -1,23 +1,27 @@
 package com.projectronin.interop.rcdm.validate.profile
 
+import com.projectronin.event.interop.internal.v1.ResourceType
 import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.CodeableConcepts
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.Meta
+import com.projectronin.interop.fhir.r4.datatype.Reference
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.Binary
+import com.projectronin.interop.fhir.r4.resource.Location
 import com.projectronin.interop.fhir.r4.resource.Organization
 import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.fhir.r4.validate.resource.R4BinaryValidator
 import com.projectronin.interop.fhir.r4.validate.resource.R4PatientValidator
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.Validation
+import com.projectronin.interop.fhir.validate.append
 import com.projectronin.interop.rcdm.common.enums.RCDMVersion
 import com.projectronin.interop.rcdm.common.enums.RoninProfile
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -37,6 +41,23 @@ class ProfileValidatorTest {
 
         override fun validate(resource: Patient, validation: Validation, context: LocationContext) {
             validateRoninNormalizedCodeableConcept(resource.maritalStatus, Patient::maritalStatus, context, validation)
+
+            validateReferenceType(
+                resource.managingOrganization,
+                listOf(ResourceType.Organization),
+                context.append(LocationContext(Patient::managingOrganization)),
+                validation,
+                resource.contained
+            )
+
+            resource.generalPractitioner.forEachIndexed { index, reference ->
+                validateReferenceType(
+                    reference,
+                    listOf(ResourceType.Practitioner),
+                    context.append(LocationContext("", "generalPractitioner[$index]")),
+                    validation
+                )
+            }
         }
     }
 
@@ -637,5 +658,107 @@ class ProfileValidatorTest {
 
         val validation = TestValidator().validate(patient, LocationContext(Patient::class))
         assertEquals(0, validation.issues().size)
+    }
+
+    @Test
+    fun `validateReferenceType ignores null references`() {
+        val patient = Patient(
+            id = Id("1234"),
+            meta = Meta(profile = listOf(RoninProfile.PATIENT.canonical)),
+            identifier = requiredIdentifiers,
+            managingOrganization = null
+        )
+
+        val validation = TestValidator().validate(patient, LocationContext(Patient::class))
+        assertEquals(0, validation.issues().size)
+    }
+
+    @Test
+    fun `validateReferenceType succeeds when reference is remote and for type`() {
+        val patient = Patient(
+            id = Id("1234"),
+            meta = Meta(profile = listOf(RoninProfile.PATIENT.canonical)),
+            identifier = requiredIdentifiers,
+            generalPractitioner = listOf(Reference(reference = "Practitioner/test-1234".asFHIR()))
+        )
+
+        val validation = TestValidator().validate(patient, LocationContext(Patient::class))
+        assertEquals(0, validation.issues().size)
+    }
+
+    @Test
+    fun `validateReferenceType fails when reference is remote and for invalid type`() {
+        val patient = Patient(
+            id = Id("1234"),
+            meta = Meta(profile = listOf(RoninProfile.PATIENT.canonical)),
+            identifier = requiredIdentifiers,
+            generalPractitioner = listOf(Reference(reference = "Patient/test-1234".asFHIR()))
+        )
+
+        val validation = TestValidator().validate(patient, LocationContext(Patient::class))
+        assertEquals(1, validation.issues().size)
+        assertEquals(
+            "ERROR INV_REF_TYPE: reference can only be one of the following: Practitioner @ Patient.generalPractitioner[0].reference",
+            validation.issues().first().toString()
+        )
+    }
+
+    @Test
+    fun `validateReferenceType succeeds when reference is local and for contained resource with proper type`() {
+        val patient = Patient(
+            id = Id("1234"),
+            meta = Meta(profile = listOf(RoninProfile.PATIENT.canonical)),
+            identifier = requiredIdentifiers,
+            managingOrganization = Reference(reference = "#5678".asFHIR()),
+            contained = listOf(Organization(id = Id("5678")))
+        )
+
+        val validation = TestValidator().validate(patient, LocationContext(Patient::class))
+        // It will have a contained resource warning
+        assertEquals(1, validation.issues().size)
+        assertEquals(
+            "WARNING RONIN_CONTAINED_RESOURCE: There is a Contained Resource present @ Patient.contained",
+            validation.issues().first().toString()
+        )
+    }
+
+    @Test
+    fun `validateReferenceType fails when reference is local and for contained resource with invalid type`() {
+        val patient = Patient(
+            id = Id("1234"),
+            meta = Meta(profile = listOf(RoninProfile.PATIENT.canonical)),
+            identifier = requiredIdentifiers,
+            managingOrganization = Reference(reference = "#5678".asFHIR()),
+            contained = listOf(Location(id = Id("5678")))
+        )
+
+        val validation = TestValidator().validate(patient, LocationContext(Patient::class))
+        // It will also have a contained resource warning
+        assertEquals(2, validation.issues().size)
+        assertEquals(
+            "WARNING RONIN_CONTAINED_RESOURCE: There is a Contained Resource present @ Patient.contained",
+            validation.issues()[0].toString()
+        )
+        assertEquals(
+            "ERROR INV_REF_TYPE: reference can only be one of the following: Organization @ Patient.managingOrganization.reference",
+            validation.issues()[1].toString()
+        )
+    }
+
+    @Test
+    fun `validateReferenceType succeeds when reference is local and no contained resources`() {
+        val patient = Patient(
+            id = Id("1234"),
+            meta = Meta(profile = listOf(RoninProfile.PATIENT.canonical)),
+            identifier = requiredIdentifiers,
+            managingOrganization = Reference(reference = "#5678".asFHIR())
+        )
+
+        val validation = TestValidator().validate(patient, LocationContext(Patient::class))
+        assertEquals(1, validation.issues().size)
+        assertEquals(
+            "ERROR RONIN_REQ_REF_1: Contained resource is required if a local reference is provided @ Patient.managingOrganization.reference",
+            validation.issues().first().toString()
+        )
     }
 }

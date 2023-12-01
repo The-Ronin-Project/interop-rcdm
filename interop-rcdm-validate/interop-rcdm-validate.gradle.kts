@@ -11,6 +11,7 @@ dependencies {
     implementation(libs.interop.ehr.tenant)
     implementation(libs.interop.fhir)
     implementation(libs.interop.validation.client)
+    implementation(libs.event.interop.resource.internal)
 
     testImplementation(libs.mockk)
 }

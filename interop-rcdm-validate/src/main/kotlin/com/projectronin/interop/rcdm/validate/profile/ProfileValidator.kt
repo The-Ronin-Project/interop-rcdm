@@ -1,12 +1,15 @@
 package com.projectronin.interop.rcdm.validate.profile
 
+import com.projectronin.event.interop.internal.v1.ResourceType
 import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.CodeableConcepts
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Identifier
+import com.projectronin.interop.fhir.r4.datatype.Reference
 import com.projectronin.interop.fhir.r4.resource.DomainResource
 import com.projectronin.interop.fhir.r4.resource.Resource
 import com.projectronin.interop.fhir.validate.FHIRError
+import com.projectronin.interop.fhir.validate.InvalidReferenceType
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.RequiredFieldError
 import com.projectronin.interop.fhir.validate.Validation
@@ -113,6 +116,60 @@ abstract class ProfileValidator<R : Resource<R>> {
                 }
             }
         }
+    }
+
+    protected fun validateReferenceType(
+        reference: Reference?,
+        resourceTypesList: List<ResourceType>,
+        context: LocationContext,
+        validation: Validation,
+        containedResource: List<Resource<*>>? = listOf()
+    ) {
+        val resourceTypesStringList = resourceTypesList.map { it.name }
+        val requiredContainedResource = FHIRError(
+            code = "RONIN_REQ_REF_1",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "Contained resource is required if a local reference is provided",
+            location = LocationContext(Reference::reference)
+        )
+
+        validation.apply {
+            reference?.let {
+                if (it.reference?.value.toString().startsWith("#")) {
+                    val id = it.reference?.value.toString().substringAfter("#")
+                    if (containedResource.isNullOrEmpty()) {
+                        checkTrue(
+                            false,
+                            requiredContainedResource,
+                            context
+                        )
+                    } else {
+                        checkTrue(
+                            resourceTypesStringList.contains(containedResource.find { r -> r.id?.value == id }?.resourceType),
+                            InvalidReferenceType(Reference::reference, resourceTypesList),
+                            context
+                        )
+                    }
+                } else {
+                    checkTrue(
+                        reference.isInTypeList(resourceTypesStringList),
+                        InvalidReferenceType(Reference::reference, resourceTypesList),
+                        context
+                    )
+                }
+            }
+        }
+    }
+
+    private fun Reference?.isInTypeList(resourceTypeList: List<String>): Boolean {
+        this?.let { reference ->
+            resourceTypeList.forEach { value ->
+                if (reference.isForType(value)) {
+                    return true
+                }
+            }
+        }
+        return false
     }
 
     private fun validateContained(resource: R, locationContext: LocationContext, validation: Validation) {
