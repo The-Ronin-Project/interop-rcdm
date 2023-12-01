@@ -1252,7 +1252,6 @@ class NormalizationRegistryClientTest {
             system = Uri(value = "sourceSystemA")
         )
         val concept1 = CodeableConcept(
-            text = "ignore-me-1".asFHIR(),
             coding = listOf(coding1)
         )
         val mapping1 = client.getConceptMapping(
@@ -1270,7 +1269,6 @@ class NormalizationRegistryClientTest {
             system = Uri(value = "sourceSystem2")
         )
         val concept2 = CodeableConcept(
-            text = "ignore-me-2".asFHIR(),
             coding = listOf(coding2)
         )
         val mapping2 = client.getConceptMapping(
@@ -1415,7 +1413,8 @@ class NormalizationRegistryClientTest {
                             value = "valueA",
                             system = "systemA"
                         )
-                    )
+                    ),
+                    text = "to-be-replaced"
                 ) to listOf(
                     TargetConcept(
                         text = "replaced-it",
@@ -1651,7 +1650,6 @@ class NormalizationRegistryClientTest {
             system = Uri(value = "system-Staging-1")
         )
         val concept1 = CodeableConcept(
-            text = "ignore-me-1".asFHIR(),
             coding = listOf(coding1)
         )
         val mapping1 = client.getConceptMapping(
@@ -1672,7 +1670,6 @@ class NormalizationRegistryClientTest {
             system = Uri(value = "system-AllVitals-2")
         )
         val concept2 = CodeableConcept(
-            text = "ignore-me-2".asFHIR(),
             coding = listOf(coding2)
         )
         val mapping2 = client.getConceptMapping(
@@ -1693,7 +1690,6 @@ class NormalizationRegistryClientTest {
             system = Uri(value = "system-HeartRate-3")
         )
         val concept3 = CodeableConcept(
-            text = "ignore-me-3".asFHIR(),
             coding = listOf(coding3)
         )
         val mapping3 = client.getConceptMapping(
@@ -1869,7 +1865,6 @@ class NormalizationRegistryClientTest {
             system = Uri(value = "system-Staging-1")
         )
         val concept1 = CodeableConcept(
-            text = "ignore-me-1".asFHIR(),
             coding = listOf(coding1)
         )
         val mapping1 = client.getConceptMapping(
@@ -1890,7 +1885,6 @@ class NormalizationRegistryClientTest {
             system = Uri(value = "system-AllVitals-2")
         )
         val concept2 = CodeableConcept(
-            text = "ignore-me-2".asFHIR(),
             coding = listOf(coding2)
         )
         val mapping2 = client.getConceptMapping(
@@ -1911,7 +1905,6 @@ class NormalizationRegistryClientTest {
             system = Uri(value = "system-HeartRate-3")
         )
         val concept3 = CodeableConcept(
-            text = "ignore-me-3".asFHIR(),
             coding = listOf(coding3)
         )
         val mapping3 = client.getConceptMapping(
@@ -1926,7 +1919,6 @@ class NormalizationRegistryClientTest {
             system = Uri(value = "AppointmentStatus-4")
         )
         val concept4 = CodeableConcept(
-            text = "ignore-me-4".asFHIR(),
             coding = listOf(coding4)
         )
         val mapping4 = client.getConceptMapping(
@@ -2083,7 +2075,6 @@ class NormalizationRegistryClientTest {
             system = Uri(value = "system-Staging-1")
         )
         val concept1 = CodeableConcept(
-            text = "ignore-me-1".asFHIR(),
             coding = listOf(coding1)
         )
         val mapping1 = client.getConceptMapping(
@@ -2107,7 +2098,6 @@ class NormalizationRegistryClientTest {
             system = Uri(value = "system-AllVitals-2")
         )
         val concept2 = CodeableConcept(
-            text = "ignore-me-2".asFHIR(),
             coding = listOf(coding2)
         )
         val mapping2 = client.getConceptMapping(
@@ -2134,7 +2124,6 @@ class NormalizationRegistryClientTest {
             system = Uri(value = "system-HeartRate-3")
         )
         val concept3 = CodeableConcept(
-            text = "ignore-me-3".asFHIR(),
             coding = listOf(coding3)
         )
         val mapping3 = client.getConceptMapping(
@@ -2307,7 +2296,8 @@ class NormalizationRegistryClientTest {
             coding = listOf(
                 Coding(
                     code = Code(value = "21704910"),
-                    system = Uri(value = "https://fhir.cerner.com/ec2458f2-1e24-41c8-b71b-0e701af7583d/codeSet/72")
+                    system = Uri(value = "https://fhir.cerner.com/ec2458f2-1e24-41c8-b71b-0e701af7583d/codeSet/72"),
+                    display = "Potassium Level".asFHIR()
                 ),
                 Coding(
                     code = Code(value = "2823-3"),
@@ -2378,7 +2368,8 @@ class NormalizationRegistryClientTest {
                 ),
                 Coding(
                     code = Code(value = "21704910"),
-                    system = Uri(value = "https://fhir.cerner.com/ec2458f2-1e24-41c8-b71b-0e701af7583d/codeSet/72")
+                    system = Uri(value = "https://fhir.cerner.com/ec2458f2-1e24-41c8-b71b-0e701af7583d/codeSet/72"),
+                    display = "Potassium Level".asFHIR()
                 )
             )
         )
@@ -2535,7 +2526,8 @@ class NormalizationRegistryClientTest {
             coding = listOf(
                 Coding(
                     code = Code(value = "85354-9"),
-                    system = Uri(value = "http://loinc.org")
+                    system = Uri(value = "http://loinc.org"),
+                    display = "Blood pressure panel with all children optional".asFHIR()
                 )
             )
         )
@@ -2613,7 +2605,8 @@ class NormalizationRegistryClientTest {
             coding = listOf(
                 Coding(
                     code = Code(value = "EPIC#44065"),
-                    system = Uri(value = "urn:oid:1.2.840.114350.1.13.297.2.7.2.727688")
+                    system = Uri(value = "urn:oid:1.2.840.114350.1.13.297.2.7.2.727688"),
+                    display = "Clark's level".asFHIR()
                 )
             )
         )
@@ -2683,7 +2676,8 @@ class NormalizationRegistryClientTest {
                 ),
                 Coding(
                     code = Code(value = "EPIC#42388"),
-                    system = Uri(value = "urn:oid:1.2.840.114350.1.13.297.2.7.2.727688")
+                    system = Uri(value = "urn:oid:1.2.840.114350.1.13.297.2.7.2.727688"),
+                    display = "anatomic stage/prognostic group".asFHIR()
                 )
             )
         )
@@ -2749,7 +2743,8 @@ class NormalizationRegistryClientTest {
             coding = listOf(
                 Coding(
                     code = Code(value = "EPIC#42388"),
-                    system = Uri(value = "urn:oid:1.2.840.114350.1.13.297.2.7.2.727688")
+                    system = Uri(value = "urn:oid:1.2.840.114350.1.13.297.2.7.2.727688"),
+                    display = "anatomic stage/prognostic group".asFHIR()
                 ),
                 Coding(
                     code = Code(value = "SNOMED#246111003"),
@@ -2819,7 +2814,8 @@ class NormalizationRegistryClientTest {
             coding = listOf(
                 Coding(
                     code = Code(value = "EPIC#42391"),
-                    system = Uri(value = "urn:oid:1.2.840.114350.1.13.297.2.7.2.727688")
+                    system = Uri(value = "urn:oid:1.2.840.114350.1.13.297.2.7.2.727688"),
+                    display = "lymph-vascular invasion (LVI)".asFHIR()
                 )
             )
         )
@@ -2857,7 +2853,8 @@ class NormalizationRegistryClientTest {
             coding = listOf(
                 Coding(
                     code = Code(value = "EPIC#31000073346"),
-                    system = Uri(value = "urn:oid:1.2.840.114350.1.13.297.2.7.2.727688")
+                    system = Uri(value = "urn:oid:1.2.840.114350.1.13.297.2.7.2.727688"),
+                    display = "WHO/ISUP grade (low/high)".asFHIR()
                 )
             )
         )
@@ -2901,7 +2898,8 @@ class NormalizationRegistryClientTest {
                 Coding(
                     code = Code(value = "EPIC#42384"),
                     // code = Code(value = "EPIC#442384"),
-                    system = Uri(value = "urn:oid:1.2.840.114350.1.13.297.2.7.2.727688")
+                    system = Uri(value = "urn:oid:1.2.840.114350.1.13.297.2.7.2.727688"),
+                    display = "regional lymph nodes (N)".asFHIR()
                 )
             )
         )
@@ -3155,7 +3153,7 @@ class NormalizationRegistryClientTest {
             system = Uri(value = "system-Staging-1")
         )
         val concept = CodeableConcept(
-            text = "ignore-me-1".asFHIR(),
+            text = "ignore-1".asFHIR(),
             coding = listOf(coding)
         )
         val exception =
@@ -3458,7 +3456,8 @@ class NormalizationRegistryClientTest {
             coding = listOf(
                 Coding(
                     code = Code(value = "363905002"),
-                    system = Uri(value = "http://snomed.info/sct")
+                    system = Uri(value = "http://snomed.info/sct"),
+                    display = "Details of alcohol drinking behavior (observable entity)".asFHIR()
                 )
             )
         )
