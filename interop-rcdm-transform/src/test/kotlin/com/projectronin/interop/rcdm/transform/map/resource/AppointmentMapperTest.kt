@@ -1,5 +1,6 @@
 package com.projectronin.interop.rcdm.transform.map.resource
 
+import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.datatype.DynamicValue
 import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
 import com.projectronin.interop.fhir.r4.datatype.Extension
@@ -8,6 +9,7 @@ import com.projectronin.interop.fhir.r4.resource.Appointment
 import com.projectronin.interop.fhir.r4.valueset.AppointmentStatus
 import com.projectronin.interop.rcdm.common.enums.RoninExtension
 import com.projectronin.interop.rcdm.registry.NormalizationRegistryClient
+import com.projectronin.interop.rcdm.registry.model.ConceptMapCoding
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
 import io.mockk.mockk
@@ -43,7 +45,7 @@ class AppointmentMapperTest {
             value = DynamicValue(DynamicValueType.CODING, status)
         )
 
-        val mappedStatus = Code("booked", extension = listOf(mappedExtension))
+        val mappedStatus = Code("booked")
 
         every {
             registryClient.getConceptMappingForEnum(
@@ -54,11 +56,11 @@ class AppointmentMapperTest {
                 enumExtensionUrl = RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS.value,
                 resource = appointment
             )
-        } returns mockk {
-            every { coding.code?.value } returns "booked"
-            every { extension } returns mappedExtension
-            every { metadata } returns listOf()
-        }
+        } returns ConceptMapCoding(
+            coding = Coding(code = Code("booked")),
+            extension = mappedExtension,
+            metadata = emptyList()
+        )
 
         val (mappedResource, validation) = mapper.map(appointment, tenant, null)
         mappedResource!!

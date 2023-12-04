@@ -1,6 +1,5 @@
 package com.projectronin.interop.rcdm.transform.map.resource
 
-import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.resource.Appointment
 import com.projectronin.interop.fhir.r4.valueset.AppointmentStatus
 import com.projectronin.interop.fhir.validate.LocationContext
@@ -38,15 +37,13 @@ class AppointmentMapper(registryClient: NormalizationRegistryClient) :
                 parentContext,
                 validation,
                 forceCacheReloadTS
-            )?.let { response ->
-                Code(value = response.coding.code?.value, extension = listOf(response.extension))
-            }
+            )
         }
 
         return MapResponse(
             mappedStatus?.let {
                 resource.copy(
-                    status = it,
+                    status = it.coding.code,
                     extension = resource.extension + it.extension
                 )
             } ?: resource,

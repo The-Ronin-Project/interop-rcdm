@@ -93,21 +93,7 @@ class RoninAppointmentTransformerTest {
                 )
             ),
             identifier = listOf(Identifier(value = "id".asFHIR())),
-            status = Code(
-                "cancelled",
-                extension = listOf(
-                    Extension(
-                        url = Uri("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceAppointmentStatus"),
-                        value = DynamicValue(
-                            type = DynamicValueType.CODING,
-                            value = Coding(
-                                system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
-                                code = Code(value = "input")
-                            )
-                        )
-                    )
-                )
-            ),
+            status = Code("cancelled"),
             cancelationReason = CodeableConcept(text = "cancel reason".asFHIR()),
             serviceCategory = listOf(CodeableConcept(text = "service category".asFHIR())),
             serviceType = listOf(CodeableConcept(text = "service type".asFHIR())),
@@ -210,24 +196,7 @@ class RoninAppointmentTransformerTest {
             ),
             transformed.identifier
         )
-        assertEquals(
-            Code(
-                "cancelled",
-                extension = listOf(
-                    Extension(
-                        url = Uri("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceAppointmentStatus"),
-                        value = DynamicValue(
-                            type = DynamicValueType.CODING,
-                            value = Coding(
-                                system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
-                                code = Code(value = "input")
-                            )
-                        )
-                    )
-                )
-            ),
-            transformed.status
-        )
+        assertEquals(Code("cancelled"), transformed.status)
         assertEquals(CodeableConcept(text = "cancel reason".asFHIR()), transformed.cancelationReason)
         assertEquals((listOf(CodeableConcept(text = "service category".asFHIR()))), transformed.serviceCategory)
         assertEquals((listOf(CodeableConcept(text = "service type".asFHIR()))), transformed.serviceType)
@@ -277,21 +246,7 @@ class RoninAppointmentTransformerTest {
                     )
                 )
             ),
-            status = Code(
-                "cancelled",
-                extension = listOf(
-                    Extension(
-                        url = Uri("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceAppointmentStatus"),
-                        value = DynamicValue(
-                            type = DynamicValueType.CODING,
-                            value = Coding(
-                                system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
-                                code = Code(value = "input")
-                            )
-                        )
-                    )
-                )
-            ),
+            status = Code("cancelled"),
             participant = listOf(
                 Participant(
                     actor = Reference(
@@ -356,24 +311,7 @@ class RoninAppointmentTransformerTest {
             ),
             transformed.identifier
         )
-        assertEquals(
-            Code(
-                "cancelled",
-                extension = listOf(
-                    Extension(
-                        url = Uri("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceAppointmentStatus"),
-                        value = DynamicValue(
-                            type = DynamicValueType.CODING,
-                            value = Coding(
-                                system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
-                                code = Code(value = "input")
-                            )
-                        )
-                    )
-                )
-            ),
-            transformed.status
-        )
+        assertEquals(Code("cancelled"), transformed.status)
         assertNull(transformed.cancelationReason)
         assertEquals(listOf<CodeableConcept>(), transformed.serviceCategory)
         assertEquals(listOf<CodeableConcept>(), transformed.serviceType)
