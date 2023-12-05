@@ -129,6 +129,7 @@ class NormalizationRegistryClient(
         )
         val registryItem = getConceptMapItem(cacheKey, forceCacheReloadTS)
         val codedEnum = enumClass.java.enumConstants.find { it.code == coding.code?.value }
+        logger.debug { "Found CodedEnum $codedEnum for ($elementName, $tenantMnemonic)" }
         return codedEnum?.let {
             ConceptMapCoding(coding, createCodingExtension(enumExtensionUrl, coding), registryItem?.metadata)
         } ?: registryItem?.let { coding.getConceptMapping(registryItem, resource) }
@@ -179,7 +180,13 @@ class NormalizationRegistryClient(
         sourceConcept: SourceConcept,
         resource: T
     ): TargetConcept? {
-        val potentialTargets = conceptMapItem.map[sourceConcept] ?: return null
+        val potentialTargets = conceptMapItem.map[sourceConcept]
+        if (potentialTargets == null) {
+            logger.info { "Unable to find potential targets for $sourceConcept" }
+            return null
+        } else {
+            logger.debug { "Found ${potentialTargets.size} potential targets for $sourceConcept" }
+        }
 
         @Suppress("UNCHECKED_CAST")
         val dependsOnEvaluator = dependsOnEvaluatorByType[resource::class] as? DependsOnEvaluator<T>
@@ -196,8 +203,17 @@ class NormalizationRegistryClient(
         }
 
         return when (matchedTargets.size) {
-            1 -> matchedTargets.single()
-            0 -> null
+            1 -> {
+                val target = matchedTargets.single()
+                logger.debug { "Matched target $target for $sourceConcept" }
+                target
+            }
+
+            0 -> {
+                logger.info { "Unable to match target from ${potentialTargets.size} potential targets for $sourceConcept" }
+                null
+            }
+
             else -> throw IllegalStateException("Multiple qualified TargetConcepts found for $sourceConcept")
         }
     }
@@ -312,12 +328,14 @@ class NormalizationRegistryClient(
         forceCacheReloadTS: LocalDateTime?
     ): ConceptMapItem? {
         return runBlocking {
+            logger.trace { "Requesting registryMutex to retrieve $key" }
             registryMutex.withLock {
+                logger.debug { "Acquired registryMutex - Retrieving $key from cache" }
                 checkRegistryStatus(forceCacheReloadTS)
 
                 conceptMapCache.get(key) {
                     registry[key]?.let { registryItems ->
-                        ConceptMapItem(
+                        val item = ConceptMapItem(
                             registryItems.map { item ->
                                 getConceptMapData(item.filename).entries
                             }.flatten().associate { it.toPair() },
@@ -335,6 +353,8 @@ class NormalizationRegistryClient(
                                 )
                             }
                         )
+                        logger.info { "Computed ConceptMapItem $item with key $key" }
+                        item
                     }
                 }
             }
@@ -382,7 +402,9 @@ class NormalizationRegistryClient(
         forceCacheReloadTS: LocalDateTime?
     ): ValueSetItem? {
         return runBlocking {
+            logger.trace { "Requesting registryMutex to retrieve $key" }
             registryMutex.withLock {
+                logger.debug { "Acquired registryMutex - Retrieving $key" }
                 checkRegistryStatus(forceCacheReloadTS)
 
                 valueSetCache.get(key) {
@@ -395,7 +417,9 @@ class NormalizationRegistryClient(
                             valueSetUuid = item.valueSetUuid ?: "N/A",
                             version = item.version ?: "N/A"
                         )
-                        ValueSetItem(set = getValueSetData(item.filename), metadata)
+                        val valueSetItem = ValueSetItem(set = getValueSetData(item.filename), metadata)
+                        logger.info { "Computed ValueSetItem $valueSetItem with key $key" }
+                        valueSetItem
                     }
                 }
             }
@@ -423,6 +447,7 @@ class NormalizationRegistryClient(
         val cacheReloadTime = forceCacheReloadTS ?: LocalDateTime.now().minusHours(defaultReloadHours.toLong())
 
         if (registryLastUpdated.isBefore(cacheReloadTime)) {
+            logger.info { "Reloading registry as it is now past cacheReloadTime of $cacheReloadTime" }
             reloadRegistry()
         }
     }
@@ -431,9 +456,11 @@ class NormalizationRegistryClient(
      * Reloads the registry. As a consequence of reloading the registry
      */
     private fun reloadRegistry() {
+        logger.debug { "Reloading registry" }
         val newRegistry = getNewRegistry()
         if (newRegistry == null) {
             // Continue using the registry, but reset the time to force another attempt next time.
+            logger.warn { "Failed to get new registry - continuing to use old registry" }
             registryLastUpdated = LocalDateTime.MIN
             return
         }
@@ -495,7 +522,7 @@ class NormalizationRegistryClient(
                 ConceptMap::class
             )
         } catch (e: Exception) {
-            logger.info { e.message }
+            logger.warn { "Error parsing ConceptMap from $filename ${e.message}" }
             return emptyMap()
         }
         // squish ConceptMap into more usable form
@@ -534,7 +561,7 @@ class NormalizationRegistryClient(
         val valueSet = try {
             JacksonUtil.readJsonObject(ociClient.getObjectFromINFX(filename)!!, ValueSet::class)
         } catch (e: Exception) {
-            logger.info { e.message }
+            logger.warn { "Error parsing ValueSet from $filename ${e.message}" }
             return emptyList()
         }
         // squish ValueSet into more usable form
@@ -544,6 +571,7 @@ class NormalizationRegistryClient(
             val targetCode = it.code?.value
             val targetDisplay = it.display?.value
             if (targetSystem == null || targetVersion == null || targetCode == null || targetDisplay == null) {
+                logger.warn { "Skipping value in ValueSet from $filename as required property is null $it" }
                 null
             } else {
                 TargetValue(targetCode, targetSystem, targetDisplay, targetVersion)
