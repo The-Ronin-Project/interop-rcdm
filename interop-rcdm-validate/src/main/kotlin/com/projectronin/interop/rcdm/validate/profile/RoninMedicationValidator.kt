@@ -11,9 +11,10 @@ import com.projectronin.interop.fhir.validate.ValidationIssueSeverity
 import com.projectronin.interop.rcdm.common.enums.RCDMVersion
 import com.projectronin.interop.rcdm.common.enums.RoninExtension
 import com.projectronin.interop.rcdm.common.enums.RoninProfile
+import org.springframework.stereotype.Component
 import kotlin.reflect.KClass
 import com.projectronin.interop.fhir.validate.ProfileValidator as R4ProfileValidator
-
+@Component
 class RoninMedicationValidator : ProfileValidator<Medication>() {
     override val supportedResource: KClass<Medication> = Medication::class
     override val r4Validator: R4ProfileValidator<Medication> = R4MedicationValidator

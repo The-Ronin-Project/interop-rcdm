@@ -15,13 +15,18 @@ import com.projectronin.interop.rcdm.registry.NormalizationRegistryClient
 import com.projectronin.interop.rcdm.registry.model.ConceptMapCodeableConcept
 import com.projectronin.interop.rcdm.registry.model.ConceptMapCoding
 import com.projectronin.interop.tenant.config.model.Tenant
+import io.github.classgraph.ClassGraph
 import io.mockk.every
 import io.mockk.mockk
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
+import org.springframework.stereotype.Component
 import java.time.LocalDateTime
+import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
+import kotlin.reflect.full.findAnnotation
 
 class BaseMapperTest {
     private val registryClient = mockk<NormalizationRegistryClient>()
@@ -308,5 +313,25 @@ class BaseMapperTest {
         assertEquals(conceptMapCoding, response)
 
         assertEquals(0, validation.issues().size)
+    }
+
+    @Test
+    fun `all classes are annotated`() {
+        val classes =
+            ClassGraph().acceptPackages("com.projectronin.interop.rcdm.transform.map")
+                .enableClassInfo()
+                .scan().use {
+                    it.getSubclasses(BaseMapper::class.java).filterNot { classInfo ->
+                        classInfo.isAbstract || classInfo.isInnerClass || classInfo.isInterface
+                    }.map { classInfo ->
+                        @Suppress("UNCHECKED_CAST")
+                        classInfo.loadClass().kotlin as KClass<BaseMapper<*>>
+                    }
+                }
+        classes.forEach {
+            Assertions.assertNotNull(it.findAnnotation<Component>()) {
+                "${it.simpleName} is not annotated with @Component"
+            }
+        }
     }
 }

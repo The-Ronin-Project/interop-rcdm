@@ -7,9 +7,11 @@ import com.projectronin.interop.fhir.validate.RequiredFieldError
 import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.rcdm.common.enums.RCDMVersion
 import com.projectronin.interop.rcdm.common.enums.RoninProfile
+import org.springframework.stereotype.Component
 import kotlin.reflect.KClass
 import com.projectronin.interop.fhir.validate.ProfileValidator as R4ProfileValidator
 
+@Component
 class RoninOrganizationValidator : ProfileValidator<Organization>() {
     override val supportedResource: KClass<Organization> = Organization::class
     override val r4Validator: R4ProfileValidator<Organization> = R4OrganizationValidator

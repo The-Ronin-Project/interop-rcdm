@@ -12,9 +12,10 @@ import com.projectronin.interop.rcdm.transform.map.BaseMapper
 import com.projectronin.interop.rcdm.transform.map.MapResponse
 import com.projectronin.interop.rcdm.transform.map.ResourceMapper
 import com.projectronin.interop.tenant.config.model.Tenant
+import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 import kotlin.reflect.KClass
-
+@Component
 class MedicationMapper(registryClient: NormalizationRegistryClient) :
     ResourceMapper<Medication>, BaseMapper<Medication>(registryClient) {
     override val supportedResource: KClass<Medication> = Medication::class

@@ -6,8 +6,9 @@ import com.projectronin.interop.rcdm.common.enums.RoninProfile
 import com.projectronin.interop.rcdm.transform.model.TransformResponse
 import com.projectronin.interop.rcdm.transform.util.getRoninIdentifiers
 import com.projectronin.interop.tenant.config.model.Tenant
+import org.springframework.stereotype.Component
 import kotlin.reflect.KClass
-
+@Component
 class RoninMedicationTransformer : ProfileTransformer<Medication>() {
     override val supportedResource: KClass<Medication> = Medication::class
     override val profile: RoninProfile = RoninProfile.MEDICATION

@@ -100,7 +100,7 @@ class RoninMedicationTransformerTest {
     }
 
     @Test
-    fun `transform and validate - succeeds with all attributes present - ingredient item is type REFERENCE`() {
+    fun `transform - succeeds with all attributes present - ingredient item is type REFERENCE`() {
         val medication = Medication(
             id = Id("12345"),
             meta = Meta(

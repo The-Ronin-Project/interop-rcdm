@@ -9,12 +9,16 @@ import com.projectronin.interop.rcdm.common.enums.RCDMVersion
 import com.projectronin.interop.rcdm.common.enums.RoninProfile
 import com.projectronin.interop.rcdm.transform.model.TransformResponse
 import com.projectronin.interop.tenant.config.model.Tenant
+import io.github.classgraph.ClassGraph
 import io.mockk.mockk
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.springframework.stereotype.Component
 import kotlin.reflect.KClass
+import kotlin.reflect.full.findAnnotation
 
 class ProfileTransformerTest {
     private val transformer = object : ProfileTransformer<Patient>() {
@@ -110,5 +114,25 @@ class ProfileTransformerTest {
         val expectedPatient = Patient(meta = Meta(profile = listOf(RoninProfile.PATIENT.canonical)))
         assertEquals(expectedPatient, transformResponse.resource)
         assertEquals(listOf(organization), transformResponse.embeddedResources)
+    }
+
+    @Test
+    fun `all classes are annotated`() {
+        val classes =
+            ClassGraph().acceptPackages("com.projectronin.interop.rcdm.transform.profile")
+                .enableClassInfo()
+                .scan().use {
+                    it.getSubclasses(ProfileTransformer::class.java).filterNot { classInfo ->
+                        classInfo.isAbstract || classInfo.isInnerClass || classInfo.isInterface
+                    }.map { classInfo ->
+                        @Suppress("UNCHECKED_CAST")
+                        classInfo.loadClass().kotlin as KClass<ProfileTransformer<*>>
+                    }
+                }
+        classes.forEach {
+            Assertions.assertNotNull(it.findAnnotation<Component>()) {
+                "${it.simpleName} is not annotated with @Component"
+            }
+        }
     }
 }

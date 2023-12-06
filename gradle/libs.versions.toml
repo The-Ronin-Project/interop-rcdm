@@ -1,5 +1,6 @@
 [versions]
 caffeine = "3.1.8"
+classgraph = "4.8.164"
 interop-common = "3.13.4"
 interop-datalake = "8.4.2"
 interop-ehr = "12.7.0"
@@ -12,6 +13,7 @@ mockk = "1.13.8"
 
 [libraries]
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "caffeine" }
+classgraph = { module = "io.github.classgraph:classgraph", version.ref = "classgraph" }
 event-interop-resource-internal = { module = "com.projectronin.contract.event:event-interop-resource-internal", version.ref = "interop-event-resource-internal" }
 interop-common = { module = "com.projectronin.interop:interop-common", version.ref = "interop-common" }
 interop-commonJackson = { module = "com.projectronin.interop:interop-common-jackson", version.ref = "interop-common" }

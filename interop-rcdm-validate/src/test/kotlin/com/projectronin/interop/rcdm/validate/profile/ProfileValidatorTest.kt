@@ -24,11 +24,15 @@ import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.fhir.validate.append
 import com.projectronin.interop.rcdm.common.enums.RCDMVersion
 import com.projectronin.interop.rcdm.common.enums.RoninProfile
+import io.github.classgraph.ClassGraph
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.springframework.stereotype.Component
 import kotlin.reflect.KClass
+import kotlin.reflect.full.findAnnotation
 import com.projectronin.interop.fhir.validate.ProfileValidator as R4ProfileValidator
 
 class ProfileValidatorTest {
@@ -760,5 +764,25 @@ class ProfileValidatorTest {
             "ERROR RONIN_REQ_REF_1: Contained resource is required if a local reference is provided @ Patient.managingOrganization.reference",
             validation.issues().first().toString()
         )
+    }
+
+    @Test
+    fun `all classes are annotated`() {
+        val classes =
+            ClassGraph().acceptPackages("com.projectronin.interop.rcdm.validate.profile")
+                .enableClassInfo()
+                .scan().use {
+                    it.getSubclasses(ProfileValidator::class.java).filterNot { classInfo ->
+                        classInfo.isAbstract || classInfo.isInnerClass || classInfo.isInterface
+                    }.map { classInfo ->
+                        @Suppress("UNCHECKED_CAST")
+                        classInfo.loadClass().kotlin as KClass<ProfileValidator<*>>
+                    }
+                }
+        classes.forEach {
+            assertNotNull(it.findAnnotation<Component>()) {
+                "${it.simpleName} is not annotated with @Component"
+            }
+        }
     }
 }
