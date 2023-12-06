@@ -1,6 +1,7 @@
 package com.projectronin.interop.rcdm.transform.util
 
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
+import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.datatype.DynamicValue
 import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
 import com.projectronin.interop.fhir.r4.datatype.Extension
@@ -18,6 +19,24 @@ fun CodeableConcept?.getExtensionOrEmptyList(roninExtension: RoninExtension): Li
                 url = Uri(roninExtension.value),
                 value = DynamicValue(
                     type = DynamicValueType.CODEABLE_CONCEPT,
+                    value = this
+                )
+            )
+        )
+    } ?: emptyList()
+}
+
+/**
+ * Creates an [Extension] list using the supplied [url] and [Coding] object. Supports the calling transform
+ * by checking input for nulls and returning a list or emptyList. This supports simpler list arithmetic in the caller.
+ */
+fun Coding?.getExtensionOrEmptyList(url: RoninExtension): List<Extension> {
+    return this?.let {
+        listOf(
+            Extension(
+                url = Uri(url.value),
+                value = DynamicValue(
+                    type = DynamicValueType.CODING,
                     value = this
                 )
             )
