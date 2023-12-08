@@ -29,7 +29,7 @@ class ProcedureMapperTest {
     }
 
     @Test
-    fun `supported resource is Condition`() {
+    fun `supported resource is Procedure`() {
         assertEquals(Procedure::class, mapper.supportedResource)
     }
 

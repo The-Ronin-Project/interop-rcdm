@@ -44,7 +44,7 @@ class ProfileValidatorTest {
         override val profileVersion: Int = 1
 
         override fun validate(resource: Patient, validation: Validation, context: LocationContext) {
-            validateRoninNormalizedCodeableConcept(resource.maritalStatus, Patient::maritalStatus, context, validation)
+            validateRoninNormalizedCodeableConcept(resource.maritalStatus, Patient::maritalStatus, null, context, validation)
 
             validateReferenceType(
                 resource.managingOrganization,

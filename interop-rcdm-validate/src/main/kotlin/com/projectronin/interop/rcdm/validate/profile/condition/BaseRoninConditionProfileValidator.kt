@@ -47,7 +47,7 @@ abstract class BaseRoninConditionProfileValidator : ProfileValidator<Condition>(
             )
 
             checkNotNull(resource.code, requiredCodeError, context)
-            validateRoninNormalizedCodeableConcept(resource.code, Condition::code, context, validation)
+            validateRoninNormalizedCodeableConcept(resource.code, Condition::code, null, context, validation)
 
             checkTrue(
                 resource.extension.any {

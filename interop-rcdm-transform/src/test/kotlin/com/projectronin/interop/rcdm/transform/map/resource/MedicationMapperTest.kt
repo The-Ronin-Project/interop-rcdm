@@ -23,7 +23,7 @@ class MedicationMapperTest {
     }
 
     @Test
-    fun `supported resource is Appointment`() {
+    fun `supported resource is Medication`() {
         assertEquals(Medication::class, mapper.supportedResource)
     }
 

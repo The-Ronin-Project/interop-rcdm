@@ -65,10 +65,12 @@ abstract class ProfileValidator<R : Resource<R>> {
 
     protected fun validateRoninNormalizedCodeableConcept(
         codeableConcept: CodeableConcept?,
-        property: KProperty1<R, CodeableConcept?>,
+        propertyCodeableConcept: KProperty1<R, CodeableConcept?>? = null,
+        propertyCodeableConceptList: KProperty1<R, List<CodeableConcept?>>? = null, // ServiceRequest.category is a List<CodeableConcept>, not cool
         parentContext: LocationContext,
         validation: Validation
     ) {
+        val property = propertyCodeableConcept ?: propertyCodeableConceptList
         validation.apply {
             codeableConcept?.let {
                 val coding = codeableConcept.coding.singleOrNull()
@@ -78,7 +80,7 @@ abstract class ProfileValidator<R : Resource<R>> {
                         code = "RONIN_NOV_CODING_002",
                         severity = ValidationIssueSeverity.ERROR,
                         description = "Must contain exactly 1 coding",
-                        location = LocationContext("", "${property.name}.coding")
+                        location = LocationContext("", "${property?.name}.coding")
                     ),
                     parentContext
                 )
@@ -89,7 +91,7 @@ abstract class ProfileValidator<R : Resource<R>> {
                             code = "RONIN_NOV_CODING_003",
                             severity = ValidationIssueSeverity.ERROR,
                             description = "Coding system cannot be null or blank",
-                            location = LocationContext("", "${property.name}.coding[0].system")
+                            location = LocationContext("", "${property?.name}.coding[0].system")
                         ),
                         parentContext
                     )
@@ -99,7 +101,7 @@ abstract class ProfileValidator<R : Resource<R>> {
                             code = "RONIN_NOV_CODING_004",
                             severity = ValidationIssueSeverity.ERROR,
                             description = "Coding code cannot be null or blank",
-                            location = LocationContext("", "${property.name}.coding[0].code")
+                            location = LocationContext("", "${property?.name}.coding[0].code")
                         ),
                         parentContext
                     )
@@ -109,7 +111,7 @@ abstract class ProfileValidator<R : Resource<R>> {
                             code = "RONIN_NOV_CODING_005",
                             severity = ValidationIssueSeverity.ERROR,
                             description = "Coding display cannot be null or blank",
-                            location = LocationContext("", "${property.name}.coding[0].display")
+                            location = LocationContext("", "${property?.name}.coding[0].display")
                         ),
                         parentContext
                     )

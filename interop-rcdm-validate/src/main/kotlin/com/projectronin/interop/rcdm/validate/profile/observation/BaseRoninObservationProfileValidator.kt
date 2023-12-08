@@ -79,7 +79,7 @@ abstract class BaseRoninObservationProfileValidator(protected val registryClient
 
     override fun validate(resource: Observation, validation: Validation, context: LocationContext) {
         validation.apply {
-            validateRoninNormalizedCodeableConcept(resource.code, Observation::code, context, this)
+            validateRoninNormalizedCodeableConcept(resource.code, Observation::code, null, context, this)
 
             checkNotNull(resource.subject, requiredSubjectError, context)
 

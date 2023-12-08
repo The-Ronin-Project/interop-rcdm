@@ -33,7 +33,7 @@ class RoninMedicationValidator : ProfileValidator<Medication>() {
     override fun validate(resource: Medication, validation: Validation, context: LocationContext) {
         validation.apply {
             checkNotNull(resource.code, requiredCodeError, context)
-            validateRoninNormalizedCodeableConcept(resource.code, Medication::code, context, this)
+            validateRoninNormalizedCodeableConcept(resource.code, Medication::code, null, context, this)
             checkTrue(
                 resource.extension.any {
                     it.url == RoninExtension.TENANT_SOURCE_MEDICATION_CODE.uri &&

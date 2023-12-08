@@ -32,7 +32,7 @@ class ObservationMapperTest {
     }
 
     @Test
-    fun `supported resource is Condition`() {
+    fun `supported resource is Observation`() {
         assertEquals(Observation::class, mapper.supportedResource)
     }
 
