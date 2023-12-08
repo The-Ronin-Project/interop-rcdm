@@ -144,47 +144,6 @@ class RoninPulseOximetryValidatorTest {
     }
 
     @Test
-    fun `validation fails if no flowRate components`() {
-        val pulseOximetry = Observation(
-            id = Id("1234"),
-            meta = Meta(profile = listOf(RoninProfile.OBSERVATION_PULSE_OXIMETRY.canonical), source = Uri("source")),
-            identifier = requiredIdentifiers,
-            extension = listOf(
-                Extension(
-                    url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
-                    value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "code".asFHIR()))
-                )
-            ),
-            status = ObservationStatus.FINAL.asCode(),
-            code = CodeableConcept(coding = listOf(pulseOximetryCoding)),
-            subject = Reference(reference = FHIRString("Patient/1234")),
-            category = listOf(vitalSignsCategoryConcept),
-            effective = DynamicValue(DynamicValueType.DATE_TIME, DateTime("2023")),
-            component = listOf(
-                ObservationComponent(
-                    extension = listOf(sourceConcentrationCodeExtension),
-                    code = concentrationCodeableConcept,
-                    value = DynamicValue(
-                        DynamicValueType.QUANTITY,
-                        Quantity(
-                            value = Decimal(BigDecimal.valueOf(65)),
-                            unit = "%".asFHIR(),
-                            system = CodeSystem.UCUM.uri,
-                            code = Code("%")
-                        )
-                    )
-                )
-            )
-        )
-        val validation = validator.validate(pulseOximetry, LocationContext(Observation::class))
-        assertEquals(1, validation.issues().size)
-        assertEquals(
-            "ERROR RONIN_PXOBS_004: Must match this system|code: http://loinc.org|12345-2 @ Observation.component:FlowRate.code",
-            validation.issues().first().toString()
-        )
-    }
-
-    @Test
     fun `validation fails if multiple flowRate components`() {
         val pulseOximetry = Observation(
             id = Id("1234"),
@@ -301,47 +260,6 @@ class RoninPulseOximetryValidatorTest {
         assertEquals(1, validation.issues().size)
         assertEquals(
             "ERROR INV_VALUE_SET: 'L/sec' is outside of required value set @ Observation.component:FlowRate.valueQuantity.code",
-            validation.issues().first().toString()
-        )
-    }
-
-    @Test
-    fun `validation fails if no concentration components`() {
-        val pulseOximetry = Observation(
-            id = Id("1234"),
-            meta = Meta(profile = listOf(RoninProfile.OBSERVATION_PULSE_OXIMETRY.canonical), source = Uri("source")),
-            identifier = requiredIdentifiers,
-            extension = listOf(
-                Extension(
-                    url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
-                    value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "code".asFHIR()))
-                )
-            ),
-            status = ObservationStatus.FINAL.asCode(),
-            code = CodeableConcept(coding = listOf(pulseOximetryCoding)),
-            subject = Reference(reference = FHIRString("Patient/1234")),
-            category = listOf(vitalSignsCategoryConcept),
-            effective = DynamicValue(DynamicValueType.DATE_TIME, DateTime("2023")),
-            component = listOf(
-                ObservationComponent(
-                    extension = listOf(sourceFlowRateCodeExtension),
-                    code = flowRateCodeableConcept,
-                    value = DynamicValue(
-                        DynamicValueType.QUANTITY,
-                        Quantity(
-                            value = Decimal(BigDecimal.valueOf(110)),
-                            unit = "L/min".asFHIR(),
-                            system = CodeSystem.UCUM.uri,
-                            code = Code("L/min")
-                        )
-                    )
-                )
-            )
-        )
-        val validation = validator.validate(pulseOximetry, LocationContext(Observation::class))
-        assertEquals(1, validation.issues().size)
-        assertEquals(
-            "ERROR RONIN_PXOBS_005: Must match this system|code: http://loinc.org|12345-3 @ Observation.component:Concentration.code",
             validation.issues().first().toString()
         )
     }
@@ -468,6 +386,50 @@ class RoninPulseOximetryValidatorTest {
     }
 
     @Test
+    fun `validation fails with a generic component`() {
+        val pulseOximetry = Observation(
+            id = Id("1234"),
+            meta = Meta(profile = listOf(RoninProfile.OBSERVATION_PULSE_OXIMETRY.canonical), source = Uri("source")),
+            identifier = requiredIdentifiers,
+            extension = listOf(
+                Extension(
+                    url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
+                    value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "code".asFHIR()))
+                )
+            ),
+            status = ObservationStatus.FINAL.asCode(),
+            code = CodeableConcept(coding = listOf(pulseOximetryCoding)),
+            subject = Reference(reference = FHIRString("Patient/1234")),
+            category = listOf(vitalSignsCategoryConcept),
+            effective = DynamicValue(DynamicValueType.DATE_TIME, DateTime("2023")),
+            component = listOf(
+                ObservationComponent(
+                    extension = listOf(
+                        Extension(
+                            url = RoninExtension.TENANT_SOURCE_OBSERVATION_COMPONENT_CODE.uri,
+                            value = DynamicValue(
+                                DynamicValueType.CODEABLE_CONCEPT,
+                                concentrationCodeableConcept
+                            )
+                        )
+                    ),
+                    code = CodeableConcept("code".asFHIR()),
+                    value = DynamicValue(
+                        DynamicValueType.STRING,
+                        "test"
+                    )
+                )
+            )
+        )
+        val validation = validator.validate(pulseOximetry, LocationContext(Observation::class))
+        assertEquals(1, validation.issues().size)
+        assertEquals(
+            "ERROR RONIN_PXOBS_007: Pulse Oximetry components must be either a Flow Rate or Concentration @ Observation.component",
+            validation.issues().first().toString()
+        )
+    }
+
+    @Test
     fun `validation succeeds with components`() {
         val pulseOximetry = Observation(
             id = Id("1234"),
@@ -518,6 +480,29 @@ class RoninPulseOximetryValidatorTest {
     }
 
     @Test
+    fun `validation succeeds without components`() {
+        val pulseOximetry = Observation(
+            id = Id("1234"),
+            meta = Meta(profile = listOf(RoninProfile.OBSERVATION_PULSE_OXIMETRY.canonical), source = Uri("source")),
+            identifier = requiredIdentifiers,
+            extension = listOf(
+                Extension(
+                    url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
+                    value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "code".asFHIR()))
+                )
+            ),
+            status = ObservationStatus.FINAL.asCode(),
+            code = CodeableConcept(coding = listOf(pulseOximetryCoding)),
+            subject = Reference(reference = FHIRString("Patient/1234")),
+            category = listOf(vitalSignsCategoryConcept),
+            effective = DynamicValue(DynamicValueType.DATE_TIME, DateTime("2023")),
+            component = emptyList()
+        )
+        val validation = validator.validate(pulseOximetry, LocationContext(Observation::class))
+        assertEquals(0, validation.issues().size)
+    }
+
+    @Test
     fun `validation succeeds with data absent reason`() {
         val pulseOximetry = Observation(
             id = Id("1234"),
@@ -535,6 +520,80 @@ class RoninPulseOximetryValidatorTest {
             category = listOf(vitalSignsCategoryConcept),
             effective = DynamicValue(DynamicValueType.DATE_TIME, DateTime("2023")),
             dataAbsentReason = CodeableConcept(text = "Unknown".asFHIR())
+        )
+        val validation = validator.validate(pulseOximetry, LocationContext(Observation::class))
+        assertEquals(0, validation.issues().size)
+    }
+
+    @Test
+    fun `validation succeeds if no flowRate components`() {
+        val pulseOximetry = Observation(
+            id = Id("1234"),
+            meta = Meta(profile = listOf(RoninProfile.OBSERVATION_PULSE_OXIMETRY.canonical), source = Uri("source")),
+            identifier = requiredIdentifiers,
+            extension = listOf(
+                Extension(
+                    url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
+                    value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "code".asFHIR()))
+                )
+            ),
+            status = ObservationStatus.FINAL.asCode(),
+            code = CodeableConcept(coding = listOf(pulseOximetryCoding)),
+            subject = Reference(reference = FHIRString("Patient/1234")),
+            category = listOf(vitalSignsCategoryConcept),
+            effective = DynamicValue(DynamicValueType.DATE_TIME, DateTime("2023")),
+            component = listOf(
+                ObservationComponent(
+                    extension = listOf(sourceConcentrationCodeExtension),
+                    code = concentrationCodeableConcept,
+                    value = DynamicValue(
+                        DynamicValueType.QUANTITY,
+                        Quantity(
+                            value = Decimal(BigDecimal.valueOf(65)),
+                            unit = "%".asFHIR(),
+                            system = CodeSystem.UCUM.uri,
+                            code = Code("%")
+                        )
+                    )
+                )
+            )
+        )
+        val validation = validator.validate(pulseOximetry, LocationContext(Observation::class))
+        assertEquals(0, validation.issues().size)
+    }
+
+    @Test
+    fun `validation succeeds if no concentration components`() {
+        val pulseOximetry = Observation(
+            id = Id("1234"),
+            meta = Meta(profile = listOf(RoninProfile.OBSERVATION_PULSE_OXIMETRY.canonical), source = Uri("source")),
+            identifier = requiredIdentifiers,
+            extension = listOf(
+                Extension(
+                    url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
+                    value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "code".asFHIR()))
+                )
+            ),
+            status = ObservationStatus.FINAL.asCode(),
+            code = CodeableConcept(coding = listOf(pulseOximetryCoding)),
+            subject = Reference(reference = FHIRString("Patient/1234")),
+            category = listOf(vitalSignsCategoryConcept),
+            effective = DynamicValue(DynamicValueType.DATE_TIME, DateTime("2023")),
+            component = listOf(
+                ObservationComponent(
+                    extension = listOf(sourceFlowRateCodeExtension),
+                    code = flowRateCodeableConcept,
+                    value = DynamicValue(
+                        DynamicValueType.QUANTITY,
+                        Quantity(
+                            value = Decimal(BigDecimal.valueOf(110)),
+                            unit = "L/min".asFHIR(),
+                            system = CodeSystem.UCUM.uri,
+                            code = Code("L/min")
+                        )
+                    )
+                )
+            )
         )
         val validation = validator.validate(pulseOximetry, LocationContext(Observation::class))
         assertEquals(0, validation.issues().size)

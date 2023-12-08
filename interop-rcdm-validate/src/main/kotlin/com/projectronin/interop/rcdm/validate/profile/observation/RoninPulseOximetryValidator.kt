@@ -65,19 +65,6 @@ class RoninPulseOximetryValidator(registryClient: NormalizationRegistryClient) :
             validation.apply {
                 val flowRateCodeContext = LocationContext("Observation", "component:FlowRate.code")
                 checkTrue(
-                    flowRate.isNotEmpty(),
-                    FHIRError(
-                        code = "RONIN_PXOBS_004",
-                        severity = ValidationIssueSeverity.ERROR,
-                        description = "Must match this system|code: ${
-                        validFlowRateCodes.joinToString(", ") { "${it.system?.value}|${it.code?.value}" }
-                        }",
-                        location = flowRateCodeContext,
-                        metadata = validFlowRateValueSet.metadata?.let { listOf(it) } ?: emptyList()
-                    ),
-                    parentContext
-                )
-                checkTrue(
                     flowRate.size <= 1,
                     FHIRError(
                         code = "USCORE_PXOBS_005",
@@ -91,19 +78,6 @@ class RoninPulseOximetryValidator(registryClient: NormalizationRegistryClient) :
 
                 val concentrationCodeContext = LocationContext("Observation", "component:Concentration.code")
                 checkTrue(
-                    concentration.isNotEmpty(),
-                    FHIRError(
-                        code = "RONIN_PXOBS_005",
-                        severity = ValidationIssueSeverity.ERROR,
-                        description = "Must match this system|code: ${
-                        validConcentrationCodes.joinToString(", ") { "${it.system?.value}|${it.code?.value}" }
-                        }",
-                        location = concentrationCodeContext,
-                        metadata = validConcentrationValueSet.metadata?.let { listOf(it) } ?: emptyList()
-                    ),
-                    parentContext
-                )
-                checkTrue(
                     concentration.size <= 1,
                     FHIRError(
                         code = "USCORE_PXOBS_006",
@@ -111,6 +85,18 @@ class RoninPulseOximetryValidator(registryClient: NormalizationRegistryClient) :
                         description = "Only 1 entry is allowed for pulse oximetry oxygen concentration",
                         location = concentrationCodeContext,
                         metadata = validConcentrationValueSet.metadata?.let { listOf(it) } ?: emptyList()
+                    ),
+                    parentContext
+                )
+
+                checkTrue(
+                    (components - flowRate.toSet() - concentration.toSet()).isEmpty(),
+                    FHIRError(
+                        code = "RONIN_PXOBS_007",
+                        severity = ValidationIssueSeverity.ERROR,
+                        description = "Pulse Oximetry components must be either a Flow Rate or Concentration",
+                        location = LocationContext("Observation", "component"),
+                        metadata = emptyList()
                     ),
                     parentContext
                 )
