@@ -15,14 +15,16 @@ import com.projectronin.interop.tenant.config.model.Tenant
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 import kotlin.reflect.KClass
+
 @Component
 class MedicationMapper(registryClient: NormalizationRegistryClient) :
     ResourceMapper<Medication>, BaseMapper<Medication>(registryClient) {
     override val supportedResource: KClass<Medication> = Medication::class
+
     override fun map(
         resource: Medication,
         tenant: Tenant,
-        forceCacheReloadTS: LocalDateTime?
+        forceCacheReloadTS: LocalDateTime?,
     ): MapResponse<Medication> {
         val validation = Validation()
         // val parentContext = LocationContext(Medication::class)
@@ -33,28 +35,31 @@ class MedicationMapper(registryClient: NormalizationRegistryClient) :
         //         val mappedCode = resource.code?.let {
         //             getConceptMapping(it, Medication::code, resource, tenant, parentContext, validation, forceCacheReloadTS)
         //         }
-        val mappedCode = resource.code?.let {
-            ConceptMapCodeableConcept(
-                codeableConcept = it,
-                extension = Extension(
-                    url = RoninExtension.TENANT_SOURCE_MEDICATION_CODE.uri,
-                    value = DynamicValue(
-                        type = DynamicValueType.CODEABLE_CONCEPT,
-                        value = it
-                    )
-                ),
-                metadata = emptyList()
-            )
-        }
+        val mappedCode =
+            resource.code?.let {
+                ConceptMapCodeableConcept(
+                    codeableConcept = it,
+                    extension =
+                        Extension(
+                            url = RoninExtension.TENANT_SOURCE_MEDICATION_CODE.uri,
+                            value =
+                                DynamicValue(
+                                    type = DynamicValueType.CODEABLE_CONCEPT,
+                                    value = it,
+                                ),
+                        ),
+                    metadata = emptyList(),
+                )
+            }
 
         return MapResponse(
             mappedCode?.let {
                 resource.copy(
                     code = it.codeableConcept,
-                    extension = resource.extension + it.extension
+                    extension = resource.extension + it.extension,
                 )
             } ?: resource,
-            validation
+            validation,
         )
     }
 }

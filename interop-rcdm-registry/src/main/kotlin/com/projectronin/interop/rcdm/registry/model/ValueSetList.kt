@@ -5,5 +5,5 @@ import com.projectronin.interop.rcdm.common.metadata.ValueSetMetadata
 
 data class ValueSetList(
     val codes: List<Coding>,
-    val metadata: ValueSetMetadata? = null
+    val metadata: ValueSetMetadata? = null,
 )

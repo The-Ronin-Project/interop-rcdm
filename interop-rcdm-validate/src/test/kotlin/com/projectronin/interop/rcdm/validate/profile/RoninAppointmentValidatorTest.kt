@@ -42,28 +42,31 @@ class RoninAppointmentValidatorTest {
 
     @Test
     fun `validate succeeds`() {
-        val appointment = Appointment(
-            id = Id("1234"),
-            meta = Meta(profile = listOf(RoninProfile.APPOINTMENT.canonical)),
-            extension = listOf(
-                Extension(
-                    url = RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS.uri,
-                    value = DynamicValue(
-                        type = DynamicValueType.CODING,
-                        value = Coding(code = Code("garbo"))
-                    )
-                )
-
-            ),
-            identifier = requiredIdentifiers,
-            status = Code(AppointmentStatus.BOOKED.code),
-            participant = listOf(
-                Participant(
-                    actor = Reference(reference = "Practitioner/123".asFHIR()),
-                    status = Code(ParticipationStatus.ACCEPTED.code)
-                )
+        val appointment =
+            Appointment(
+                id = Id("1234"),
+                meta = Meta(profile = listOf(RoninProfile.APPOINTMENT.canonical)),
+                extension =
+                    listOf(
+                        Extension(
+                            url = RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS.uri,
+                            value =
+                                DynamicValue(
+                                    type = DynamicValueType.CODING,
+                                    value = Coding(code = Code("garbo")),
+                                ),
+                        ),
+                    ),
+                identifier = requiredIdentifiers,
+                status = Code(AppointmentStatus.BOOKED.code),
+                participant =
+                    listOf(
+                        Participant(
+                            actor = Reference(reference = "Practitioner/123".asFHIR()),
+                            status = Code(ParticipationStatus.ACCEPTED.code),
+                        ),
+                    ),
             )
-        )
 
         val validation = validator.validate(appointment, LocationContext(Appointment::class))
         assertEquals(0, validation.issues().size)
@@ -71,151 +74,163 @@ class RoninAppointmentValidatorTest {
 
     @Test
     fun `validate fails with bad extension uri`() {
-        val appointment = Appointment(
-            id = Id("1234"),
-            meta = Meta(profile = listOf(RoninProfile.APPOINTMENT.canonical)),
-            extension = listOf(
-                Extension(
-                    url = Uri("google.biz"),
-                    value = DynamicValue(
-                        type = DynamicValueType.CODING,
-                        value = Coding(code = Code("garbo"))
-                    )
-                )
-
-            ),
-            identifier = requiredIdentifiers,
-            status = Code(AppointmentStatus.BOOKED.code),
-            participant = listOf(
-                Participant(
-                    actor = Reference(reference = "Practitioner/123".asFHIR()),
-                    status = Code(ParticipationStatus.ACCEPTED.code)
-                )
+        val appointment =
+            Appointment(
+                id = Id("1234"),
+                meta = Meta(profile = listOf(RoninProfile.APPOINTMENT.canonical)),
+                extension =
+                    listOf(
+                        Extension(
+                            url = Uri("google.biz"),
+                            value =
+                                DynamicValue(
+                                    type = DynamicValueType.CODING,
+                                    value = Coding(code = Code("garbo")),
+                                ),
+                        ),
+                    ),
+                identifier = requiredIdentifiers,
+                status = Code(AppointmentStatus.BOOKED.code),
+                participant =
+                    listOf(
+                        Participant(
+                            actor = Reference(reference = "Practitioner/123".asFHIR()),
+                            status = Code(ParticipationStatus.ACCEPTED.code),
+                        ),
+                    ),
             )
-        )
 
         val validation = validator.validate(appointment, LocationContext(Appointment::class))
         assertEquals(1, validation.issues().size)
         assertEquals(
             "ERROR RONIN_APPT_002: Tenant source appointment status extension is missing or invalid @ Appointment.status",
-            validation.issues().first().toString()
+            validation.issues().first().toString(),
         )
     }
 
     @Test
     fun `validate fails with bad extension value`() {
-        val appointment = Appointment(
-            id = Id("1234"),
-            meta = Meta(profile = listOf(RoninProfile.APPOINTMENT.canonical)),
-            extension = listOf(
-                Extension(
-                    url = RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS.uri,
-                    value = DynamicValue(
-                        type = DynamicValueType.REFERENCE,
-                        value = Reference("Garbo".asFHIR())
-                    )
-                )
-
-            ),
-            identifier = requiredIdentifiers,
-            status = Code(AppointmentStatus.BOOKED.code),
-            participant = listOf(
-                Participant(
-                    actor = Reference(reference = "Practitioner/123".asFHIR()),
-                    status = Code(ParticipationStatus.ACCEPTED.code)
-                )
+        val appointment =
+            Appointment(
+                id = Id("1234"),
+                meta = Meta(profile = listOf(RoninProfile.APPOINTMENT.canonical)),
+                extension =
+                    listOf(
+                        Extension(
+                            url = RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS.uri,
+                            value =
+                                DynamicValue(
+                                    type = DynamicValueType.REFERENCE,
+                                    value = Reference("Garbo".asFHIR()),
+                                ),
+                        ),
+                    ),
+                identifier = requiredIdentifiers,
+                status = Code(AppointmentStatus.BOOKED.code),
+                participant =
+                    listOf(
+                        Participant(
+                            actor = Reference(reference = "Practitioner/123".asFHIR()),
+                            status = Code(ParticipationStatus.ACCEPTED.code),
+                        ),
+                    ),
             )
-        )
 
         val validation = validator.validate(appointment, LocationContext(Appointment::class))
         assertEquals(1, validation.issues().size)
         assertEquals(
             "ERROR RONIN_APPT_002: Tenant source appointment status extension is missing or invalid @ Appointment.status",
-            validation.issues().first().toString()
+            validation.issues().first().toString(),
         )
     }
 
     @Test
     fun `validate fails with missing extension value`() {
-        val appointment = Appointment(
-            id = Id("1234"),
-            meta = Meta(profile = listOf(RoninProfile.APPOINTMENT.canonical)),
-            extension = listOf(
-                Extension(
-                    url = RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS.uri,
-                    value = null
-                )
-
-            ),
-            identifier = requiredIdentifiers,
-            status = Code(AppointmentStatus.BOOKED.code),
-            participant = listOf(
-                Participant(
-                    actor = Reference(reference = "Practitioner/123".asFHIR()),
-                    status = Code(ParticipationStatus.ACCEPTED.code)
-                )
+        val appointment =
+            Appointment(
+                id = Id("1234"),
+                meta = Meta(profile = listOf(RoninProfile.APPOINTMENT.canonical)),
+                extension =
+                    listOf(
+                        Extension(
+                            url = RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS.uri,
+                            value = null,
+                        ),
+                    ),
+                identifier = requiredIdentifiers,
+                status = Code(AppointmentStatus.BOOKED.code),
+                participant =
+                    listOf(
+                        Participant(
+                            actor = Reference(reference = "Practitioner/123".asFHIR()),
+                            status = Code(ParticipationStatus.ACCEPTED.code),
+                        ),
+                    ),
             )
-        )
 
         val validation = validator.validate(appointment, LocationContext(Appointment::class))
         assertEquals(1, validation.issues().size)
         assertEquals(
             "ERROR RONIN_APPT_002: Tenant source appointment status extension is missing or invalid @ Appointment.status",
-            validation.issues().first().toString()
+            validation.issues().first().toString(),
         )
     }
 
     @Test
     fun `validate fails with missing extension uri`() {
-        val appointment = Appointment(
-            id = Id("1234"),
-            meta = Meta(profile = listOf(RoninProfile.APPOINTMENT.canonical)),
-            extension = listOf(
-                Extension(
-                    url = null,
-                    value = null
-                )
-
-            ),
-            identifier = requiredIdentifiers,
-            status = Code(AppointmentStatus.BOOKED.code),
-            participant = listOf(
-                Participant(
-                    actor = Reference(reference = "Practitioner/123".asFHIR()),
-                    status = Code(ParticipationStatus.ACCEPTED.code)
-                )
+        val appointment =
+            Appointment(
+                id = Id("1234"),
+                meta = Meta(profile = listOf(RoninProfile.APPOINTMENT.canonical)),
+                extension =
+                    listOf(
+                        Extension(
+                            url = null,
+                            value = null,
+                        ),
+                    ),
+                identifier = requiredIdentifiers,
+                status = Code(AppointmentStatus.BOOKED.code),
+                participant =
+                    listOf(
+                        Participant(
+                            actor = Reference(reference = "Practitioner/123".asFHIR()),
+                            status = Code(ParticipationStatus.ACCEPTED.code),
+                        ),
+                    ),
             )
-        )
 
         val validation = validator.validate(appointment, LocationContext(Appointment::class))
         assertEquals(1, validation.issues().size)
         assertEquals(
             "ERROR RONIN_APPT_002: Tenant source appointment status extension is missing or invalid @ Appointment.status",
-            validation.issues().first().toString()
+            validation.issues().first().toString(),
         )
     }
 
     @Test
     fun `validate fails with missing extension`() {
-        val appointment = Appointment(
-            id = Id("1234"),
-            meta = Meta(profile = listOf(RoninProfile.APPOINTMENT.canonical)),
-            extension = emptyList(),
-            identifier = requiredIdentifiers,
-            status = Code(AppointmentStatus.BOOKED.code),
-            participant = listOf(
-                Participant(
-                    actor = Reference(reference = "Practitioner/123".asFHIR()),
-                    status = Code(ParticipationStatus.ACCEPTED.code)
-                )
+        val appointment =
+            Appointment(
+                id = Id("1234"),
+                meta = Meta(profile = listOf(RoninProfile.APPOINTMENT.canonical)),
+                extension = emptyList(),
+                identifier = requiredIdentifiers,
+                status = Code(AppointmentStatus.BOOKED.code),
+                participant =
+                    listOf(
+                        Participant(
+                            actor = Reference(reference = "Practitioner/123".asFHIR()),
+                            status = Code(ParticipationStatus.ACCEPTED.code),
+                        ),
+                    ),
             )
-        )
 
         val validation = validator.validate(appointment, LocationContext(Appointment::class))
         assertEquals(1, validation.issues().size)
         assertEquals(
             "ERROR RONIN_APPT_001: Appointment extension list may not be empty @ Appointment.status",
-            validation.issues().first().toString()
+            validation.issues().first().toString(),
         )
     }
 }

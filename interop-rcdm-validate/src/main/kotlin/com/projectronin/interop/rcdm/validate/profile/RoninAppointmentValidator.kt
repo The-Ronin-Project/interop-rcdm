@@ -22,20 +22,26 @@ class RoninAppointmentValidator : ProfileValidator<Appointment>() {
     override val rcdmVersion = RCDMVersion.V3_19_0
     override val profileVersion = 2
 
-    private val requiredAppointmentExtensionError = FHIRError(
-        code = "RONIN_APPT_001",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "Appointment extension list may not be empty",
-        location = LocationContext(Appointment::status)
-    )
-    private val invalidAppointmentStatusExtensionError = FHIRError(
-        code = "RONIN_APPT_002",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "Tenant source appointment status extension is missing or invalid",
-        location = LocationContext(Appointment::status)
-    )
+    private val requiredAppointmentExtensionError =
+        FHIRError(
+            code = "RONIN_APPT_001",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "Appointment extension list may not be empty",
+            location = LocationContext(Appointment::status),
+        )
+    private val invalidAppointmentStatusExtensionError =
+        FHIRError(
+            code = "RONIN_APPT_002",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "Tenant source appointment status extension is missing or invalid",
+            location = LocationContext(Appointment::status),
+        )
 
-    override fun validate(resource: Appointment, validation: Validation, context: LocationContext) {
+    override fun validate(
+        resource: Appointment,
+        validation: Validation,
+        context: LocationContext,
+    ) {
         validation.apply {
             // extension - not empty - 1..*
             val extension = resource.extension
@@ -49,7 +55,7 @@ class RoninAppointmentValidator : ProfileValidator<Appointment>() {
                             it.value?.type == DynamicValueType.CODING
                     },
                     invalidAppointmentStatusExtensionError,
-                    context
+                    context,
                 )
             }
         }

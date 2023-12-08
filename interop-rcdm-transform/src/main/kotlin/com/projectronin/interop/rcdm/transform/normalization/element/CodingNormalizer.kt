@@ -12,13 +12,17 @@ import kotlin.reflect.KClass
 class CodingNormalizer : ElementNormalizer<Coding> {
     override val elementType: KClass<Coding> = Coding::class
 
-    override fun normalize(element: Coding, tenant: Tenant): TransformResult<Coding> {
+    override fun normalize(
+        element: Coding,
+        tenant: Tenant,
+    ): TransformResult<Coding> {
         val normalizedSystem = element.system?.normalizeCoding()
-        val normalizedCoding = if (normalizedSystem == element.system) {
-            element
-        } else {
-            element.copy(system = normalizedSystem)
-        }
+        val normalizedCoding =
+            if (normalizedSystem == element.system) {
+                element
+            } else {
+                element.copy(system = normalizedSystem)
+            }
         return TransformResult(normalizedCoding)
     }
 }

@@ -15,10 +15,15 @@ class RoninRequestGroupTransformer : ProfileTransformer<RequestGroup>() {
     override val profile: RoninProfile = RoninProfile.REQUEST_GROUP
     override val rcdmVersion = RCDMVersion.V3_19_0
     override val profileVersion = 2
-    override fun transformInternal(original: RequestGroup, tenant: Tenant): TransformResponse<RequestGroup>? {
-        val transformed = original.copy(
-            identifier = original.getRoninIdentifiers(tenant)
-        )
+
+    override fun transformInternal(
+        original: RequestGroup,
+        tenant: Tenant,
+    ): TransformResponse<RequestGroup>? {
+        val transformed =
+            original.copy(
+                identifier = original.getRoninIdentifiers(tenant),
+            )
         return TransformResponse(transformed)
     }
 }

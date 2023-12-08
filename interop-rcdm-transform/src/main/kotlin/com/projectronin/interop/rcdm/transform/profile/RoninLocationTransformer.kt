@@ -17,20 +17,26 @@ class RoninLocationTransformer : ProfileTransformer<Location>() {
     override val rcdmVersion: RCDMVersion = RCDMVersion.V3_19_0
     override val profileVersion: Int = 2
 
-    private val DEFAULT_NAME = "Unnamed Location"
-    override fun transformInternal(original: Location, tenant: Tenant): TransformResponse<Location>? {
+    private val defaultName = "Unnamed Location"
+
+    override fun transformInternal(
+        original: Location,
+        tenant: Tenant,
+    ): TransformResponse<Location>? {
         val originalName = original.name
-        val name = if (originalName == null) {
-            FHIRString(DEFAULT_NAME)
-        } else if (originalName.value.isNullOrEmpty()) {
-            FHIRString(DEFAULT_NAME, originalName.id, originalName.extension)
-        } else {
-            original.name
-        }
-        val transformed = original.copy(
-            identifier = original.getRoninIdentifiers(tenant),
-            name = name
-        )
+        val name =
+            if (originalName == null) {
+                FHIRString(defaultName)
+            } else if (originalName.value.isNullOrEmpty()) {
+                FHIRString(defaultName, originalName.id, originalName.extension)
+            } else {
+                original.name
+            }
+        val transformed =
+            original.copy(
+                identifier = original.getRoninIdentifiers(tenant),
+                name = name,
+            )
         return TransformResponse(transformed)
     }
 }

@@ -20,13 +20,15 @@ import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
+@Suppress("ktlint:standard:max-line-length")
 class ProcedureMapperTest {
     private val registryClient = mockk<NormalizationRegistryClient>()
     private val mapper = ProcedureMapper(registryClient)
 
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "tenant"
-    }
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "tenant"
+        }
 
     @Test
     fun `supported resource is Procedure`() {
@@ -35,12 +37,13 @@ class ProcedureMapperTest {
 
     @Test
     fun `maps when no mappable elements`() {
-        val procedure = Procedure(
-            status = Code(EventStatus.COMPLETED.code),
-            code = null,
-            category = null,
-            subject = Reference(reference = "Patient".asFHIR())
-        )
+        val procedure =
+            Procedure(
+                status = Code(EventStatus.COMPLETED.code),
+                code = null,
+                category = null,
+                subject = Reference(reference = "Patient".asFHIR()),
+            )
 
         val (mappedResource, validation) = mapper.map(procedure, tenant, null)
         assertEquals(procedure, mappedResource)
@@ -49,33 +52,39 @@ class ProcedureMapperTest {
 
     @Test
     fun `maps code`() {
-        val code = CodeableConcept(
-            coding = listOf(
-                Coding(system = Uri("http://snomed.info/sct"), code = Code("12345"))
+        val code =
+            CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(system = Uri("http://snomed.info/sct"), code = Code("12345")),
+                    ),
             )
-        )
-        val procedure = Procedure(
-            status = Code(EventStatus.COMPLETED.code),
-            code = code,
-            subject = Reference(reference = "Patient".asFHIR())
-        )
+        val procedure =
+            Procedure(
+                status = Code(EventStatus.COMPLETED.code),
+                code = code,
+                subject = Reference(reference = "Patient".asFHIR()),
+            )
 
-        val mappedCode = CodeableConcept(
-            coding = listOf(
-                Coding(system = Uri("http://snomed.info/sct"), code = Code("67890"))
+        val mappedCode =
+            CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(system = Uri("http://snomed.info/sct"), code = Code("67890")),
+                    ),
             )
-        )
-        val mappedExtension = Extension(
-            url = RoninExtension.TENANT_SOURCE_PROCEDURE_CODE.uri,
-            value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, code)
-        )
+        val mappedExtension =
+            Extension(
+                url = RoninExtension.TENANT_SOURCE_PROCEDURE_CODE.uri,
+                value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, code),
+            )
         every {
             registryClient.getConceptMapping(
                 "tenant",
                 "Procedure.code",
                 code,
                 procedure,
-                null
+                null,
             )
         } returns ConceptMapCodeableConcept(mappedCode, mappedExtension, listOf())
 
@@ -88,41 +97,52 @@ class ProcedureMapperTest {
 
     @Test
     fun `maps category and code`() {
-        val code = CodeableConcept(
-            coding = listOf(
-                Coding(system = Uri("http://snomed.info/sct"), code = Code("12345"))
+        val code =
+            CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(system = Uri("http://snomed.info/sct"), code = Code("12345")),
+                    ),
             )
-        )
-        val category = CodeableConcept(
-            coding = listOf(
-                Coding(system = Uri("something-here"), code = Code("54321"))
+        val category =
+            CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(system = Uri("something-here"), code = Code("54321")),
+                    ),
             )
-        )
-        val procedure = Procedure(
-            status = Code(EventStatus.COMPLETED.code),
-            code = code,
-            category = category,
-            subject = Reference(reference = "Patient".asFHIR())
-        )
+        val procedure =
+            Procedure(
+                status = Code(EventStatus.COMPLETED.code),
+                code = code,
+                category = category,
+                subject = Reference(reference = "Patient".asFHIR()),
+            )
 
-        val mappedCode = CodeableConcept(
-            coding = listOf(
-                Coding(system = Uri("http://snomed.info/sct"), code = Code("67890"))
+        val mappedCode =
+            CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(system = Uri("http://snomed.info/sct"), code = Code("67890")),
+                    ),
             )
-        )
-        val mappedCategory = CodeableConcept(
-            coding = listOf(
-                Coding(system = Uri("something-here"), code = Code("89012"))
+        val mappedCategory =
+            CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(system = Uri("something-here"), code = Code("89012")),
+                    ),
             )
-        )
-        val mappedExtensionsCode = Extension(
-            url = RoninExtension.TENANT_SOURCE_PROCEDURE_CODE.uri,
-            value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, code)
-        )
-        val mappedExtensionsCategory = Extension(
-            url = RoninExtension.TENANT_SOURCE_PROCEDURE_CATEGORY.uri,
-            value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, code)
-        )
+        val mappedExtensionsCode =
+            Extension(
+                url = RoninExtension.TENANT_SOURCE_PROCEDURE_CODE.uri,
+                value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, code),
+            )
+        val mappedExtensionsCategory =
+            Extension(
+                url = RoninExtension.TENANT_SOURCE_PROCEDURE_CATEGORY.uri,
+                value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, code),
+            )
 
         every {
             registryClient.getConceptMapping(
@@ -130,7 +150,7 @@ class ProcedureMapperTest {
                 "Procedure.code",
                 code,
                 procedure,
-                null
+                null,
             )
         } returns ConceptMapCodeableConcept(mappedCode, mappedExtensionsCode, listOf())
         every {
@@ -139,7 +159,7 @@ class ProcedureMapperTest {
                 "Procedure.category",
                 category,
                 procedure,
-                null
+                null,
             )
         } returns ConceptMapCodeableConcept(mappedCategory, mappedExtensionsCategory, listOf())
         val (mappedResource, validation) = mapper.map(procedure, tenant, null)
@@ -151,16 +171,19 @@ class ProcedureMapperTest {
 
     @Test
     fun `failed code mapping`() {
-        val code = CodeableConcept(
-            coding = listOf(
-                Coding(system = Uri("http://snomed.info/sct"), code = Code("12345"))
+        val code =
+            CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(system = Uri("http://snomed.info/sct"), code = Code("12345")),
+                    ),
             )
-        )
-        val procedure = Procedure(
-            status = Code(EventStatus.COMPLETED.code),
-            code = code,
-            subject = Reference(reference = "Patient".asFHIR())
-        )
+        val procedure =
+            Procedure(
+                status = Code(EventStatus.COMPLETED.code),
+                code = code,
+                subject = Reference(reference = "Patient".asFHIR()),
+            )
 
         every {
             registryClient.getConceptMapping(
@@ -168,7 +191,7 @@ class ProcedureMapperTest {
                 "Procedure.code",
                 code,
                 procedure,
-                null
+                null,
             )
         } returns null
 
@@ -178,7 +201,7 @@ class ProcedureMapperTest {
         assertEquals(1, validation.issues().size)
         assertEquals(
             "ERROR NOV_CONMAP_LOOKUP: Tenant source value '12345' has no target defined in any Procedure.code concept map for tenant 'tenant' @ Procedure.code",
-            validation.issues().first().toString()
+            validation.issues().first().toString(),
         )
     }
 }

@@ -12,5 +12,9 @@ interface ElementValidator<E : Element<E>> {
     /**
      * Validates the [element] when encountered for [profiles].
      */
-    fun validate(element: E, profiles: List<RoninProfile>, parentContext: LocationContext): Validation
+    fun validate(
+        element: E,
+        profiles: List<RoninProfile>,
+        parentContext: LocationContext,
+    ): Validation
 }

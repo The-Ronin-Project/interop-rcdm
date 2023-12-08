@@ -24,9 +24,10 @@ import org.junit.jupiter.api.Test
 class RoninServiceRequestTransformerTest {
     private val transformer = RoninServiceRequestTransformer()
 
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "test"
-    }
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "test"
+        }
 
     @Test
     fun `returns supported resource`() {
@@ -40,49 +41,57 @@ class RoninServiceRequestTransformerTest {
                 ServiceRequest(
                     intent = RequestIntent.ORDER.asCode(),
                     status = RequestStatus.ACTIVE.asCode(),
-                    subject = Reference(
-                        reference = "Patient/Patient#1".asFHIR(),
-                        type = Uri("Patient", extension = dataAuthorityExtension)
-                    )
-                )
-            )
+                    subject =
+                        Reference(
+                            reference = "Patient/Patient#1".asFHIR(),
+                            type = Uri("Patient", extension = dataAuthorityExtension),
+                        ),
+                ),
+            ),
         )
     }
 
     @Test
     fun `transform succeeds`() {
-        val serviceRequest = ServiceRequest(
-            id = Id("ServiceRequest1"),
-            meta = Meta(
-                profile = listOf(Canonical("ServiceRequest")),
-                source = Uri("source")
-            ),
-            identifier = listOf(),
-            intent = RequestIntent.ORDER.asCode(),
-            status = RequestStatus.ACTIVE.asCode(),
-            subject = Reference(
-                reference = "Patient/Patient#1".asFHIR(),
-                type = Uri("Patient", extension = dataAuthorityExtension)
-            ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = Uri("CodeSystem"),
-                        code = Code(value = "Code")
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = Uri("CategorySystem"),
-                            code = Code(value = "CategoryCode")
-                        )
-                    )
-                )
+        val serviceRequest =
+            ServiceRequest(
+                id = Id("ServiceRequest1"),
+                meta =
+                    Meta(
+                        profile = listOf(Canonical("ServiceRequest")),
+                        source = Uri("source"),
+                    ),
+                identifier = listOf(),
+                intent = RequestIntent.ORDER.asCode(),
+                status = RequestStatus.ACTIVE.asCode(),
+                subject =
+                    Reference(
+                        reference = "Patient/Patient#1".asFHIR(),
+                        type = Uri("Patient", extension = dataAuthorityExtension),
+                    ),
+                code =
+                    CodeableConcept(
+                        coding =
+                            listOf(
+                                Coding(
+                                    system = Uri("CodeSystem"),
+                                    code = Code(value = "Code"),
+                                ),
+                            ),
+                    ),
+                category =
+                    listOf(
+                        CodeableConcept(
+                            coding =
+                                listOf(
+                                    Coding(
+                                        system = Uri("CategorySystem"),
+                                        code = Code(value = "CategoryCode"),
+                                    ),
+                                ),
+                        ),
+                    ),
             )
-        )
 
         val transformResponse = transformer.transform(serviceRequest, tenant)
         transformResponse!!
@@ -91,26 +100,28 @@ class RoninServiceRequestTransformerTest {
         assertEquals("ServiceRequest1", transformed.id?.value)
         assertEquals(
             CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = Uri("CodeSystem"),
-                        code = Code(value = "Code")
-                    )
-                )
+                coding =
+                    listOf(
+                        Coding(
+                            system = Uri("CodeSystem"),
+                            code = Code(value = "Code"),
+                        ),
+                    ),
             ),
-            transformed.code
+            transformed.code,
         )
         assertEquals(1, transformed.category.size)
         assertEquals(
             CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = Uri("CategorySystem"),
-                        code = Code(value = "CategoryCode")
-                    )
-                )
+                coding =
+                    listOf(
+                        Coding(
+                            system = Uri("CategorySystem"),
+                            code = Code(value = "CategoryCode"),
+                        ),
+                    ),
             ),
-            transformed.category.first()
+            transformed.category.first(),
         )
     }
 }

@@ -21,7 +21,7 @@ class RoninObservationValidator(registryClient: NormalizationRegistryClient) :
     override fun validateSpecificObservation(
         resource: Observation,
         parentContext: LocationContext,
-        validation: Validation
+        validation: Validation,
     ) {
     }
 }

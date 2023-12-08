@@ -17,23 +17,22 @@ import com.projectronin.interop.rcdm.common.enums.RoninExtension
  * contained reference (e.g. "reference": "#00000000" starts with # |
  * codeable concept (e.g. type is codeable concept)
  */
-fun populateExtensionWithReference(
-    normalized: DynamicValue<Any>?
-): List<Extension> {
+fun populateExtensionWithReference(normalized: DynamicValue<Any>?): List<Extension> {
     val type = normalized?.type ?: return emptyList()
-    val extensionValue = when (type) {
-        DynamicValueType.CODEABLE_CONCEPT -> OriginalMedDataType.CodeableConcept.value
-        DynamicValueType.REFERENCE -> getReferenceType(normalized)
-        else -> null
-    }
+    val extensionValue =
+        when (type) {
+            DynamicValueType.CODEABLE_CONCEPT -> OriginalMedDataType.CodeableConcept.value
+            DynamicValueType.REFERENCE -> getReferenceType(normalized)
+            else -> null
+        }
     return if (extensionValue == null) {
         emptyList()
     } else {
         listOf(
             Extension(
                 url = Uri(RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
-                value = DynamicValue(type = DynamicValueType.CODE, value = extensionValue)
-            )
+                value = DynamicValue(type = DynamicValueType.CODE, value = extensionValue),
+            ),
         )
     }
 }

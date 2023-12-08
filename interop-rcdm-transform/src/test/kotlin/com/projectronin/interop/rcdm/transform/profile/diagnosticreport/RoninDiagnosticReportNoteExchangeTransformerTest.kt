@@ -33,9 +33,10 @@ import org.junit.jupiter.api.Test
 class RoninDiagnosticReportNoteExchangeTransformerTest {
     private val transformer = RoninDiagnosticReportNoteExchangeTransformer()
 
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "test"
-    }
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "test"
+        }
 
     @Test
     fun `returns supported resource`() {
@@ -59,73 +60,88 @@ class RoninDiagnosticReportNoteExchangeTransformerTest {
 
     @Test
     fun `transform works`() {
-        val dxReport = DiagnosticReport(
-            id = Id("12345"),
-            meta = Meta(
-                profile = listOf(Canonical("http://hl7.org/fhir/R4/diagnosticreport.html")),
-                source = Uri("source")
-            ),
-            implicitRules = Uri("implicit-rules"),
-            language = Code("en-US"),
-            text = Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()),
-            contained = listOf(Location(id = Id("67890"))),
-            extension = listOf(
-                Extension(
-                    url = Uri("http://hl7.org/extension-1"),
-                    value = DynamicValue(DynamicValueType.STRING, "value")
-                )
-            ),
-            modifierExtension = listOf(
-                Extension(
-                    url = Uri("http://localhost/modifier-extension"),
-                    value = DynamicValue(DynamicValueType.STRING, "Value")
-                )
-            ),
-            identifier = listOf(Identifier(value = "id".asFHIR())),
-            basedOn = listOf(
-                Reference(id = "basedOnId".asFHIR(), display = "basedOnDisplay".asFHIR())
-            ),
-            status = Code("registered"),
-            category = listOf(
-                CodeableConcept(text = "dx report".asFHIR())
-            ),
-            code = CodeableConcept(text = "dx report".asFHIR()),
-            subject = Reference(display = "reference".asFHIR()),
-            encounter = Reference(id = "encounterReference".asFHIR(), display = "encounterDisplay".asFHIR()),
-            effective = DynamicValue(
-                type = DynamicValueType.DATE_TIME,
-                "2022-01-01T00:00:00Z"
-            ),
-            issued = Instant("2018-02-02T00:00:00Z"),
-            performer = listOf(
-                Reference(id = "performerId".asFHIR(), display = "performerDisplay".asFHIR())
-            ),
-            resultsInterpreter = listOf(
-                Reference(id = "resultsInterpreter".asFHIR(), display = "resultsInterpreterDisplay".asFHIR())
-            ),
-            specimen = listOf(
-                Reference(id = "specimenId".asFHIR(), display = "specimenDisplay".asFHIR())
-            ),
-            result = listOf(
-                Reference(id = "resultId".asFHIR(), display = "resultDisplay".asFHIR())
-            ),
-            imagingStudy = listOf(
-                Reference(id = "imagingStudyId".asFHIR(), display = "imagingStudyDisplay".asFHIR())
-            ),
-            media = listOf(
-                DiagnosticReportMedia(
-                    id = "mediaId".asFHIR(),
-                    link = Reference(id = "linkId".asFHIR(), display = "linkDisplay".asFHIR())
-                )
-            ),
-            conclusion = "conclusionFhirString".asFHIR(),
-            conclusionCode = listOf(
-                CodeableConcept(text = "conclusionCode".asFHIR())
-            ),
-            presentedForm = listOf(
-                Attachment(id = "attachmentId".asFHIR())
+        val dxReport =
+            DiagnosticReport(
+                id = Id("12345"),
+                meta =
+                    Meta(
+                        profile = listOf(Canonical("http://hl7.org/fhir/R4/diagnosticreport.html")),
+                        source = Uri("source"),
+                    ),
+                implicitRules = Uri("implicit-rules"),
+                language = Code("en-US"),
+                text = Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()),
+                contained = listOf(Location(id = Id("67890"))),
+                extension =
+                    listOf(
+                        Extension(
+                            url = Uri("http://hl7.org/extension-1"),
+                            value = DynamicValue(DynamicValueType.STRING, "value"),
+                        ),
+                    ),
+                modifierExtension =
+                    listOf(
+                        Extension(
+                            url = Uri("http://localhost/modifier-extension"),
+                            value = DynamicValue(DynamicValueType.STRING, "Value"),
+                        ),
+                    ),
+                identifier = listOf(Identifier(value = "id".asFHIR())),
+                basedOn =
+                    listOf(
+                        Reference(id = "basedOnId".asFHIR(), display = "basedOnDisplay".asFHIR()),
+                    ),
+                status = Code("registered"),
+                category =
+                    listOf(
+                        CodeableConcept(text = "dx report".asFHIR()),
+                    ),
+                code = CodeableConcept(text = "dx report".asFHIR()),
+                subject = Reference(display = "reference".asFHIR()),
+                encounter = Reference(id = "encounterReference".asFHIR(), display = "encounterDisplay".asFHIR()),
+                effective =
+                    DynamicValue(
+                        type = DynamicValueType.DATE_TIME,
+                        "2022-01-01T00:00:00Z",
+                    ),
+                issued = Instant("2018-02-02T00:00:00Z"),
+                performer =
+                    listOf(
+                        Reference(id = "performerId".asFHIR(), display = "performerDisplay".asFHIR()),
+                    ),
+                resultsInterpreter =
+                    listOf(
+                        Reference(id = "resultsInterpreter".asFHIR(), display = "resultsInterpreterDisplay".asFHIR()),
+                    ),
+                specimen =
+                    listOf(
+                        Reference(id = "specimenId".asFHIR(), display = "specimenDisplay".asFHIR()),
+                    ),
+                result =
+                    listOf(
+                        Reference(id = "resultId".asFHIR(), display = "resultDisplay".asFHIR()),
+                    ),
+                imagingStudy =
+                    listOf(
+                        Reference(id = "imagingStudyId".asFHIR(), display = "imagingStudyDisplay".asFHIR()),
+                    ),
+                media =
+                    listOf(
+                        DiagnosticReportMedia(
+                            id = "mediaId".asFHIR(),
+                            link = Reference(id = "linkId".asFHIR(), display = "linkDisplay".asFHIR()),
+                        ),
+                    ),
+                conclusion = "conclusionFhirString".asFHIR(),
+                conclusionCode =
+                    listOf(
+                        CodeableConcept(text = "conclusionCode".asFHIR()),
+                    ),
+                presentedForm =
+                    listOf(
+                        Attachment(id = "attachmentId".asFHIR()),
+                    ),
             )
-        )
 
         val transformResponse = transformer.transform(dxReport, tenant)
 
@@ -139,34 +155,34 @@ class RoninDiagnosticReportNoteExchangeTransformerTest {
         assertEquals(
             Meta(
                 profile = listOf(Canonical(RoninProfile.DIAGNOSTIC_REPORT_NOTE_EXCHANGE.value)),
-                source = Uri("source")
+                source = Uri("source"),
             ),
-            transformed.meta
+            transformed.meta,
         )
         assertEquals(Uri("implicit-rules"), transformed.implicitRules)
         assertEquals(Code("en-US"), transformed.language)
         assertEquals(Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()), transformed.text)
         assertEquals(
             listOf(Location(id = Id("67890"))),
-            transformed.contained
+            transformed.contained,
         )
         assertEquals(
             listOf(
                 Extension(
                     url = Uri("http://hl7.org/extension-1"),
-                    value = DynamicValue(DynamicValueType.STRING, "value")
-                )
+                    value = DynamicValue(DynamicValueType.STRING, "value"),
+                ),
             ),
-            transformed.extension
+            transformed.extension,
         )
         assertEquals(
             listOf(
                 Extension(
                     url = Uri("http://localhost/modifier-extension"),
-                    value = DynamicValue(DynamicValueType.STRING, "Value")
-                )
+                    value = DynamicValue(DynamicValueType.STRING, "Value"),
+                ),
             ),
-            transformed.modifierExtension
+            transformed.modifierExtension,
         )
         assertEquals(
             listOf(
@@ -174,110 +190,110 @@ class RoninDiagnosticReportNoteExchangeTransformerTest {
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
                     system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
+                    value = "12345".asFHIR(),
                 ),
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
+                    value = "test".asFHIR(),
                 ),
                 Identifier(
                     type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
                     system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
+                    value = "EHR Data Authority".asFHIR(),
+                ),
             ),
-            transformed.identifier
+            transformed.identifier,
         )
         assertEquals(
             listOf(
-                Reference(id = "basedOnId".asFHIR(), display = "basedOnDisplay".asFHIR())
+                Reference(id = "basedOnId".asFHIR(), display = "basedOnDisplay".asFHIR()),
             ),
-            transformed.basedOn
+            transformed.basedOn,
         )
         assertEquals(Code("registered"), transformed.status)
         assertEquals(
             listOf(
-                CodeableConcept(text = "dx report".asFHIR())
+                CodeableConcept(text = "dx report".asFHIR()),
             ),
-            transformed.category
+            transformed.category,
         )
         assertEquals(
             CodeableConcept(
-                text = "dx report".asFHIR()
+                text = "dx report".asFHIR(),
             ),
-            transformed.code
+            transformed.code,
         )
         assertEquals(Reference(display = "reference".asFHIR()), transformed.subject)
         assertEquals(
             Reference(
                 id = "encounterReference".asFHIR(),
-                display = "encounterDisplay".asFHIR()
+                display = "encounterDisplay".asFHIR(),
             ),
-            transformed.encounter
+            transformed.encounter,
         )
         assertEquals(
             DynamicValue(
                 type = DynamicValueType.DATE_TIME,
-                "2022-01-01T00:00:00Z"
+                "2022-01-01T00:00:00Z",
             ),
-            transformed.effective
+            transformed.effective,
         )
         assertEquals(
             Instant("2018-02-02T00:00:00Z"),
-            transformed.issued
+            transformed.issued,
         )
         assertEquals(
             listOf(
-                Reference(id = "performerId".asFHIR(), display = "performerDisplay".asFHIR())
+                Reference(id = "performerId".asFHIR(), display = "performerDisplay".asFHIR()),
             ),
-            transformed.performer
+            transformed.performer,
         )
         assertEquals(
             listOf(
-                Reference(id = "resultsInterpreter".asFHIR(), display = "resultsInterpreterDisplay".asFHIR())
+                Reference(id = "resultsInterpreter".asFHIR(), display = "resultsInterpreterDisplay".asFHIR()),
             ),
-            transformed.resultsInterpreter
+            transformed.resultsInterpreter,
         )
         assertEquals(
             listOf(
-                Reference(id = "specimenId".asFHIR(), display = "specimenDisplay".asFHIR())
+                Reference(id = "specimenId".asFHIR(), display = "specimenDisplay".asFHIR()),
             ),
-            transformed.specimen
+            transformed.specimen,
         )
         assertEquals(
             listOf(
-                Reference(id = "resultId".asFHIR(), display = "resultDisplay".asFHIR())
+                Reference(id = "resultId".asFHIR(), display = "resultDisplay".asFHIR()),
             ),
-            transformed.result
+            transformed.result,
         )
         assertEquals(
             listOf(
-                Reference(id = "imagingStudyId".asFHIR(), display = "imagingStudyDisplay".asFHIR())
+                Reference(id = "imagingStudyId".asFHIR(), display = "imagingStudyDisplay".asFHIR()),
             ),
-            transformed.imagingStudy
+            transformed.imagingStudy,
         )
         assertEquals(
             listOf(
                 DiagnosticReportMedia(
                     id = "mediaId".asFHIR(),
-                    link = Reference(id = "linkId".asFHIR(), display = "linkDisplay".asFHIR())
-                )
+                    link = Reference(id = "linkId".asFHIR(), display = "linkDisplay".asFHIR()),
+                ),
             ),
-            transformed.media
+            transformed.media,
         )
         assertEquals("conclusionFhirString".asFHIR(), transformed.conclusion)
         assertEquals(
             listOf(
-                CodeableConcept(text = "conclusionCode".asFHIR())
+                CodeableConcept(text = "conclusionCode".asFHIR()),
             ),
-            transformed.conclusionCode
+            transformed.conclusionCode,
         )
         assertEquals(
             listOf(
-                Attachment(id = "attachmentId".asFHIR())
+                Attachment(id = "attachmentId".asFHIR()),
             ),
-            transformed.presentedForm
+            transformed.presentedForm,
         )
     }
 }

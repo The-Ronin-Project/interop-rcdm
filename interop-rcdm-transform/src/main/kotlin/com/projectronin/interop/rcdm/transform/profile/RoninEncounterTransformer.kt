@@ -16,10 +16,14 @@ class RoninEncounterTransformer : ProfileTransformer<Encounter>() {
     override val rcdmVersion: RCDMVersion = RCDMVersion.V3_20_0
     override val profileVersion: Int = 4
 
-    override fun transformInternal(original: Encounter, tenant: Tenant): TransformResponse<Encounter>? {
-        val transformed = original.copy(
-            identifier = original.getRoninIdentifiers(tenant)
-        )
+    override fun transformInternal(
+        original: Encounter,
+        tenant: Tenant,
+    ): TransformResponse<Encounter>? {
+        val transformed =
+            original.copy(
+                identifier = original.getRoninIdentifiers(tenant),
+            )
         return TransformResponse(transformed)
     }
 }

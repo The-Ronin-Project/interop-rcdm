@@ -15,10 +15,15 @@ class RoninAppointmentTransformer : ProfileTransformer<Appointment>() {
     override val profile: RoninProfile = RoninProfile.APPOINTMENT
     override val rcdmVersion: RCDMVersion = RCDMVersion.V3_19_0
     override val profileVersion: Int = 3
-    override fun transformInternal(original: Appointment, tenant: Tenant): TransformResponse<Appointment>? {
-        val transformed = original.copy(
-            identifier = original.getRoninIdentifiers(tenant)
-        )
+
+    override fun transformInternal(
+        original: Appointment,
+        tenant: Tenant,
+    ): TransformResponse<Appointment>? {
+        val transformed =
+            original.copy(
+                identifier = original.getRoninIdentifiers(tenant),
+            )
         return TransformResponse(transformed)
     }
 }

@@ -37,48 +37,55 @@ class RoninObservationValidatorTest {
 
     @Test
     fun `validate succeeds`() {
-        val respiratoryRate = Observation(
-            id = Id("1234"),
-            meta = Meta(profile = listOf(RoninProfile.OBSERVATION.canonical), source = Uri("source")),
-            identifier = requiredIdentifiers,
-            extension = listOf(
-                Extension(
-                    url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
-                    value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "code".asFHIR()))
-                )
-            ),
-            status = com.projectronin.interop.fhir.r4.valueset.ObservationStatus.FINAL.asCode(),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Respiratory Rate".asFHIR(),
-                        code = Code("1234-5")
-                    )
-                )
-            ),
-            subject = Reference(reference = FHIRString("Patient/1234")),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = Code("other-observation")
-                        )
-                    )
-                )
-            ),
-            effective = DynamicValue(DynamicValueType.DATE_TIME, DateTime("2023")),
-            value = DynamicValue(
-                DynamicValueType.QUANTITY,
-                Quantity(
-                    value = Decimal(BigDecimal.valueOf(70)),
-                    unit = "/min".asFHIR(),
-                    system = CodeSystem.UCUM.uri,
-                    code = Code("/min")
-                )
+        val respiratoryRate =
+            Observation(
+                id = Id("1234"),
+                meta = Meta(profile = listOf(RoninProfile.OBSERVATION.canonical), source = Uri("source")),
+                identifier = requiredIdentifiers,
+                extension =
+                    listOf(
+                        Extension(
+                            url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
+                            value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "code".asFHIR())),
+                        ),
+                    ),
+                status = com.projectronin.interop.fhir.r4.valueset.ObservationStatus.FINAL.asCode(),
+                code =
+                    CodeableConcept(
+                        coding =
+                            listOf(
+                                Coding(
+                                    system = CodeSystem.LOINC.uri,
+                                    display = "Respiratory Rate".asFHIR(),
+                                    code = Code("1234-5"),
+                                ),
+                            ),
+                    ),
+                subject = Reference(reference = FHIRString("Patient/1234")),
+                category =
+                    listOf(
+                        CodeableConcept(
+                            coding =
+                                listOf(
+                                    Coding(
+                                        system = CodeSystem.OBSERVATION_CATEGORY.uri,
+                                        code = Code("other-observation"),
+                                    ),
+                                ),
+                        ),
+                    ),
+                effective = DynamicValue(DynamicValueType.DATE_TIME, DateTime("2023")),
+                value =
+                    DynamicValue(
+                        DynamicValueType.QUANTITY,
+                        Quantity(
+                            value = Decimal(BigDecimal.valueOf(70)),
+                            unit = "/min".asFHIR(),
+                            system = CodeSystem.UCUM.uri,
+                            code = Code("/min"),
+                        ),
+                    ),
             )
-        )
         val validation = validator.validate(respiratoryRate, LocationContext(Observation::class))
         assertEquals(0, validation.issues().size)
     }

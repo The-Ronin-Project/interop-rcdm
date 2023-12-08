@@ -29,7 +29,11 @@ class RoninPulseOximetryValidator(registryClient: NormalizationRegistryClient) :
     private fun validConcentrationValueSet(): ValueSetList =
         registryClient.getRequiredValueSet("Observation.component:Concentration.code", profile.value)
 
-    override fun validateVitalSign(resource: Observation, parentContext: LocationContext, validation: Validation) {
+    override fun validateVitalSign(
+        resource: Observation,
+        parentContext: LocationContext,
+        validation: Validation,
+    ) {
         validateVitalSignValue(resource.value, validPulseOximetryUnits, validation)
 
         if (resource.dataAbsentReason == null) {
@@ -39,19 +43,21 @@ class RoninPulseOximetryValidator(registryClient: NormalizationRegistryClient) :
             val validConcentrationCodes = validConcentrationValueSet.codes
 
             val components = resource.component
-            val flowRate = components.filter { comp ->
-                comp.code?.coding?.any { it.isInValueSet(validFlowRateCodes) } ?: false
-            }
-            val concentration = components.filter { comp ->
-                comp.code?.coding?.any { it.isInValueSet(validConcentrationCodes) } ?: false
-            }
+            val flowRate =
+                components.filter { comp ->
+                    comp.code?.coding?.any { it.isInValueSet(validFlowRateCodes) } ?: false
+                }
+            val concentration =
+                components.filter { comp ->
+                    comp.code?.coding?.any { it.isInValueSet(validConcentrationCodes) } ?: false
+                }
 
             if (flowRate.size == 1) {
                 validateVitalSignValue(
                     flowRate.first().value,
                     validFlowRateUnits,
                     validation,
-                    LocationContext("Observation", "component:FlowRate.value")
+                    LocationContext("Observation", "component:FlowRate.value"),
                 )
             }
             if (concentration.size == 1) {
@@ -59,7 +65,7 @@ class RoninPulseOximetryValidator(registryClient: NormalizationRegistryClient) :
                     concentration.first().value,
                     validConcentrationUnits,
                     validation,
-                    LocationContext("Observation", "component:Concentration.value")
+                    LocationContext("Observation", "component:Concentration.value"),
                 )
             }
             validation.apply {
@@ -71,9 +77,9 @@ class RoninPulseOximetryValidator(registryClient: NormalizationRegistryClient) :
                         severity = ValidationIssueSeverity.ERROR,
                         description = "Only 1 entry is allowed for pulse oximetry flow rate",
                         location = flowRateCodeContext,
-                        metadata = validFlowRateValueSet.metadata?.let { listOf(it) } ?: emptyList()
+                        metadata = validFlowRateValueSet.metadata?.let { listOf(it) } ?: emptyList(),
                     ),
-                    parentContext
+                    parentContext,
                 )
 
                 val concentrationCodeContext = LocationContext("Observation", "component:Concentration.code")
@@ -84,9 +90,9 @@ class RoninPulseOximetryValidator(registryClient: NormalizationRegistryClient) :
                         severity = ValidationIssueSeverity.ERROR,
                         description = "Only 1 entry is allowed for pulse oximetry oxygen concentration",
                         location = concentrationCodeContext,
-                        metadata = validConcentrationValueSet.metadata?.let { listOf(it) } ?: emptyList()
+                        metadata = validConcentrationValueSet.metadata?.let { listOf(it) } ?: emptyList(),
                     ),
-                    parentContext
+                    parentContext,
                 )
 
                 checkTrue(
@@ -96,9 +102,9 @@ class RoninPulseOximetryValidator(registryClient: NormalizationRegistryClient) :
                         severity = ValidationIssueSeverity.ERROR,
                         description = "Pulse Oximetry components must be either a Flow Rate or Concentration",
                         location = LocationContext("Observation", "component"),
-                        metadata = emptyList()
+                        metadata = emptyList(),
                     ),
-                    parentContext
+                    parentContext,
                 )
             }
         }

@@ -22,14 +22,19 @@ class RoninMedicationStatementValidator : ProfileValidator<MedicationStatement>(
     override val rcdmVersion: RCDMVersion = RCDMVersion.V3_29_0
     override val profileVersion: Int = 3
 
-    private val requiredMedicationReferenceError = FHIRError(
-        code = "RONIN_MEDSTAT_001",
-        description = "Medication must be a Reference",
-        severity = ValidationIssueSeverity.ERROR,
-        location = LocationContext(MedicationStatement::medication)
-    )
+    private val requiredMedicationReferenceError =
+        FHIRError(
+            code = "RONIN_MEDSTAT_001",
+            description = "Medication must be a Reference",
+            severity = ValidationIssueSeverity.ERROR,
+            location = LocationContext(MedicationStatement::medication),
+        )
 
-    override fun validate(resource: MedicationStatement, validation: Validation, context: LocationContext) {
+    override fun validate(
+        resource: MedicationStatement,
+        validation: Validation,
+        context: LocationContext,
+    ) {
         validation.apply {
             validateMedicationDatatype(resource.extension, context, this)
 
@@ -37,7 +42,7 @@ class RoninMedicationStatementValidator : ProfileValidator<MedicationStatement>(
                 checkTrue(
                     medication.type == DynamicValueType.REFERENCE,
                     requiredMedicationReferenceError,
-                    context
+                    context,
                 )
             }
         }

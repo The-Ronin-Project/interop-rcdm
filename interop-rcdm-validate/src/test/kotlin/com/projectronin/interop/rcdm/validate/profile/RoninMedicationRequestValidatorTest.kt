@@ -44,176 +44,201 @@ class RoninMedicationRequestValidatorTest {
 
     @Test
     fun `validate succeeds`() {
-        val medicationRequest = MedicationRequest(
-            id = Id("12345"),
-            meta = Meta(profile = listOf(Canonical(RoninProfile.MEDICATION_REQUEST.value)), source = Uri("source")),
-            extension = listOf(
-                Extension(
-                    url = Uri(value = RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
-                    value = DynamicValue(
-                        type = DynamicValueType.CODE,
-                        value = Code("literal reference")
-                    )
-                )
-            ),
-            identifier = requiredIdentifiers,
-            status = MedicationRequestStatus.COMPLETED.asCode(),
-            intent = MedicationRequestIntent.FILLER_ORDER.asCode(),
-            medication = DynamicValue(
-                type = DynamicValueType.REFERENCE,
-                value = Reference(reference = FHIRString("Medication/test-1234"))
-            ),
-            subject = Reference(
-                reference = "Patient/1234".asFHIR(),
-                type = Uri("Patient", extension = dataAuthorityExtension)
-            ),
-            requester = Reference(reference = "Practitioner/1234".asFHIR())
-        )
+        val medicationRequest =
+            MedicationRequest(
+                id = Id("12345"),
+                meta = Meta(profile = listOf(Canonical(RoninProfile.MEDICATION_REQUEST.value)), source = Uri("source")),
+                extension =
+                    listOf(
+                        Extension(
+                            url = Uri(value = RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
+                            value =
+                                DynamicValue(
+                                    type = DynamicValueType.CODE,
+                                    value = Code("literal reference"),
+                                ),
+                        ),
+                    ),
+                identifier = requiredIdentifiers,
+                status = MedicationRequestStatus.COMPLETED.asCode(),
+                intent = MedicationRequestIntent.FILLER_ORDER.asCode(),
+                medication =
+                    DynamicValue(
+                        type = DynamicValueType.REFERENCE,
+                        value = Reference(reference = FHIRString("Medication/test-1234")),
+                    ),
+                subject =
+                    Reference(
+                        reference = "Patient/1234".asFHIR(),
+                        type = Uri("Patient", extension = dataAuthorityExtension),
+                    ),
+                requester = Reference(reference = "Practitioner/1234".asFHIR()),
+            )
         val validation = validator.validate(medicationRequest, LocationContext(MedicationRequest::class))
         assertEquals(0, validation.issues().size)
     }
 
     @Test
     fun `validate fails when requester is not provided`() {
-        val medicationRequest = MedicationRequest(
-            id = Id("12345"),
-            meta = Meta(profile = listOf(Canonical(RoninProfile.MEDICATION_REQUEST.value)), source = Uri("source")),
-            extension = listOf(
-                Extension(
-                    url = Uri(value = RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
-                    value = DynamicValue(
-                        type = DynamicValueType.CODE,
-                        value = Code("literal reference")
-                    )
-                )
-            ),
-            identifier = requiredIdentifiers,
-            status = MedicationRequestStatus.COMPLETED.asCode(),
-            intent = MedicationRequestIntent.FILLER_ORDER.asCode(),
-            requester = null,
-            medication = DynamicValue(
-                type = DynamicValueType.REFERENCE,
-                value = Reference(reference = FHIRString("Medication/test-1234"))
-            ),
-            subject = Reference(
-                reference = "Patient/1234".asFHIR(),
-                type = Uri("Patient", extension = dataAuthorityExtension)
+        val medicationRequest =
+            MedicationRequest(
+                id = Id("12345"),
+                meta = Meta(profile = listOf(Canonical(RoninProfile.MEDICATION_REQUEST.value)), source = Uri("source")),
+                extension =
+                    listOf(
+                        Extension(
+                            url = Uri(value = RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
+                            value =
+                                DynamicValue(
+                                    type = DynamicValueType.CODE,
+                                    value = Code("literal reference"),
+                                ),
+                        ),
+                    ),
+                identifier = requiredIdentifiers,
+                status = MedicationRequestStatus.COMPLETED.asCode(),
+                intent = MedicationRequestIntent.FILLER_ORDER.asCode(),
+                requester = null,
+                medication =
+                    DynamicValue(
+                        type = DynamicValueType.REFERENCE,
+                        value = Reference(reference = FHIRString("Medication/test-1234")),
+                    ),
+                subject =
+                    Reference(
+                        reference = "Patient/1234".asFHIR(),
+                        type = Uri("Patient", extension = dataAuthorityExtension),
+                    ),
             )
-        )
 
         val validation = validator.validate(medicationRequest, LocationContext(MedicationRequest::class))
         assertEquals(1, validation.issues().size)
         assertEquals(
             "ERROR REQ_FIELD: requester is a required element @ MedicationRequest.requester",
-            validation.issues().first().toString()
+            validation.issues().first().toString(),
         )
     }
 
     @Test
     fun `validate fails with no medication datatype extension`() {
-        val medicationRequest = MedicationRequest(
-            id = Id("12345"),
-            meta = Meta(profile = listOf(Canonical(RoninProfile.MEDICATION_REQUEST.value)), source = Uri("source")),
-            extension = listOf(
-                Extension(
-                    url = Uri(value = "incorrect-url"),
-                    value = DynamicValue(
-                        type = DynamicValueType.CODE,
-                        value = Code("literal reference")
-                    )
-                )
-            ),
-            identifier = requiredIdentifiers,
-            status = MedicationRequestStatus.COMPLETED.asCode(),
-            intent = MedicationRequestIntent.FILLER_ORDER.asCode(),
-            medication = DynamicValue(
-                type = DynamicValueType.REFERENCE,
-                value = Reference(reference = FHIRString("Medication/test-1234"))
-            ),
-            subject = Reference(
-                reference = "Patient/1234".asFHIR(),
-                type = Uri("Patient", extension = dataAuthorityExtension)
-            ),
-            requester = Reference(reference = "Practitioner/1234".asFHIR())
-        )
+        val medicationRequest =
+            MedicationRequest(
+                id = Id("12345"),
+                meta = Meta(profile = listOf(Canonical(RoninProfile.MEDICATION_REQUEST.value)), source = Uri("source")),
+                extension =
+                    listOf(
+                        Extension(
+                            url = Uri(value = "incorrect-url"),
+                            value =
+                                DynamicValue(
+                                    type = DynamicValueType.CODE,
+                                    value = Code("literal reference"),
+                                ),
+                        ),
+                    ),
+                identifier = requiredIdentifiers,
+                status = MedicationRequestStatus.COMPLETED.asCode(),
+                intent = MedicationRequestIntent.FILLER_ORDER.asCode(),
+                medication =
+                    DynamicValue(
+                        type = DynamicValueType.REFERENCE,
+                        value = Reference(reference = FHIRString("Medication/test-1234")),
+                    ),
+                subject =
+                    Reference(
+                        reference = "Patient/1234".asFHIR(),
+                        type = Uri("Patient", extension = dataAuthorityExtension),
+                    ),
+                requester = Reference(reference = "Practitioner/1234".asFHIR()),
+            )
 
         val validation = validator.validate(medicationRequest, LocationContext(MedicationRequest::class))
         assertEquals(1, validation.issues().size)
         assertEquals(
             "ERROR RONIN_MEDDTEXT_001: Extension must contain original Medication Datatype @ MedicationRequest.extension",
-            validation.issues().first().toString()
+            validation.issues().first().toString(),
         )
     }
 
     @Test
     fun `validate fails with wrong medication datatype extension value`() {
-        val medicationRequest = MedicationRequest(
-            id = Id("12345"),
-            meta = Meta(profile = listOf(Canonical(RoninProfile.MEDICATION_REQUEST.value)), source = Uri("source")),
-            extension = listOf(
-                Extension(
-                    url = Uri(value = RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
-                    value = DynamicValue(
-                        type = DynamicValueType.CODE,
-                        value = Code("blah")
-                    )
-                )
-            ),
-            identifier = requiredIdentifiers,
-            status = MedicationRequestStatus.COMPLETED.asCode(),
-            intent = MedicationRequestIntent.FILLER_ORDER.asCode(),
-            medication = DynamicValue(
-                type = DynamicValueType.REFERENCE,
-                value = Reference(reference = FHIRString("Medication/test-1234"))
-            ),
-            subject = Reference(
-                reference = "Patient/1234".asFHIR(),
-                type = Uri("Patient", extension = dataAuthorityExtension)
-            ),
-            requester = Reference(reference = "Practitioner/1234".asFHIR())
-        )
+        val medicationRequest =
+            MedicationRequest(
+                id = Id("12345"),
+                meta = Meta(profile = listOf(Canonical(RoninProfile.MEDICATION_REQUEST.value)), source = Uri("source")),
+                extension =
+                    listOf(
+                        Extension(
+                            url = Uri(value = RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
+                            value =
+                                DynamicValue(
+                                    type = DynamicValueType.CODE,
+                                    value = Code("blah"),
+                                ),
+                        ),
+                    ),
+                identifier = requiredIdentifiers,
+                status = MedicationRequestStatus.COMPLETED.asCode(),
+                intent = MedicationRequestIntent.FILLER_ORDER.asCode(),
+                medication =
+                    DynamicValue(
+                        type = DynamicValueType.REFERENCE,
+                        value = Reference(reference = FHIRString("Medication/test-1234")),
+                    ),
+                subject =
+                    Reference(
+                        reference = "Patient/1234".asFHIR(),
+                        type = Uri("Patient", extension = dataAuthorityExtension),
+                    ),
+                requester = Reference(reference = "Practitioner/1234".asFHIR()),
+            )
 
         val validation = validator.validate(medicationRequest, LocationContext(MedicationRequest::class))
         assertEquals(1, validation.issues().size)
         assertEquals(
             "ERROR RONIN_MEDDTEXT_002: Medication Datatype extension value is invalid @ MedicationRequest.extension",
-            validation.issues().first().toString()
+            validation.issues().first().toString(),
         )
     }
 
     @Test
     fun `validate fails with wrong medication datatype extension type`() {
-        val medicationRequest = MedicationRequest(
-            id = Id("12345"),
-            meta = Meta(profile = listOf(Canonical(RoninProfile.MEDICATION_REQUEST.value)), source = Uri("source")),
-            extension = listOf(
-                Extension(
-                    url = Uri(value = RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
-                    value = DynamicValue(
-                        type = DynamicValueType.STRING,
-                        value = Code("codeable concept")
-                    )
-                )
-            ),
-            identifier = requiredIdentifiers,
-            status = MedicationRequestStatus.COMPLETED.asCode(),
-            intent = MedicationRequestIntent.FILLER_ORDER.asCode(),
-            medication = DynamicValue(
-                type = DynamicValueType.REFERENCE,
-                value = Reference(reference = FHIRString("Medication/test-1234"))
-            ),
-            subject = Reference(
-                reference = "Patient/1234".asFHIR(),
-                type = Uri("Patient", extension = dataAuthorityExtension)
-            ),
-            requester = Reference(reference = "Practitioner/1234".asFHIR())
-        )
+        val medicationRequest =
+            MedicationRequest(
+                id = Id("12345"),
+                meta = Meta(profile = listOf(Canonical(RoninProfile.MEDICATION_REQUEST.value)), source = Uri("source")),
+                extension =
+                    listOf(
+                        Extension(
+                            url = Uri(value = RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
+                            value =
+                                DynamicValue(
+                                    type = DynamicValueType.STRING,
+                                    value = Code("codeable concept"),
+                                ),
+                        ),
+                    ),
+                identifier = requiredIdentifiers,
+                status = MedicationRequestStatus.COMPLETED.asCode(),
+                intent = MedicationRequestIntent.FILLER_ORDER.asCode(),
+                medication =
+                    DynamicValue(
+                        type = DynamicValueType.REFERENCE,
+                        value = Reference(reference = FHIRString("Medication/test-1234")),
+                    ),
+                subject =
+                    Reference(
+                        reference = "Patient/1234".asFHIR(),
+                        type = Uri("Patient", extension = dataAuthorityExtension),
+                    ),
+                requester = Reference(reference = "Practitioner/1234".asFHIR()),
+            )
 
         val validation = validator.validate(medicationRequest, LocationContext(MedicationRequest::class))
         assertEquals(1, validation.issues().size)
         assertEquals(
             "ERROR RONIN_MEDDTEXT_003: Medication Datatype extension type is invalid @ MedicationRequest.extension",
-            validation.issues().first().toString()
+            validation.issues().first().toString(),
         )
     }
 }

@@ -18,8 +18,7 @@ abstract class BaseRoninObservationTransformer(protected val registryClient: Nor
 
     open fun getQualifyingCategories(): List<Coding> = emptyList()
 
-    open fun getQualifyingCodes(): List<Coding> =
-        registryClient.getRequiredValueSet("Observation.code", profile.value).codes
+    open fun getQualifyingCodes(): List<Coding> = registryClient.getRequiredValueSet("Observation.code", profile.value).codes
 
     protected open fun getTransformedBodySite(bodySite: CodeableConcept?) = bodySite
 
@@ -28,11 +27,15 @@ abstract class BaseRoninObservationTransformer(protected val registryClient: Nor
             resource.code.qualifiesForValueSet(getQualifyingCodes())
     }
 
-    override fun transformInternal(original: Observation, tenant: Tenant): TransformResponse<Observation>? {
-        val transformed = original.copy(
-            identifier = original.getRoninIdentifiers(tenant),
-            bodySite = getTransformedBodySite(original.bodySite)
-        )
+    override fun transformInternal(
+        original: Observation,
+        tenant: Tenant,
+    ): TransformResponse<Observation>? {
+        val transformed =
+            original.copy(
+                identifier = original.getRoninIdentifiers(tenant),
+                bodySite = getTransformedBodySite(original.bodySite),
+            )
         return TransformResponse(transformed)
     }
 }

@@ -30,9 +30,10 @@ import org.junit.jupiter.api.Test
 class RoninProcedureTransformerTest {
     private val transformer = RoninProcedureTransformer()
 
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "test"
-    }
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "test"
+        }
 
     @Test
     fun `returns supported resource`() {
@@ -45,52 +46,60 @@ class RoninProcedureTransformerTest {
             transformer.qualifies(
                 Procedure(
                     status = Code(EventStatus.UNKNOWN.code),
-                    subject = Reference(reference = "Patient".asFHIR())
-                )
-            )
+                    subject = Reference(reference = "Patient".asFHIR()),
+                ),
+            ),
         )
     }
 
     @Test
     fun `transform succeeds`() {
-        val procedure = Procedure(
-            id = Id("12345"),
-            meta = Meta(
-                profile = listOf(Canonical("http://hl7.org/fhir/R4/Procedure.html")),
-                source = Uri("source")
-            ),
-            extension = listOf(
-                Extension(
-                    url = Uri("http://hl7.org/extension-1"),
-                    value = DynamicValue(DynamicValueType.STRING, "value")
-                )
-            ),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_MRN,
-                    system = CodeSystem.RONIN_MRN.uri,
-                    value = "6789".asFHIR()
-                )
-            ),
-            status = EventStatus.ON_HOLD.asCode(),
-            subject = Reference(reference = FHIRString("Patient/123123")),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = Uri("CodeSystem"),
-                        code = Code(value = "Code")
-                    )
-                )
-            ),
-            category = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = Uri("CategorySystem"),
-                        code = Code(value = "CategoryCode")
-                    )
-                )
+        val procedure =
+            Procedure(
+                id = Id("12345"),
+                meta =
+                    Meta(
+                        profile = listOf(Canonical("http://hl7.org/fhir/R4/Procedure.html")),
+                        source = Uri("source"),
+                    ),
+                extension =
+                    listOf(
+                        Extension(
+                            url = Uri("http://hl7.org/extension-1"),
+                            value = DynamicValue(DynamicValueType.STRING, "value"),
+                        ),
+                    ),
+                identifier =
+                    listOf(
+                        Identifier(
+                            type = CodeableConcepts.RONIN_MRN,
+                            system = CodeSystem.RONIN_MRN.uri,
+                            value = "6789".asFHIR(),
+                        ),
+                    ),
+                status = EventStatus.ON_HOLD.asCode(),
+                subject = Reference(reference = FHIRString("Patient/123123")),
+                code =
+                    CodeableConcept(
+                        coding =
+                            listOf(
+                                Coding(
+                                    system = Uri("CodeSystem"),
+                                    code = Code(value = "Code"),
+                                ),
+                            ),
+                    ),
+                category =
+                    CodeableConcept(
+                        coding =
+                            listOf(
+                                Coding(
+                                    system = Uri("CategorySystem"),
+                                    code = Code(value = "CategoryCode"),
+                                ),
+                            ),
+                    ),
             )
-        )
 
         val transformResponse = transformer.transform(procedure, tenant)
 
@@ -103,9 +112,9 @@ class RoninProcedureTransformerTest {
         assertEquals(
             Meta(
                 source = Uri("source"),
-                profile = listOf(Canonical(RoninProfile.PROCEDURE.value))
+                profile = listOf(Canonical(RoninProfile.PROCEDURE.value)),
             ),
-            transformed.meta
+            transformed.meta,
         )
         assertEquals(procedure.extension, transformed.extension)
         assertEquals(
@@ -113,38 +122,39 @@ class RoninProcedureTransformerTest {
                 Identifier(
                     type = CodeableConcepts.RONIN_MRN,
                     system = CodeSystem.RONIN_MRN.uri,
-                    value = "6789".asFHIR()
+                    value = "6789".asFHIR(),
                 ),
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
                     system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
+                    value = "12345".asFHIR(),
                 ),
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
+                    value = "test".asFHIR(),
                 ),
                 Identifier(
                     type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
                     system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
+                    value = "EHR Data Authority".asFHIR(),
+                ),
             ),
-            transformed.identifier
+            transformed.identifier,
         )
         assertEquals(procedure.subject, transformed.subject)
         assertEquals(procedure.status, transformed.status)
         assertEquals(
             CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = Uri("CodeSystem"),
-                        code = Code(value = "Code")
-                    )
-                )
+                coding =
+                    listOf(
+                        Coding(
+                            system = Uri("CodeSystem"),
+                            code = Code(value = "Code"),
+                        ),
+                    ),
             ),
-            transformed.code
+            transformed.code,
         )
     }
 }

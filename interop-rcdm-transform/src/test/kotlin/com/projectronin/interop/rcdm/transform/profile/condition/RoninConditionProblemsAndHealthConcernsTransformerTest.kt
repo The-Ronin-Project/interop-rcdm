@@ -25,9 +25,10 @@ import org.junit.jupiter.api.Test
 class RoninConditionProblemsAndHealthConcernsTransformerTest {
     private val transformer = RoninConditionProblemsAndHealthConcernsTransformer()
 
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "tenant"
-    }
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "tenant"
+        }
 
     @Test
     fun `returns correct profile`() {
@@ -36,112 +37,128 @@ class RoninConditionProblemsAndHealthConcernsTransformerTest {
 
     @Test
     fun `qualifies for problem-list-item category`() {
-        val condition = Condition(
-            id = Id("12345"),
-            subject = Reference(display = FHIRString("subject")),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.CONDITION_CATEGORY.uri,
-                            code = Code("problem-list-item")
-                        )
-                    )
-                )
+        val condition =
+            Condition(
+                id = Id("12345"),
+                subject = Reference(display = FHIRString("subject")),
+                category =
+                    listOf(
+                        CodeableConcept(
+                            coding =
+                                listOf(
+                                    Coding(
+                                        system = CodeSystem.CONDITION_CATEGORY.uri,
+                                        code = Code("problem-list-item"),
+                                    ),
+                                ),
+                        ),
+                    ),
             )
-        )
 
         assertTrue(transformer.qualifies(condition))
     }
 
     @Test
     fun `qualifies for health-concern category`() {
-        val condition = Condition(
-            id = Id("12345"),
-            subject = Reference(display = FHIRString("subject")),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.CONDITION_CATEGORY_HEALTH_CONCERN.uri,
-                            code = Code("health-concern")
-                        )
-                    )
-                )
+        val condition =
+            Condition(
+                id = Id("12345"),
+                subject = Reference(display = FHIRString("subject")),
+                category =
+                    listOf(
+                        CodeableConcept(
+                            coding =
+                                listOf(
+                                    Coding(
+                                        system = CodeSystem.CONDITION_CATEGORY_HEALTH_CONCERN.uri,
+                                        code = Code("health-concern"),
+                                    ),
+                                ),
+                        ),
+                    ),
             )
-        )
 
         assertTrue(transformer.qualifies(condition))
     }
 
     @Test
     fun `does not qualify for unsupported category`() {
-        val condition = Condition(
-            id = Id("12345"),
-            subject = Reference(display = FHIRString("subject")),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.CONDITION_CATEGORY.uri,
-                            code = Code("encounter diagnosis")
-                        )
-                    )
-                )
+        val condition =
+            Condition(
+                id = Id("12345"),
+                subject = Reference(display = FHIRString("subject")),
+                category =
+                    listOf(
+                        CodeableConcept(
+                            coding =
+                                listOf(
+                                    Coding(
+                                        system = CodeSystem.CONDITION_CATEGORY.uri,
+                                        code = Code("encounter diagnosis"),
+                                    ),
+                                ),
+                        ),
+                    ),
             )
-        )
 
         assertFalse(transformer.qualifies(condition))
     }
 
     @Test
     fun `transforms required fields`() {
-        val condition = Condition(
-            id = Id("12345"),
-            subject = Reference(display = FHIRString("subject")),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.CONDITION_CATEGORY.uri,
-                            code = Code("problem-list-item")
-                        )
-                    )
-                )
+        val condition =
+            Condition(
+                id = Id("12345"),
+                subject = Reference(display = FHIRString("subject")),
+                category =
+                    listOf(
+                        CodeableConcept(
+                            coding =
+                                listOf(
+                                    Coding(
+                                        system = CodeSystem.CONDITION_CATEGORY.uri,
+                                        code = Code("problem-list-item"),
+                                    ),
+                                ),
+                        ),
+                    ),
             )
-        )
 
         val response = transformer.transform(condition, tenant)
         response!!
 
-        val expectedCondition = Condition(
-            id = Id("12345"),
-            meta = Meta(profile = listOf(RoninProfile.CONDITION_PROBLEMS_CONCERNS.canonical)),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = FHIRString("12345")
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = FHIRString("tenant")
-                ),
-                dataAuthorityIdentifier
-            ),
-            subject = Reference(display = FHIRString("subject")),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.CONDITION_CATEGORY.uri,
-                            code = Code("problem-list-item")
-                        )
-                    )
-                )
+        val expectedCondition =
+            Condition(
+                id = Id("12345"),
+                meta = Meta(profile = listOf(RoninProfile.CONDITION_PROBLEMS_CONCERNS.canonical)),
+                identifier =
+                    listOf(
+                        Identifier(
+                            type = CodeableConcepts.RONIN_FHIR_ID,
+                            system = CodeSystem.RONIN_FHIR_ID.uri,
+                            value = FHIRString("12345"),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_TENANT,
+                            system = CodeSystem.RONIN_TENANT.uri,
+                            value = FHIRString("tenant"),
+                        ),
+                        dataAuthorityIdentifier,
+                    ),
+                subject = Reference(display = FHIRString("subject")),
+                category =
+                    listOf(
+                        CodeableConcept(
+                            coding =
+                                listOf(
+                                    Coding(
+                                        system = CodeSystem.CONDITION_CATEGORY.uri,
+                                        code = Code("problem-list-item"),
+                                    ),
+                                ),
+                        ),
+                    ),
             )
-        )
 
         assertEquals(expectedCondition, response.resource)
         assertEquals(listOf<Resource<*>>(), response.embeddedResources)

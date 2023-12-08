@@ -18,13 +18,16 @@ abstract class BaseRoninConditionProfileTransformer : ProfileTransformer<Conditi
 
     abstract fun getQualifyingCategories(): List<Coding>
 
-    override fun qualifies(resource: Condition): Boolean =
-        resource.category.qualifiesForValueSet(getQualifyingCategories())
+    override fun qualifies(resource: Condition): Boolean = resource.category.qualifiesForValueSet(getQualifyingCategories())
 
-    override fun transformInternal(original: Condition, tenant: Tenant): TransformResponse<Condition>? {
-        val transformed = original.copy(
-            identifier = original.getRoninIdentifiers(tenant)
-        )
+    override fun transformInternal(
+        original: Condition,
+        tenant: Tenant,
+    ): TransformResponse<Condition>? {
+        val transformed =
+            original.copy(
+                identifier = original.getRoninIdentifiers(tenant),
+            )
         return TransformResponse(transformed)
     }
 }

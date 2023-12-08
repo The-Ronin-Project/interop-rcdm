@@ -22,17 +22,22 @@ import kotlin.reflect.jvm.jvmErasure
 class ValidationService(
     private val validationClient: ValidationClient,
     profileValidators: List<ProfileValidator<*>>,
-    elementValidators: List<ElementValidator<*>>
+    elementValidators: List<ElementValidator<*>>,
 ) {
     private val logger = KotlinLogging.logger { }
 
     private val validatorsByResource = profileValidators.groupBy { it.supportedResource }
     private val validatorsByElement = elementValidators.associateBy { it.supportedElement }
 
-    fun <R : Resource<R>> validate(resource: R, tenant: Tenant): Boolean {
+    fun <R : Resource<R>> validate(
+        resource: R,
+        tenant: Tenant,
+    ): Boolean {
         val qualifiedValidators = getQualifiedValidators(resource)
         if (qualifiedValidators.isEmpty()) {
-            throw IllegalStateException("No qualified validators found for ${resource.resourceType} with id ${resource.id?.value} and meta ${resource.meta}")
+            throw IllegalStateException(
+                "No qualified validators found for ${resource.resourceType} with id ${resource.id?.value} and meta ${resource.meta}",
+            )
         }
 
         val locationContext = LocationContext(resource::class)
@@ -76,7 +81,7 @@ class ValidationService(
         element: T,
         profiles: List<RoninProfile>,
         parentContext: LocationContext,
-        validation: Validation
+        validation: Validation,
     ) {
         val elementName = element.javaClass.simpleName
 
@@ -122,7 +127,7 @@ class ValidationService(
         element: Element<E>,
         profiles: List<RoninProfile>,
         parentContext: LocationContext,
-        validation: Validation
+        validation: Validation,
     ) {
         val validator = validatorsByElement[element::class] as? ElementValidator<E>
         validator?.let {
@@ -136,7 +141,7 @@ class ValidationService(
         dynamicValue: DynamicValue<*>,
         profiles: List<RoninProfile>,
         parentContext: LocationContext,
-        validation: Validation
+        validation: Validation,
     ) {
         val element = dynamicValue.value as? Element<*>
         element?.let {

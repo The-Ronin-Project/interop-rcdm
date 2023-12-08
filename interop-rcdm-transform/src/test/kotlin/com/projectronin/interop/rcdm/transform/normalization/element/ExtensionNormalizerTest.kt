@@ -26,9 +26,10 @@ class ExtensionNormalizerTest {
 
     @Test
     fun `url is null`() {
-        val extension = Extension(
-            url = null
-        )
+        val extension =
+            Extension(
+                url = null,
+            )
 
         val response = normalizer.normalize(extension, tenant)
 
@@ -38,9 +39,10 @@ class ExtensionNormalizerTest {
 
     @Test
     fun `url value is null`() {
-        val extension = Extension(
-            url = Uri(null)
-        )
+        val extension =
+            Extension(
+                url = Uri(null),
+            )
 
         val response = normalizer.normalize(extension, tenant)
 
@@ -50,9 +52,10 @@ class ExtensionNormalizerTest {
 
     @Test
     fun `url is recognized by Ronin`() {
-        val extension = Extension(
-            url = RoninExtension.RONIN_DATA_AUTHORITY_EXTENSION.uri
-        )
+        val extension =
+            Extension(
+                url = RoninExtension.RONIN_DATA_AUTHORITY_EXTENSION.uri,
+            )
 
         val response = normalizer.normalize(extension, tenant)
 
@@ -62,11 +65,12 @@ class ExtensionNormalizerTest {
 
     @Test
     fun `value is null and no extensions`() {
-        val extension = Extension(
-            url = Uri("http://example.org/fake-extension"),
-            value = null,
-            extension = listOf()
-        )
+        val extension =
+            Extension(
+                url = Uri("http://example.org/fake-extension"),
+                value = null,
+                extension = listOf(),
+            )
 
         val response = normalizer.normalize(extension, tenant)
 
@@ -76,10 +80,11 @@ class ExtensionNormalizerTest {
 
     @Test
     fun `value is not null`() {
-        val extension = Extension(
-            url = Uri("http://example.org/fake-extension"),
-            value = DynamicValue(DynamicValueType.BOOLEAN, FHIRBoolean.TRUE)
-        )
+        val extension =
+            Extension(
+                url = Uri("http://example.org/fake-extension"),
+                value = DynamicValue(DynamicValueType.BOOLEAN, FHIRBoolean.TRUE),
+            )
 
         val response = normalizer.normalize(extension, tenant)
 
@@ -89,15 +94,17 @@ class ExtensionNormalizerTest {
 
     @Test
     fun `extensions exist`() {
-        val extension = Extension(
-            url = Uri("http://example.org/fake-extension"),
-            extension = listOf(
-                Extension(
-                    url = Uri("http://example.org/fake-sub-extension"),
-                    value = DynamicValue(DynamicValueType.BOOLEAN, FHIRBoolean.TRUE)
-                )
+        val extension =
+            Extension(
+                url = Uri("http://example.org/fake-extension"),
+                extension =
+                    listOf(
+                        Extension(
+                            url = Uri("http://example.org/fake-sub-extension"),
+                            value = DynamicValue(DynamicValueType.BOOLEAN, FHIRBoolean.TRUE),
+                        ),
+                    ),
             )
-        )
 
         val response = normalizer.normalize(extension, tenant)
 

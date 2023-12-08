@@ -11,5 +11,9 @@ interface ResourceMapper<R : Resource<R>> {
     /**
      * Maps the [resource] for the [tenant].
      */
-    fun map(resource: R, tenant: Tenant, forceCacheReloadTS: LocalDateTime?): MapResponse<R>
+    fun map(
+        resource: R,
+        tenant: Tenant,
+        forceCacheReloadTS: LocalDateTime?,
+    ): MapResponse<R>
 }

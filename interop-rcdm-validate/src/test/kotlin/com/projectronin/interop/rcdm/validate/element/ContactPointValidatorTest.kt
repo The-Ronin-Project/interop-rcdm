@@ -24,341 +24,386 @@ class ContactPointValidatorTest {
 
     @Test
     fun `validate fails if system is null`() {
-        val contactPoint = ContactPoint(
-            system = null,
-            value = FHIRString("555-987-6543")
-        )
+        val contactPoint =
+            ContactPoint(
+                system = null,
+                value = FHIRString("555-987-6543"),
+            )
 
         val validation =
             validator.validate(contactPoint, listOf(RoninProfile.PATIENT), LocationContext("Patient", "telecom[0]"))
         assertEquals(1, validation.issues().size)
         assertEquals(
             "ERROR REQ_FIELD: system is a required element @ Patient.telecom[0].system",
-            validation.issues().first().toString()
+            validation.issues().first().toString(),
         )
     }
 
     @Test
     fun `validate fails if no system extensions`() {
-        val contactPoint = ContactPoint(
-            system = Code(
-                value = "phone",
-                extension = listOf()
-            ),
-            value = FHIRString("555-987-6543")
-        )
+        val contactPoint =
+            ContactPoint(
+                system =
+                    Code(
+                        value = "phone",
+                        extension = listOf(),
+                    ),
+                value = FHIRString("555-987-6543"),
+            )
 
         val validation =
             validator.validate(contactPoint, listOf(RoninProfile.PATIENT), LocationContext("Patient", "telecom[0]"))
         assertEquals(1, validation.issues().size)
         assertEquals(
             "ERROR RONIN_CNTCTPT_001: A single tenant source element system extension is required @ Patient.telecom[0].system",
-            validation.issues().first().toString()
+            validation.issues().first().toString(),
         )
     }
 
     @Test
     fun `validate fails if multiple system extension`() {
-        val contactPoint = ContactPoint(
-            system = Code(
-                value = "phone",
-                extension = listOf(
-                    Extension(
-                        url = RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.uri,
-                        value = DynamicValue(DynamicValueType.CODING, Coding(code = Code("phone")))
+        val contactPoint =
+            ContactPoint(
+                system =
+                    Code(
+                        value = "phone",
+                        extension =
+                            listOf(
+                                Extension(
+                                    url = RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.uri,
+                                    value = DynamicValue(DynamicValueType.CODING, Coding(code = Code("phone"))),
+                                ),
+                                Extension(
+                                    url = RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.uri,
+                                    value = DynamicValue(DynamicValueType.CODING, Coding(code = Code("phone"))),
+                                ),
+                            ),
                     ),
-                    Extension(
-                        url = RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.uri,
-                        value = DynamicValue(DynamicValueType.CODING, Coding(code = Code("phone")))
-                    )
-                )
-            ),
-            value = FHIRString("555-987-6543")
-        )
+                value = FHIRString("555-987-6543"),
+            )
 
         val validation =
             validator.validate(contactPoint, listOf(RoninProfile.PATIENT), LocationContext("Patient", "telecom[0]"))
         assertEquals(1, validation.issues().size)
         assertEquals(
             "ERROR RONIN_CNTCTPT_001: A single tenant source element system extension is required @ Patient.telecom[0].system",
-            validation.issues().first().toString()
+            validation.issues().first().toString(),
         )
     }
 
     @Test
     fun `validate fails if system extension has null url`() {
-        val contactPoint = ContactPoint(
-            system = Code(
-                value = "phone",
-                extension = listOf(
-                    Extension(
-                        url = null,
-                        value = DynamicValue(DynamicValueType.CODING, Coding(code = Code("phone")))
-                    )
-                )
-            ),
-            value = FHIRString("555-987-6543")
-        )
+        val contactPoint =
+            ContactPoint(
+                system =
+                    Code(
+                        value = "phone",
+                        extension =
+                            listOf(
+                                Extension(
+                                    url = null,
+                                    value = DynamicValue(DynamicValueType.CODING, Coding(code = Code("phone"))),
+                                ),
+                            ),
+                    ),
+                value = FHIRString("555-987-6543"),
+            )
 
         val validation =
             validator.validate(contactPoint, listOf(RoninProfile.PATIENT), LocationContext("Patient", "telecom[0]"))
         assertEquals(1, validation.issues().size)
         assertEquals(
             "ERROR RONIN_CNTCTPT_001: A single tenant source element system extension is required @ Patient.telecom[0].system",
-            validation.issues().first().toString()
+            validation.issues().first().toString(),
         )
     }
 
     @Test
     fun `validate fails if system extension has url with null value`() {
-        val contactPoint = ContactPoint(
-            system = Code(
-                value = "phone",
-                extension = listOf(
-                    Extension(
-                        url = Uri(null),
-                        value = DynamicValue(DynamicValueType.CODING, Coding(code = Code("phone")))
-                    )
-                )
-            ),
-            value = FHIRString("555-987-6543")
-        )
+        val contactPoint =
+            ContactPoint(
+                system =
+                    Code(
+                        value = "phone",
+                        extension =
+                            listOf(
+                                Extension(
+                                    url = Uri(null),
+                                    value = DynamicValue(DynamicValueType.CODING, Coding(code = Code("phone"))),
+                                ),
+                            ),
+                    ),
+                value = FHIRString("555-987-6543"),
+            )
 
         val validation =
             validator.validate(contactPoint, listOf(RoninProfile.PATIENT), LocationContext("Patient", "telecom[0]"))
         assertEquals(1, validation.issues().size)
         assertEquals(
             "ERROR RONIN_CNTCTPT_001: A single tenant source element system extension is required @ Patient.telecom[0].system",
-            validation.issues().first().toString()
+            validation.issues().first().toString(),
         )
     }
 
     @Test
     fun `validate fails if incorrect system extension url`() {
-        val contactPoint = ContactPoint(
-            system = Code(
-                value = "phone",
-                extension = listOf(
-                    Extension(
-                        url = RoninExtension.RONIN_DATA_AUTHORITY_EXTENSION.uri,
-                        value = DynamicValue(DynamicValueType.CODING, Coding(code = Code("phone")))
-                    )
-                )
-            ),
-            value = FHIRString("555-987-6543")
-        )
+        val contactPoint =
+            ContactPoint(
+                system =
+                    Code(
+                        value = "phone",
+                        extension =
+                            listOf(
+                                Extension(
+                                    url = RoninExtension.RONIN_DATA_AUTHORITY_EXTENSION.uri,
+                                    value = DynamicValue(DynamicValueType.CODING, Coding(code = Code("phone"))),
+                                ),
+                            ),
+                    ),
+                value = FHIRString("555-987-6543"),
+            )
 
         val validation =
             validator.validate(contactPoint, listOf(RoninProfile.PATIENT), LocationContext("Patient", "telecom[0]"))
         assertEquals(1, validation.issues().size)
         assertEquals(
             "ERROR RONIN_CNTCTPT_001: A single tenant source element system extension is required @ Patient.telecom[0].system",
-            validation.issues().first().toString()
+            validation.issues().first().toString(),
         )
     }
 
     @Test
     fun `validate fails if value is null`() {
-        val contactPoint = ContactPoint(
-            system = Code(
-                value = "phone",
-                extension = listOf(
-                    Extension(
-                        url = RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.uri,
-                        value = DynamicValue(DynamicValueType.CODING, Coding(code = Code("phone")))
-                    )
-                )
-            ),
-            value = null
-        )
+        val contactPoint =
+            ContactPoint(
+                system =
+                    Code(
+                        value = "phone",
+                        extension =
+                            listOf(
+                                Extension(
+                                    url = RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.uri,
+                                    value = DynamicValue(DynamicValueType.CODING, Coding(code = Code("phone"))),
+                                ),
+                            ),
+                    ),
+                value = null,
+            )
 
         val validation =
             validator.validate(contactPoint, listOf(RoninProfile.PATIENT), LocationContext("Patient", "telecom[0]"))
         assertEquals(1, validation.issues().size)
         assertEquals(
             "ERROR REQ_FIELD: value is a required element @ Patient.telecom[0].value",
-            validation.issues().first().toString()
+            validation.issues().first().toString(),
         )
     }
 
     @Test
     fun `validate fails if no use extensions`() {
-        val contactPoint = ContactPoint(
-            system = Code(
-                value = "phone",
-                extension = listOf(
-                    Extension(
-                        url = RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.uri,
-                        value = DynamicValue(DynamicValueType.CODING, Coding(code = Code("phone")))
-                    )
-                )
-            ),
-            use = Code(
-                value = "mobile",
-                extension = listOf()
-            ),
-            value = FHIRString("555-987-6543")
-        )
+        val contactPoint =
+            ContactPoint(
+                system =
+                    Code(
+                        value = "phone",
+                        extension =
+                            listOf(
+                                Extension(
+                                    url = RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.uri,
+                                    value = DynamicValue(DynamicValueType.CODING, Coding(code = Code("phone"))),
+                                ),
+                            ),
+                    ),
+                use =
+                    Code(
+                        value = "mobile",
+                        extension = listOf(),
+                    ),
+                value = FHIRString("555-987-6543"),
+            )
 
         val validation =
             validator.validate(contactPoint, listOf(RoninProfile.PATIENT), LocationContext("Patient", "telecom[0]"))
         assertEquals(1, validation.issues().size)
         assertEquals(
             "ERROR RONIN_CNTCTPT_003: A single tenant source element use extension is required @ Patient.telecom[0].use",
-            validation.issues().first().toString()
+            validation.issues().first().toString(),
         )
     }
 
     @Test
     fun `validate fails if multiple use extensions`() {
-        val contactPoint = ContactPoint(
-            system = Code(
-                value = "phone",
-                extension = listOf(
-                    Extension(
-                        url = RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.uri,
-                        value = DynamicValue(DynamicValueType.CODING, Coding(code = Code("phone")))
-                    )
-                )
-            ),
-            use = Code(
-                value = "mobile",
-                extension = listOf(
-                    Extension(
-                        url = RoninExtension.TENANT_SOURCE_TELECOM_USE.uri,
-                        value = DynamicValue(DynamicValueType.CODING, Coding(code = Code("phone")))
+        val contactPoint =
+            ContactPoint(
+                system =
+                    Code(
+                        value = "phone",
+                        extension =
+                            listOf(
+                                Extension(
+                                    url = RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.uri,
+                                    value = DynamicValue(DynamicValueType.CODING, Coding(code = Code("phone"))),
+                                ),
+                            ),
                     ),
-                    Extension(
-                        url = RoninExtension.TENANT_SOURCE_TELECOM_USE.uri,
-                        value = DynamicValue(DynamicValueType.CODING, Coding(code = Code("phone")))
-                    )
-                )
-            ),
-            value = FHIRString("555-987-6543")
-        )
+                use =
+                    Code(
+                        value = "mobile",
+                        extension =
+                            listOf(
+                                Extension(
+                                    url = RoninExtension.TENANT_SOURCE_TELECOM_USE.uri,
+                                    value = DynamicValue(DynamicValueType.CODING, Coding(code = Code("phone"))),
+                                ),
+                                Extension(
+                                    url = RoninExtension.TENANT_SOURCE_TELECOM_USE.uri,
+                                    value = DynamicValue(DynamicValueType.CODING, Coding(code = Code("phone"))),
+                                ),
+                            ),
+                    ),
+                value = FHIRString("555-987-6543"),
+            )
 
         val validation =
             validator.validate(contactPoint, listOf(RoninProfile.PATIENT), LocationContext("Patient", "telecom[0]"))
         assertEquals(1, validation.issues().size)
         assertEquals(
             "ERROR RONIN_CNTCTPT_003: A single tenant source element use extension is required @ Patient.telecom[0].use",
-            validation.issues().first().toString()
+            validation.issues().first().toString(),
         )
     }
 
     @Test
     fun `validate fails if use extension has null url`() {
-        val contactPoint = ContactPoint(
-            system = Code(
-                value = "phone",
-                extension = listOf(
-                    Extension(
-                        url = RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.uri,
-                        value = DynamicValue(DynamicValueType.CODING, Coding(code = Code("phone")))
-                    )
-                )
-            ),
-            use = Code(
-                value = "mobile",
-                extension = listOf(
-                    Extension(
-                        url = null,
-                        value = DynamicValue(DynamicValueType.CODING, Coding(code = Code("phone")))
-                    )
-                )
-            ),
-            value = FHIRString("555-987-6543")
-        )
+        val contactPoint =
+            ContactPoint(
+                system =
+                    Code(
+                        value = "phone",
+                        extension =
+                            listOf(
+                                Extension(
+                                    url = RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.uri,
+                                    value = DynamicValue(DynamicValueType.CODING, Coding(code = Code("phone"))),
+                                ),
+                            ),
+                    ),
+                use =
+                    Code(
+                        value = "mobile",
+                        extension =
+                            listOf(
+                                Extension(
+                                    url = null,
+                                    value = DynamicValue(DynamicValueType.CODING, Coding(code = Code("phone"))),
+                                ),
+                            ),
+                    ),
+                value = FHIRString("555-987-6543"),
+            )
 
         val validation =
             validator.validate(contactPoint, listOf(RoninProfile.PATIENT), LocationContext("Patient", "telecom[0]"))
         assertEquals(1, validation.issues().size)
         assertEquals(
             "ERROR RONIN_CNTCTPT_003: A single tenant source element use extension is required @ Patient.telecom[0].use",
-            validation.issues().first().toString()
+            validation.issues().first().toString(),
         )
     }
 
     @Test
     fun `validate fails if use extension has url with null value`() {
-        val contactPoint = ContactPoint(
-            system = Code(
-                value = "phone",
-                extension = listOf(
-                    Extension(
-                        url = RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.uri,
-                        value = DynamicValue(DynamicValueType.CODING, Coding(code = Code("phone")))
-                    )
-                )
-            ),
-            use = Code(
-                value = "mobile",
-                extension = listOf(
-                    Extension(
-                        url = Uri(null),
-                        value = DynamicValue(DynamicValueType.CODING, Coding(code = Code("phone")))
-                    )
-                )
-            ),
-            value = FHIRString("555-987-6543")
-        )
+        val contactPoint =
+            ContactPoint(
+                system =
+                    Code(
+                        value = "phone",
+                        extension =
+                            listOf(
+                                Extension(
+                                    url = RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.uri,
+                                    value = DynamicValue(DynamicValueType.CODING, Coding(code = Code("phone"))),
+                                ),
+                            ),
+                    ),
+                use =
+                    Code(
+                        value = "mobile",
+                        extension =
+                            listOf(
+                                Extension(
+                                    url = Uri(null),
+                                    value = DynamicValue(DynamicValueType.CODING, Coding(code = Code("phone"))),
+                                ),
+                            ),
+                    ),
+                value = FHIRString("555-987-6543"),
+            )
 
         val validation =
             validator.validate(contactPoint, listOf(RoninProfile.PATIENT), LocationContext("Patient", "telecom[0]"))
         assertEquals(1, validation.issues().size)
         assertEquals(
             "ERROR RONIN_CNTCTPT_003: A single tenant source element use extension is required @ Patient.telecom[0].use",
-            validation.issues().first().toString()
+            validation.issues().first().toString(),
         )
     }
 
     @Test
     fun `validate fails if incorrect use extension url`() {
-        val contactPoint = ContactPoint(
-            system = Code(
-                value = "phone",
-                extension = listOf(
-                    Extension(
-                        url = RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.uri,
-                        value = DynamicValue(DynamicValueType.CODING, Coding(code = Code("phone")))
-                    )
-                )
-            ),
-            use = Code(
-                value = "mobile",
-                extension = listOf(
-                    Extension(
-                        url = RoninExtension.TENANT_SOURCE_CONDITION_CODE.uri,
-                        value = DynamicValue(DynamicValueType.CODING, Coding(code = Code("phone")))
-                    )
-                )
-            ),
-            value = FHIRString("555-987-6543")
-        )
+        val contactPoint =
+            ContactPoint(
+                system =
+                    Code(
+                        value = "phone",
+                        extension =
+                            listOf(
+                                Extension(
+                                    url = RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.uri,
+                                    value = DynamicValue(DynamicValueType.CODING, Coding(code = Code("phone"))),
+                                ),
+                            ),
+                    ),
+                use =
+                    Code(
+                        value = "mobile",
+                        extension =
+                            listOf(
+                                Extension(
+                                    url = RoninExtension.TENANT_SOURCE_CONDITION_CODE.uri,
+                                    value = DynamicValue(DynamicValueType.CODING, Coding(code = Code("phone"))),
+                                ),
+                            ),
+                    ),
+                value = FHIRString("555-987-6543"),
+            )
 
         val validation =
             validator.validate(contactPoint, listOf(RoninProfile.PATIENT), LocationContext("Patient", "telecom[0]"))
         assertEquals(1, validation.issues().size)
         assertEquals(
             "ERROR RONIN_CNTCTPT_003: A single tenant source element use extension is required @ Patient.telecom[0].use",
-            validation.issues().first().toString()
+            validation.issues().first().toString(),
         )
     }
 
     @Test
     fun `validate succeeds with no use`() {
-        val contactPoint = ContactPoint(
-            system = Code(
-                value = "phone",
-                extension = listOf(
-                    Extension(
-                        url = RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.uri,
-                        value = DynamicValue(DynamicValueType.CODING, Coding(code = Code("phone")))
-                    )
-                )
-            ),
-            value = FHIRString("555-987-6543")
-        )
+        val contactPoint =
+            ContactPoint(
+                system =
+                    Code(
+                        value = "phone",
+                        extension =
+                            listOf(
+                                Extension(
+                                    url = RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.uri,
+                                    value = DynamicValue(DynamicValueType.CODING, Coding(code = Code("phone"))),
+                                ),
+                            ),
+                    ),
+                value = FHIRString("555-987-6543"),
+            )
 
         val validation =
             validator.validate(contactPoint, listOf(RoninProfile.PATIENT), LocationContext("Patient", "telecom[0]"))
@@ -367,27 +412,32 @@ class ContactPointValidatorTest {
 
     @Test
     fun `validate succeeds with use`() {
-        val contactPoint = ContactPoint(
-            system = Code(
-                value = "phone",
-                extension = listOf(
-                    Extension(
-                        url = RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.uri,
-                        value = DynamicValue(DynamicValueType.CODING, Coding(code = Code("phone")))
-                    )
-                )
-            ),
-            use = Code(
-                value = "mobile",
-                extension = listOf(
-                    Extension(
-                        url = RoninExtension.TENANT_SOURCE_TELECOM_USE.uri,
-                        value = DynamicValue(DynamicValueType.CODING, Coding(code = Code("phone")))
-                    )
-                )
-            ),
-            value = FHIRString("555-987-6543")
-        )
+        val contactPoint =
+            ContactPoint(
+                system =
+                    Code(
+                        value = "phone",
+                        extension =
+                            listOf(
+                                Extension(
+                                    url = RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.uri,
+                                    value = DynamicValue(DynamicValueType.CODING, Coding(code = Code("phone"))),
+                                ),
+                            ),
+                    ),
+                use =
+                    Code(
+                        value = "mobile",
+                        extension =
+                            listOf(
+                                Extension(
+                                    url = RoninExtension.TENANT_SOURCE_TELECOM_USE.uri,
+                                    value = DynamicValue(DynamicValueType.CODING, Coding(code = Code("phone"))),
+                                ),
+                            ),
+                    ),
+                value = FHIRString("555-987-6543"),
+            )
 
         val validation =
             validator.validate(contactPoint, listOf(RoninProfile.PATIENT), LocationContext("Patient", "telecom[0]"))

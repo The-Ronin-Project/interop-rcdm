@@ -19,6 +19,5 @@ class RoninDiagnosticReportLaboratoryTransformer : BaseRoninDiagnosticReportProf
     private val qualifyingCategories =
         listOf(Coding(system = CodeSystem.DIAGNOSTIC_REPORT_LABORATORY.uri, code = Code("LAB")))
 
-    override fun qualifies(resource: DiagnosticReport): Boolean =
-        resource.category.qualifiesForValueSet(qualifyingCategories)
+    override fun qualifies(resource: DiagnosticReport): Boolean = resource.category.qualifiesForValueSet(qualifyingCategories)
 }

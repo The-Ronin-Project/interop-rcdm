@@ -34,51 +34,64 @@ class RoninPatientValidator : ProfileValidator<Patient>() {
     private val requiredBirthDateError = RequiredFieldError(Patient::birthDate)
     private val requiredIdentifierValueError = RequiredFieldError(Identifier::value)
 
-    private val requiredMrnIdentifierError = FHIRError(
-        code = "RONIN_PAT_001",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "MRN identifier is required",
-        location = LocationContext(Patient::identifier)
-    )
-    private val wrongMrnIdentifierTypeError = FHIRError(
-        code = "RONIN_PAT_002",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "MRN identifier type defined without proper CodeableConcept",
-        location = LocationContext(Patient::identifier)
-    )
-    private val invalidBirthDateError = FHIRError(
-        code = "RONIN_PAT_004",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "Birth date is invalid",
-        location = LocationContext(Patient::birthDate)
-    )
-    private val invalidOfficialNameError = FHIRError(
-        code = "RONIN_PAT_005",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "A name for official use must be present",
-        location = LocationContext(Patient::name)
-    )
-    private val requiredIdentifierSystemValueError = FHIRError(
-        code = "RONIN_PAT_006",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "Identifier system or data absent reason is required",
-        location = LocationContext(Identifier::system)
-    )
+    private val requiredMrnIdentifierError =
+        FHIRError(
+            code = "RONIN_PAT_001",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "MRN identifier is required",
+            location = LocationContext(Patient::identifier),
+        )
+    private val wrongMrnIdentifierTypeError =
+        FHIRError(
+            code = "RONIN_PAT_002",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "MRN identifier type defined without proper CodeableConcept",
+            location = LocationContext(Patient::identifier),
+        )
+    private val invalidBirthDateError =
+        FHIRError(
+            code = "RONIN_PAT_004",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "Birth date is invalid",
+            location = LocationContext(Patient::birthDate),
+        )
+    private val invalidOfficialNameError =
+        FHIRError(
+            code = "RONIN_PAT_005",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "A name for official use must be present",
+            location = LocationContext(Patient::name),
+        )
+    private val requiredIdentifierSystemValueError =
+        FHIRError(
+            code = "RONIN_PAT_006",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "Identifier system or data absent reason is required",
+            location = LocationContext(Identifier::system),
+        )
 
-    private val requiredNameError = FHIRError(
-        code = "RONIN_PAT_007",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "At least one name must be provided",
-        location = LocationContext(Patient::name)
-    )
-    private val requiredFamilyOrGivenError = FHIRError(
-        code = "RONIN_PAT_008",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "Either Patient.name.given and/or Patient.name.family SHALL be present or a Data Absent Reason Extension SHALL be present",
-        location = null
-    )
+    private val requiredNameError =
+        FHIRError(
+            code = "RONIN_PAT_007",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "At least one name must be provided",
+            location = LocationContext(Patient::name),
+        )
 
-    override fun validate(resource: Patient, validation: Validation, context: LocationContext) {
+    @Suppress("ktlint:standard:max-line-length")
+    private val requiredFamilyOrGivenError =
+        FHIRError(
+            code = "RONIN_PAT_008",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "Either Patient.name.given and/or Patient.name.family SHALL be present or a Data Absent Reason Extension SHALL be present",
+            location = null,
+        )
+
+    override fun validate(
+        resource: Patient,
+        validation: Validation,
+        context: LocationContext,
+    ) {
         validation.apply {
             val mrnIdentifier = resource.identifier.find { it.system == CodeSystem.RONIN_MRN.uri }
             checkNotNull(mrnIdentifier, requiredMrnIdentifierError, context)
@@ -92,7 +105,7 @@ class RoninPatientValidator : ProfileValidator<Patient>() {
                 checkTrue(
                     identifier.system?.value != null || identifier.system.hasDataAbsentReason(),
                     requiredIdentifierSystemValueError,
-                    identifierContext
+                    identifierContext,
                 )
                 checkNotNull(identifier.value, requiredIdentifierValueError, identifierContext)
             }
@@ -112,7 +125,7 @@ class RoninPatientValidator : ProfileValidator<Patient>() {
                 checkTrue(
                     ((humanName.family != null) or (humanName.given.isNotEmpty())) xor humanName.hasDataAbsentReason(),
                     requiredFamilyOrGivenError,
-                    context.append(LocationContext("Patient", "name[$index]"))
+                    context.append(LocationContext("Patient", "name[$index]")),
                 )
             }
 

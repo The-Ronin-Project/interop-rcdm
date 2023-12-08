@@ -37,15 +37,17 @@ import org.junit.jupiter.api.Test
 class RoninMedicationTransformerTest {
     private val transformer = RoninMedicationTransformer()
 
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "test"
-    }
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "test"
+        }
 
     // re-used codes to make the tests cleaner
     private val vitaminDCode = Code("11253")
-    private val medicationCodingList = listOf(
-        Coding(system = CodeSystem.RXNORM.uri, code = vitaminDCode, display = "Vitamin D".asFHIR())
-    )
+    private val medicationCodingList =
+        listOf(
+            Coding(system = CodeSystem.RXNORM.uri, code = vitaminDCode, display = "Vitamin D".asFHIR()),
+        )
 
     @Test
     fun `returns supported resource`() {
@@ -59,14 +61,16 @@ class RoninMedicationTransformerTest {
 
     @Test
     fun `transform - succeeds with just required attributes`() {
-        val medication = Medication(
-            id = Id("12345"),
-            meta = Meta(source = Uri("source")),
-            code = CodeableConcept(
-                text = "b".asFHIR(),
-                coding = medicationCodingList
+        val medication =
+            Medication(
+                id = Id("12345"),
+                meta = Meta(source = Uri("source")),
+                code =
+                    CodeableConcept(
+                        text = "b".asFHIR(),
+                        coding = medicationCodingList,
+                    ),
             )
-        )
 
         val transformResponse = transformer.transform(medication, tenant)
 
@@ -81,101 +85,120 @@ class RoninMedicationTransformerTest {
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
                     system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
+                    value = "12345".asFHIR(),
                 ),
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
+                    value = "test".asFHIR(),
                 ),
                 Identifier(
                     type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
                     system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
+                    value = "EHR Data Authority".asFHIR(),
+                ),
             ),
-            transformed.identifier
+            transformed.identifier,
         )
         assertEquals(medication.code, transformed.code)
     }
 
     @Test
     fun `transform - succeeds with all attributes present - ingredient item is type REFERENCE`() {
-        val medication = Medication(
-            id = Id("12345"),
-            meta = Meta(
-                profile = listOf(Canonical("http://hl7.org/fhir/R4/Medication.html")),
-                source = Uri("source")
-            ),
-            implicitRules = Uri("implicit-rules"),
-            language = Code("en-US"),
-            text = Narrative(status = com.projectronin.interop.fhir.r4.valueset.NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()),
-            contained = listOf(Location(id = Id("67890"))),
-            extension = listOf(
-                Extension(
-                    url = Uri("http://hl7.org/extension-1"),
-                    value = DynamicValue(DynamicValueType.STRING, "value")
-                )
-            ),
-            modifierExtension = listOf(
-                Extension(
-                    url = Uri("http://localhost/modifier-extension"),
-                    value = DynamicValue(DynamicValueType.STRING, "Value")
-                )
-            ),
-            identifier = listOf(Identifier(value = "67890".asFHIR())),
-            code = CodeableConcept(
-                text = "b".asFHIR(),
-                coding = medicationCodingList
-            ),
-            status = com.projectronin.interop.fhir.r4.valueset.MedicationStatus.ACTIVE.asCode(),
-            manufacturer = Reference(reference = "Organization/c".asFHIR()),
-            form = CodeableConcept(
-                text = "d".asFHIR(),
-                coding = medicationCodingList
-            ),
-            amount = Ratio(
-                numerator = Quantity(
-                    value = Decimal(1.5),
-                    unit = "mg".asFHIR(),
-                    system = CodeSystem.UCUM.uri,
-                    code = Code("mg")
-                ),
-                denominator = Quantity(
-                    value = Decimal(1.0),
-                    unit = "mg".asFHIR(),
-                    system = CodeSystem.UCUM.uri,
-                    code = Code("mg")
-                )
-            ),
-            ingredient = listOf(
-                Ingredient(
-                    item = DynamicValue(
-                        type = DynamicValueType.REFERENCE,
-                        value = Reference(reference = "Substance/item".asFHIR())
+        val medication =
+            Medication(
+                id = Id("12345"),
+                meta =
+                    Meta(
+                        profile = listOf(Canonical("http://hl7.org/fhir/R4/Medication.html")),
+                        source = Uri("source"),
                     ),
-                    isActive = FHIRBoolean.TRUE,
-                    strength = Ratio(
-                        numerator = Quantity(
-                            value = Decimal(0.5),
-                            unit = "mg".asFHIR(),
-                            system = CodeSystem.UCUM.uri,
-                            code = Code("mg")
+                implicitRules = Uri("implicit-rules"),
+                language = Code("en-US"),
+                text =
+                    Narrative(
+                        status = com.projectronin.interop.fhir.r4.valueset.NarrativeStatus.GENERATED.asCode(),
+                        div = "div".asFHIR(),
+                    ),
+                contained = listOf(Location(id = Id("67890"))),
+                extension =
+                    listOf(
+                        Extension(
+                            url = Uri("http://hl7.org/extension-1"),
+                            value = DynamicValue(DynamicValueType.STRING, "value"),
                         ),
-                        denominator = Quantity(
-                            value = Decimal(1.0),
-                            unit = "mg".asFHIR(),
-                            system = CodeSystem.UCUM.uri,
-                            code = Code("mg")
-                        )
-                    )
-                )
-            ),
-            batch = Batch(
-                lotNumber = "e".asFHIR(),
-                expirationDate = DateTime("2022-10-14")
+                    ),
+                modifierExtension =
+                    listOf(
+                        Extension(
+                            url = Uri("http://localhost/modifier-extension"),
+                            value = DynamicValue(DynamicValueType.STRING, "Value"),
+                        ),
+                    ),
+                identifier = listOf(Identifier(value = "67890".asFHIR())),
+                code =
+                    CodeableConcept(
+                        text = "b".asFHIR(),
+                        coding = medicationCodingList,
+                    ),
+                status = com.projectronin.interop.fhir.r4.valueset.MedicationStatus.ACTIVE.asCode(),
+                manufacturer = Reference(reference = "Organization/c".asFHIR()),
+                form =
+                    CodeableConcept(
+                        text = "d".asFHIR(),
+                        coding = medicationCodingList,
+                    ),
+                amount =
+                    Ratio(
+                        numerator =
+                            Quantity(
+                                value = Decimal(1.5),
+                                unit = "mg".asFHIR(),
+                                system = CodeSystem.UCUM.uri,
+                                code = Code("mg"),
+                            ),
+                        denominator =
+                            Quantity(
+                                value = Decimal(1.0),
+                                unit = "mg".asFHIR(),
+                                system = CodeSystem.UCUM.uri,
+                                code = Code("mg"),
+                            ),
+                    ),
+                ingredient =
+                    listOf(
+                        Ingredient(
+                            item =
+                                DynamicValue(
+                                    type = DynamicValueType.REFERENCE,
+                                    value = Reference(reference = "Substance/item".asFHIR()),
+                                ),
+                            isActive = FHIRBoolean.TRUE,
+                            strength =
+                                Ratio(
+                                    numerator =
+                                        Quantity(
+                                            value = Decimal(0.5),
+                                            unit = "mg".asFHIR(),
+                                            system = CodeSystem.UCUM.uri,
+                                            code = Code("mg"),
+                                        ),
+                                    denominator =
+                                        Quantity(
+                                            value = Decimal(1.0),
+                                            unit = "mg".asFHIR(),
+                                            system = CodeSystem.UCUM.uri,
+                                            code = Code("mg"),
+                                        ),
+                                ),
+                        ),
+                    ),
+                batch =
+                    Batch(
+                        lotNumber = "e".asFHIR(),
+                        expirationDate = DateTime("2022-10-14"),
+                    ),
             )
-        )
 
         // transformation
         val transformResponse = transformer.transform(medication, tenant)
@@ -188,7 +211,7 @@ class RoninMedicationTransformerTest {
         assertEquals(Id("12345"), transformed.id)
         assertEquals(
             RoninProfile.MEDICATION.value,
-            transformed.meta!!.profile[0].value
+            transformed.meta!!.profile[0].value,
         )
         assertEquals(medication.implicitRules, transformed.implicitRules)
         assertEquals(medication.language, transformed.language)
@@ -203,20 +226,20 @@ class RoninMedicationTransformerTest {
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
                     system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
+                    value = "12345".asFHIR(),
                 ),
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
+                    value = "test".asFHIR(),
                 ),
                 Identifier(
                     type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
                     system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
+                    value = "EHR Data Authority".asFHIR(),
+                ),
             ),
-            transformed.identifier
+            transformed.identifier,
         )
         assertEquals(medication.code, transformed.code)
         assertEquals(Code(value = "active"), transformed.status)
@@ -226,91 +249,110 @@ class RoninMedicationTransformerTest {
         assertEquals(DynamicValueType.REFERENCE, transformed.ingredient[0].item?.type)
         assertEquals(
             Reference(reference = "Substance/item".asFHIR()),
-            transformed.ingredient[0].item?.value
+            transformed.ingredient[0].item?.value,
         )
         assertEquals(medication.batch, transformed.batch)
     }
 
     @Test
     fun `transform succeeds with all attributes present - ingredient item is type CODEABLE_CONCEPT`() {
-        val medication = Medication(
-            id = Id("12345"),
-            meta = Meta(
-                profile = listOf(Canonical("http://hl7.org/fhir/R4/Medication.html")),
-                source = Uri("source")
-            ),
-            implicitRules = Uri("implicit-rules"),
-            language = Code("en-US"),
-            text = Narrative(status = com.projectronin.interop.fhir.r4.valueset.NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()),
-            contained = listOf(Location(id = Id("67890"))),
-            extension = listOf(
-                Extension(
-                    url = Uri("http://hl7.org/extension-1"),
-                    value = DynamicValue(DynamicValueType.STRING, "value")
-                )
-            ),
-            modifierExtension = listOf(
-                Extension(
-                    url = Uri("http://localhost/modifier-extension"),
-                    value = DynamicValue(DynamicValueType.STRING, "Value")
-                )
-            ),
-            identifier = listOf(Identifier(value = "67890".asFHIR())),
-            code = CodeableConcept(
-                text = "b".asFHIR(),
-                coding = medicationCodingList
-            ),
-            status = com.projectronin.interop.fhir.r4.valueset.MedicationStatus.ACTIVE.asCode(),
-            manufacturer = Reference(reference = "Organization/c".asFHIR()),
-            form = CodeableConcept(
-                text = "d".asFHIR(),
-                coding = medicationCodingList
-            ),
-            amount = Ratio(
-                numerator = Quantity(
-                    value = Decimal(1.5),
-                    unit = "mg".asFHIR(),
-                    system = CodeSystem.UCUM.uri,
-                    code = Code("mg")
-                ),
-                denominator = Quantity(
-                    value = Decimal(1.0),
-                    unit = "mg".asFHIR(),
-                    system = CodeSystem.UCUM.uri,
-                    code = Code("mg")
-                )
-            ),
-            ingredient = listOf(
-                Ingredient(
-                    item = DynamicValue(
-                        DynamicValueType.CODEABLE_CONCEPT,
-                        CodeableConcept(
-                            text = "f".asFHIR(),
-                            coding = medicationCodingList
-                        )
+        val medication =
+            Medication(
+                id = Id("12345"),
+                meta =
+                    Meta(
+                        profile = listOf(Canonical("http://hl7.org/fhir/R4/Medication.html")),
+                        source = Uri("source"),
                     ),
-                    isActive = FHIRBoolean.TRUE,
-                    strength = Ratio(
-                        numerator = Quantity(
-                            value = Decimal(0.5),
-                            unit = "mg".asFHIR(),
-                            system = CodeSystem.UCUM.uri,
-                            code = Code("mg")
+                implicitRules = Uri("implicit-rules"),
+                language = Code("en-US"),
+                text =
+                    Narrative(
+                        status = com.projectronin.interop.fhir.r4.valueset.NarrativeStatus.GENERATED.asCode(),
+                        div = "div".asFHIR(),
+                    ),
+                contained = listOf(Location(id = Id("67890"))),
+                extension =
+                    listOf(
+                        Extension(
+                            url = Uri("http://hl7.org/extension-1"),
+                            value = DynamicValue(DynamicValueType.STRING, "value"),
                         ),
-                        denominator = Quantity(
-                            value = Decimal(1.0),
-                            unit = "mg".asFHIR(),
-                            system = CodeSystem.UCUM.uri,
-                            code = Code("mg")
-                        )
-                    )
-                )
-            ),
-            batch = Batch(
-                lotNumber = "e".asFHIR(),
-                expirationDate = DateTime("2022-10-14")
+                    ),
+                modifierExtension =
+                    listOf(
+                        Extension(
+                            url = Uri("http://localhost/modifier-extension"),
+                            value = DynamicValue(DynamicValueType.STRING, "Value"),
+                        ),
+                    ),
+                identifier = listOf(Identifier(value = "67890".asFHIR())),
+                code =
+                    CodeableConcept(
+                        text = "b".asFHIR(),
+                        coding = medicationCodingList,
+                    ),
+                status = com.projectronin.interop.fhir.r4.valueset.MedicationStatus.ACTIVE.asCode(),
+                manufacturer = Reference(reference = "Organization/c".asFHIR()),
+                form =
+                    CodeableConcept(
+                        text = "d".asFHIR(),
+                        coding = medicationCodingList,
+                    ),
+                amount =
+                    Ratio(
+                        numerator =
+                            Quantity(
+                                value = Decimal(1.5),
+                                unit = "mg".asFHIR(),
+                                system = CodeSystem.UCUM.uri,
+                                code = Code("mg"),
+                            ),
+                        denominator =
+                            Quantity(
+                                value = Decimal(1.0),
+                                unit = "mg".asFHIR(),
+                                system = CodeSystem.UCUM.uri,
+                                code = Code("mg"),
+                            ),
+                    ),
+                ingredient =
+                    listOf(
+                        Ingredient(
+                            item =
+                                DynamicValue(
+                                    DynamicValueType.CODEABLE_CONCEPT,
+                                    CodeableConcept(
+                                        text = "f".asFHIR(),
+                                        coding = medicationCodingList,
+                                    ),
+                                ),
+                            isActive = FHIRBoolean.TRUE,
+                            strength =
+                                Ratio(
+                                    numerator =
+                                        Quantity(
+                                            value = Decimal(0.5),
+                                            unit = "mg".asFHIR(),
+                                            system = CodeSystem.UCUM.uri,
+                                            code = Code("mg"),
+                                        ),
+                                    denominator =
+                                        Quantity(
+                                            value = Decimal(1.0),
+                                            unit = "mg".asFHIR(),
+                                            system = CodeSystem.UCUM.uri,
+                                            code = Code("mg"),
+                                        ),
+                                ),
+                        ),
+                    ),
+                batch =
+                    Batch(
+                        lotNumber = "e".asFHIR(),
+                        expirationDate = DateTime("2022-10-14"),
+                    ),
             )
-        )
 
         // transformation
         val transformResponse = transformer.transform(medication, tenant)
@@ -322,7 +364,7 @@ class RoninMedicationTransformerTest {
         assertEquals(Id("12345"), transformed.id)
         assertEquals(
             RoninProfile.MEDICATION.value,
-            transformed.meta!!.profile[0].value
+            transformed.meta!!.profile[0].value,
         )
         assertEquals(medication.implicitRules, transformed.implicitRules)
         assertEquals(medication.language, transformed.language)
@@ -337,20 +379,20 @@ class RoninMedicationTransformerTest {
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
                     system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
+                    value = "12345".asFHIR(),
                 ),
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
+                    value = "test".asFHIR(),
                 ),
                 Identifier(
                     type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
                     system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
+                    value = "EHR Data Authority".asFHIR(),
+                ),
             ),
-            transformed.identifier
+            transformed.identifier,
         )
         assertEquals(medication.code, transformed.code)
         assertEquals(Code(value = "active"), transformed.status)

@@ -22,22 +22,28 @@ import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
+@Suppress("ktlint:standard:max-line-length")
 class ServiceRequestMapperTest {
     private val registryClient = mockk<NormalizationRegistryClient>()
     private val mapper = ServiceRequestMapper(registryClient)
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "tenant"
-    }
-    val code = CodeableConcept(
-        coding = listOf(
-            Coding(system = Uri("http://snomed.info/sct"), code = Code("12345"))
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "tenant"
+        }
+    val code =
+        CodeableConcept(
+            coding =
+                listOf(
+                    Coding(system = Uri("http://snomed.info/sct"), code = Code("12345")),
+                ),
         )
-    )
-    val category = CodeableConcept(
-        coding = listOf(
-            Coding(system = Uri("something-here"), code = Code("54321"))
+    val category =
+        CodeableConcept(
+            coding =
+                listOf(
+                    Coding(system = Uri("something-here"), code = Code("54321")),
+                ),
         )
-    )
 
     @Test
     fun `supported resource is ServiceRequest`() {
@@ -46,31 +52,38 @@ class ServiceRequestMapperTest {
 
     @Test
     fun `maps category and code - both required`() {
-        val serviceRequest = ServiceRequest(
-            status = RequestStatus.ACTIVE.asCode(),
-            category = listOf(category),
-            code = code,
-            intent = RequestIntent.ORDER.asCode(),
-            subject = Reference(reference = "Patient".asFHIR())
-        )
-        val mappedCode = CodeableConcept(
-            coding = listOf(
-                Coding(system = Uri("http://snomed.info/sct"), code = Code("67890"))
+        val serviceRequest =
+            ServiceRequest(
+                status = RequestStatus.ACTIVE.asCode(),
+                category = listOf(category),
+                code = code,
+                intent = RequestIntent.ORDER.asCode(),
+                subject = Reference(reference = "Patient".asFHIR()),
             )
-        )
-        val mappedCategory = CodeableConcept(
-            coding = listOf(
-                Coding(system = Uri("something-here"), code = Code("89012"))
+        val mappedCode =
+            CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(system = Uri("http://snomed.info/sct"), code = Code("67890")),
+                    ),
             )
-        )
-        val mappedExtensionsCode = Extension(
-            url = RoninExtension.TENANT_SOURCE_SERVICE_REQUEST_CODE.uri,
-            value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, code)
-        )
-        val mappedExtensionsCategory = Extension(
-            url = RoninExtension.TENANT_SOURCE_SERVICE_REQUEST_CATEGORY.uri,
-            value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, code)
-        )
+        val mappedCategory =
+            CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(system = Uri("something-here"), code = Code("89012")),
+                    ),
+            )
+        val mappedExtensionsCode =
+            Extension(
+                url = RoninExtension.TENANT_SOURCE_SERVICE_REQUEST_CODE.uri,
+                value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, code),
+            )
+        val mappedExtensionsCategory =
+            Extension(
+                url = RoninExtension.TENANT_SOURCE_SERVICE_REQUEST_CATEGORY.uri,
+                value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, code),
+            )
 
         every {
             registryClient.getConceptMapping(
@@ -78,7 +91,7 @@ class ServiceRequestMapperTest {
                 "ServiceRequest.code",
                 code,
                 serviceRequest,
-                null
+                null,
             )
         } returns ConceptMapCodeableConcept(mappedCode, mappedExtensionsCode, listOf())
         every {
@@ -87,7 +100,7 @@ class ServiceRequestMapperTest {
                 "ServiceRequest.category",
                 category,
                 serviceRequest,
-                null
+                null,
             )
         } returns ConceptMapCodeableConcept(mappedCategory, mappedExtensionsCategory, listOf())
         val (mappedResource, validation) = mapper.map(serviceRequest, tenant, null)
@@ -99,13 +112,14 @@ class ServiceRequestMapperTest {
 
     @Test
     fun `fails to map category and code - both required`() {
-        val serviceRequest = ServiceRequest(
-            status = RequestStatus.ACTIVE.asCode(),
-            category = listOf(category),
-            code = code,
-            intent = RequestIntent.ORDER.asCode(),
-            subject = Reference(reference = "Patient".asFHIR())
-        )
+        val serviceRequest =
+            ServiceRequest(
+                status = RequestStatus.ACTIVE.asCode(),
+                category = listOf(category),
+                code = code,
+                intent = RequestIntent.ORDER.asCode(),
+                subject = Reference(reference = "Patient".asFHIR()),
+            )
 
         every {
             registryClient.getConceptMapping(
@@ -113,7 +127,7 @@ class ServiceRequestMapperTest {
                 "ServiceRequest.code",
                 code,
                 serviceRequest,
-                null
+                null,
             )
         } returns null
         every {
@@ -122,7 +136,7 @@ class ServiceRequestMapperTest {
                 "ServiceRequest.category",
                 category,
                 serviceRequest,
-                null
+                null,
             )
         } returns null
         val (mappedResource, validation) = mapper.map(serviceRequest, tenant, null)
@@ -130,32 +144,36 @@ class ServiceRequestMapperTest {
         assertEquals(2, validation.issues().size)
         assertEquals(
             "ERROR NOV_CONMAP_LOOKUP: Tenant source value '54321' has no target defined in any ServiceRequest.category concept map for tenant 'tenant' @ ServiceRequest.category",
-            validation.issues().first().toString()
+            validation.issues().first().toString(),
         )
         assertEquals(
             "ERROR NOV_CONMAP_LOOKUP: Tenant source value '12345' has no target defined in any ServiceRequest.code concept map for tenant 'tenant' @ ServiceRequest.code",
-            validation.issues()[1].toString()
+            validation.issues()[1].toString(),
         )
     }
 
     @Test
     fun `failed code mapping`() {
-        val serviceRequest = ServiceRequest(
-            status = RequestStatus.ACTIVE.asCode(),
-            category = listOf(category),
-            code = code,
-            intent = RequestIntent.ORDER.asCode(),
-            subject = Reference(reference = "Patient".asFHIR())
-        )
-        val mappedCategory = CodeableConcept(
-            coding = listOf(
-                Coding(system = Uri("something-here"), code = Code("89012"))
+        val serviceRequest =
+            ServiceRequest(
+                status = RequestStatus.ACTIVE.asCode(),
+                category = listOf(category),
+                code = code,
+                intent = RequestIntent.ORDER.asCode(),
+                subject = Reference(reference = "Patient".asFHIR()),
             )
-        )
-        val mappedExtensionsCategory = Extension(
-            url = RoninExtension.TENANT_SOURCE_SERVICE_REQUEST_CATEGORY.uri,
-            value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, code)
-        )
+        val mappedCategory =
+            CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(system = Uri("something-here"), code = Code("89012")),
+                    ),
+            )
+        val mappedExtensionsCategory =
+            Extension(
+                url = RoninExtension.TENANT_SOURCE_SERVICE_REQUEST_CATEGORY.uri,
+                value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, code),
+            )
 
         every {
             registryClient.getConceptMapping(
@@ -163,7 +181,7 @@ class ServiceRequestMapperTest {
                 "ServiceRequest.code",
                 code,
                 serviceRequest,
-                null
+                null,
             )
         } returns null
 
@@ -173,7 +191,7 @@ class ServiceRequestMapperTest {
                 "ServiceRequest.category",
                 category,
                 serviceRequest,
-                null
+                null,
             )
         } returns ConceptMapCodeableConcept(mappedCategory, mappedExtensionsCategory, listOf())
 
@@ -182,35 +200,39 @@ class ServiceRequestMapperTest {
         assertEquals(1, validation.issues().size)
         assertEquals(
             "ERROR NOV_CONMAP_LOOKUP: Tenant source value '12345' has no target defined in any ServiceRequest.code concept map for tenant 'tenant' @ ServiceRequest.code",
-            validation.issues().first().toString()
+            validation.issues().first().toString(),
         )
     }
 
     @Test
     fun `failed category mapping`() {
-        val serviceRequest = ServiceRequest(
-            status = RequestStatus.ACTIVE.asCode(),
-            category = listOf(category),
-            code = code,
-            intent = RequestIntent.ORDER.asCode(),
-            subject = Reference(reference = "Patient".asFHIR())
-        )
-        val mappedCode = CodeableConcept(
-            coding = listOf(
-                Coding(system = Uri("http://snomed.info/sct"), code = Code("67890"))
+        val serviceRequest =
+            ServiceRequest(
+                status = RequestStatus.ACTIVE.asCode(),
+                category = listOf(category),
+                code = code,
+                intent = RequestIntent.ORDER.asCode(),
+                subject = Reference(reference = "Patient".asFHIR()),
             )
-        )
-        val mappedExtensionsCode = Extension(
-            url = RoninExtension.TENANT_SOURCE_SERVICE_REQUEST_CODE.uri,
-            value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, code)
-        )
+        val mappedCode =
+            CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(system = Uri("http://snomed.info/sct"), code = Code("67890")),
+                    ),
+            )
+        val mappedExtensionsCode =
+            Extension(
+                url = RoninExtension.TENANT_SOURCE_SERVICE_REQUEST_CODE.uri,
+                value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, code),
+            )
         every {
             registryClient.getConceptMapping(
                 "tenant",
                 "ServiceRequest.code",
                 code,
                 serviceRequest,
-                null
+                null,
             )
         } returns ConceptMapCodeableConcept(mappedCode, mappedExtensionsCode, listOf())
         every {
@@ -219,7 +241,7 @@ class ServiceRequestMapperTest {
                 "ServiceRequest.category",
                 category,
                 serviceRequest,
-                null
+                null,
             )
         } returns null
 
@@ -228,7 +250,7 @@ class ServiceRequestMapperTest {
         assertEquals(1, validation.issues().size)
         assertEquals(
             "ERROR NOV_CONMAP_LOOKUP: Tenant source value '54321' has no target defined in any ServiceRequest.category concept map for tenant 'tenant' @ ServiceRequest.category",
-            validation.issues().first().toString()
+            validation.issues().first().toString(),
         )
     }
 }

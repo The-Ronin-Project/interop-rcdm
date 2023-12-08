@@ -20,6 +20,7 @@ import com.projectronin.interop.rcdm.validate.profile.util.requiredIdentifiers
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
+@Suppress("ktlint:standard:max-line-length")
 class RoninConditionEncounterDiagnosisValidatorTest {
     private val validator = RoninConditionEncounterDiagnosisValidator()
 
@@ -30,79 +31,93 @@ class RoninConditionEncounterDiagnosisValidatorTest {
 
     @Test
     fun `validate fails if category outside qualifying categories`() {
-        val condition = Condition(
-            id = Id("1234"),
-            meta = Meta(profile = listOf(RoninProfile.PATIENT.canonical)),
-            identifier = requiredIdentifiers,
-            subject = Reference(reference = FHIRString("Patient/1234")),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(system = CodeSystem.CONDITION_CATEGORY.uri, code = Code("not-qualified"))
-                    )
-                )
-            ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = Uri("system"),
-                        code = Code("code"),
-                        display = FHIRString("display")
-                    )
-                )
-            ),
-            extension = listOf(
-                Extension(
-                    url = RoninExtension.TENANT_SOURCE_CONDITION_CODE.uri,
-                    value = DynamicValue(
-                        DynamicValueType.CODEABLE_CONCEPT,
-                        CodeableConcept(text = FHIRString("tenant code"))
-                    )
-                )
+        val condition =
+            Condition(
+                id = Id("1234"),
+                meta = Meta(profile = listOf(RoninProfile.PATIENT.canonical)),
+                identifier = requiredIdentifiers,
+                subject = Reference(reference = FHIRString("Patient/1234")),
+                category =
+                    listOf(
+                        CodeableConcept(
+                            coding =
+                                listOf(
+                                    Coding(system = CodeSystem.CONDITION_CATEGORY.uri, code = Code("not-qualified")),
+                                ),
+                        ),
+                    ),
+                code =
+                    CodeableConcept(
+                        coding =
+                            listOf(
+                                Coding(
+                                    system = Uri("system"),
+                                    code = Code("code"),
+                                    display = FHIRString("display"),
+                                ),
+                            ),
+                    ),
+                extension =
+                    listOf(
+                        Extension(
+                            url = RoninExtension.TENANT_SOURCE_CONDITION_CODE.uri,
+                            value =
+                                DynamicValue(
+                                    DynamicValueType.CODEABLE_CONCEPT,
+                                    CodeableConcept(text = FHIRString("tenant code")),
+                                ),
+                        ),
+                    ),
             )
-        )
 
         val validation = validator.validate(condition, LocationContext(Condition::class))
         assertEquals(1, validation.issues().size)
         assertEquals(
             "ERROR RONIN_CND_001: Must match this system|code: http://terminology.hl7.org/CodeSystem/condition-category|encounter-diagnosis @ Condition.category",
-            validation.issues().first().toString()
+            validation.issues().first().toString(),
         )
     }
 
     @Test
     fun `validate works for encounter-diagnosis`() {
-        val condition = Condition(
-            id = Id("1234"),
-            meta = Meta(profile = listOf(RoninProfile.PATIENT.canonical)),
-            identifier = requiredIdentifiers,
-            subject = Reference(reference = FHIRString("Patient/1234")),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(system = CodeSystem.CONDITION_CATEGORY.uri, code = Code("encounter-diagnosis"))
-                    )
-                )
-            ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = Uri("system"),
-                        code = Code("code"),
-                        display = FHIRString("display")
-                    )
-                )
-            ),
-            extension = listOf(
-                Extension(
-                    url = RoninExtension.TENANT_SOURCE_CONDITION_CODE.uri,
-                    value = DynamicValue(
-                        DynamicValueType.CODEABLE_CONCEPT,
-                        CodeableConcept(text = FHIRString("tenant code"))
-                    )
-                )
+        val condition =
+            Condition(
+                id = Id("1234"),
+                meta = Meta(profile = listOf(RoninProfile.PATIENT.canonical)),
+                identifier = requiredIdentifiers,
+                subject = Reference(reference = FHIRString("Patient/1234")),
+                category =
+                    listOf(
+                        CodeableConcept(
+                            coding =
+                                listOf(
+                                    Coding(system = CodeSystem.CONDITION_CATEGORY.uri, code = Code("encounter-diagnosis")),
+                                ),
+                        ),
+                    ),
+                code =
+                    CodeableConcept(
+                        coding =
+                            listOf(
+                                Coding(
+                                    system = Uri("system"),
+                                    code = Code("code"),
+                                    display = FHIRString("display"),
+                                ),
+                            ),
+                    ),
+                extension =
+                    listOf(
+                        Extension(
+                            url = RoninExtension.TENANT_SOURCE_CONDITION_CODE.uri,
+                            value =
+                                DynamicValue(
+                                    DynamicValueType.CODEABLE_CONCEPT,
+                                    CodeableConcept(text = FHIRString("tenant code")),
+                                ),
+                        ),
+                    ),
             )
-        )
 
         val validation = validator.validate(condition, LocationContext(Condition::class))
         assertEquals(0, validation.issues().size)

@@ -14,28 +14,30 @@ import kotlin.reflect.KClass
 class ReferenceValidator : ElementValidator<Reference> {
     override val supportedElement: KClass<Reference> = Reference::class
 
-    private val requiredDataAuthorityExtensionIdentifier = FHIRError(
-        code = "RONIN_DAUTH_EX_001",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "Data Authority extension identifier is required for reference",
-        location = LocationContext("", "type.extension")
-    )
+    private val requiredDataAuthorityExtensionIdentifier =
+        FHIRError(
+            code = "RONIN_DAUTH_EX_001",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "Data Authority extension identifier is required for reference",
+            location = LocationContext("", "type.extension"),
+        )
 
     override fun validate(
         element: Reference,
         profiles: List<RoninProfile>,
-        parentContext: LocationContext
-    ): Validation = Validation().apply {
-        element.type?.let { type ->
-            // This only matters if the reference is populated. If the reference is not populated, then it's not part of a Data Authority.
-            element.reference?.let {
-                val dataAuthExtensionIdentifier = type.extension
-                checkTrue(
-                    dataAuthExtensionIdentifier == dataAuthorityExtension,
-                    requiredDataAuthorityExtensionIdentifier,
-                    parentContext
-                )
+        parentContext: LocationContext,
+    ): Validation =
+        Validation().apply {
+            element.type?.let { type ->
+                // This only matters if the reference is populated. If the reference is not populated, then it's not part of a Data Authority.
+                element.reference?.let {
+                    val dataAuthExtensionIdentifier = type.extension
+                    checkTrue(
+                        dataAuthExtensionIdentifier == dataAuthorityExtension,
+                        requiredDataAuthorityExtensionIdentifier,
+                        parentContext,
+                    )
+                }
             }
         }
-    }
 }

@@ -31,7 +31,11 @@ abstract class ProfileValidator<R : Resource<R>> {
     abstract val rcdmVersion: RCDMVersion
     abstract val profileVersion: Int
 
-    protected abstract fun validate(resource: R, validation: Validation, context: LocationContext)
+    protected abstract fun validate(
+        resource: R,
+        validation: Validation,
+        context: LocationContext,
+    )
 
     /**
      * Returns true if [resource] qualifies for this particular profile.
@@ -43,32 +47,38 @@ abstract class ProfileValidator<R : Resource<R>> {
     private val requiredId = RequiredFieldError(LocationContext("", "id"))
     private val requiredMeta = RequiredFieldError(LocationContext("", "meta"))
 
-    private val containedResourcePresentWarning = FHIRError(
-        code = "RONIN_CONTAINED_RESOURCE",
-        severity = ValidationIssueSeverity.WARNING,
-        description = "There is a Contained Resource present",
-        location = LocationContext("", "contained")
-    )
+    private val containedResourcePresentWarning =
+        FHIRError(
+            code = "RONIN_CONTAINED_RESOURCE",
+            severity = ValidationIssueSeverity.WARNING,
+            description = "There is a Contained Resource present",
+            location = LocationContext("", "contained"),
+        )
 
     /**
      * Validates the [resource].
      */
-    fun validate(resource: R, locationContext: LocationContext): Validation = Validation().apply {
-        checkNotNull(resource.id, requiredId, locationContext)
-        checkNotNull(resource.meta, requiredMeta, locationContext)
+    fun validate(
+        resource: R,
+        locationContext: LocationContext,
+    ): Validation =
+        Validation().apply {
+            checkNotNull(resource.id, requiredId, locationContext)
+            checkNotNull(resource.meta, requiredMeta, locationContext)
 
-        validateIdentifiers(resource, locationContext, this)
-        validateContained(resource, locationContext, this)
+            validateIdentifiers(resource, locationContext, this)
+            validateContained(resource, locationContext, this)
 
-        validate(resource, this, locationContext)
-    }
+            validate(resource, this, locationContext)
+        }
 
     protected fun validateRoninNormalizedCodeableConcept(
         codeableConcept: CodeableConcept?,
+        // CodeableConcepts could appear as a single element or part of a List.
         propertyCodeableConcept: KProperty1<R, CodeableConcept?>? = null,
-        propertyCodeableConceptList: KProperty1<R, List<CodeableConcept?>>? = null, // ServiceRequest.category is a List<CodeableConcept>, not cool
+        propertyCodeableConceptList: KProperty1<R, List<CodeableConcept?>>? = null,
         parentContext: LocationContext,
-        validation: Validation
+        validation: Validation,
     ) {
         val property = propertyCodeableConcept ?: propertyCodeableConceptList
         validation.apply {
@@ -80,9 +90,9 @@ abstract class ProfileValidator<R : Resource<R>> {
                         code = "RONIN_NOV_CODING_002",
                         severity = ValidationIssueSeverity.ERROR,
                         description = "Must contain exactly 1 coding",
-                        location = LocationContext("", "${property?.name}.coding")
+                        location = LocationContext("", "${property?.name}.coding"),
                     ),
-                    parentContext
+                    parentContext,
                 )
                 ifNotNull(coding) {
                     checkTrue(
@@ -91,9 +101,9 @@ abstract class ProfileValidator<R : Resource<R>> {
                             code = "RONIN_NOV_CODING_003",
                             severity = ValidationIssueSeverity.ERROR,
                             description = "Coding system cannot be null or blank",
-                            location = LocationContext("", "${property?.name}.coding[0].system")
+                            location = LocationContext("", "${property?.name}.coding[0].system"),
                         ),
-                        parentContext
+                        parentContext,
                     )
                     checkTrue(
                         !coding.code?.value.isNullOrBlank(),
@@ -101,9 +111,9 @@ abstract class ProfileValidator<R : Resource<R>> {
                             code = "RONIN_NOV_CODING_004",
                             severity = ValidationIssueSeverity.ERROR,
                             description = "Coding code cannot be null or blank",
-                            location = LocationContext("", "${property?.name}.coding[0].code")
+                            location = LocationContext("", "${property?.name}.coding[0].code"),
                         ),
-                        parentContext
+                        parentContext,
                     )
                     checkTrue(
                         !coding.display?.value.isNullOrBlank(),
@@ -111,9 +121,9 @@ abstract class ProfileValidator<R : Resource<R>> {
                             code = "RONIN_NOV_CODING_005",
                             severity = ValidationIssueSeverity.ERROR,
                             description = "Coding display cannot be null or blank",
-                            location = LocationContext("", "${property?.name}.coding[0].display")
+                            location = LocationContext("", "${property?.name}.coding[0].display"),
                         ),
-                        parentContext
+                        parentContext,
                     )
                 }
             }
@@ -125,15 +135,16 @@ abstract class ProfileValidator<R : Resource<R>> {
         resourceTypesList: List<ResourceType>,
         context: LocationContext,
         validation: Validation,
-        containedResource: List<Resource<*>>? = listOf()
+        containedResource: List<Resource<*>>? = listOf(),
     ) {
         val resourceTypesStringList = resourceTypesList.map { it.name }
-        val requiredContainedResource = FHIRError(
-            code = "RONIN_REQ_REF_1",
-            severity = ValidationIssueSeverity.ERROR,
-            description = "Contained resource is required if a local reference is provided",
-            location = LocationContext(Reference::reference)
-        )
+        val requiredContainedResource =
+            FHIRError(
+                code = "RONIN_REQ_REF_1",
+                severity = ValidationIssueSeverity.ERROR,
+                description = "Contained resource is required if a local reference is provided",
+                location = LocationContext(Reference::reference),
+            )
 
         validation.apply {
             reference?.let {
@@ -143,20 +154,20 @@ abstract class ProfileValidator<R : Resource<R>> {
                         checkTrue(
                             false,
                             requiredContainedResource,
-                            context
+                            context,
                         )
                     } else {
                         checkTrue(
                             resourceTypesStringList.contains(containedResource.find { r -> r.id?.value == id }?.resourceType),
                             InvalidReferenceType(Reference::reference, resourceTypesList),
-                            context
+                            context,
                         )
                     }
                 } else {
                     checkTrue(
                         reference.isInTypeList(resourceTypesStringList),
                         InvalidReferenceType(Reference::reference, resourceTypesList),
-                        context
+                        context,
                     )
                 }
             }
@@ -174,7 +185,11 @@ abstract class ProfileValidator<R : Resource<R>> {
         return false
     }
 
-    private fun validateContained(resource: R, locationContext: LocationContext, validation: Validation) {
+    private fun validateContained(
+        resource: R,
+        locationContext: LocationContext,
+        validation: Validation,
+    ) {
         if (resource is DomainResource<*>) {
             val contained = resource.contained
 
@@ -185,7 +200,11 @@ abstract class ProfileValidator<R : Resource<R>> {
         }
     }
 
-    private fun validateIdentifiers(resource: R, locationContext: LocationContext, validation: Validation) {
+    private fun validateIdentifiers(
+        resource: R,
+        locationContext: LocationContext,
+        validation: Validation,
+    ) {
         val identifiers = resource.getIdentifiersOrNull()
         identifiers?.let {
             validateTenantIdentifier(identifiers, locationContext, validation)
@@ -194,29 +213,32 @@ abstract class ProfileValidator<R : Resource<R>> {
         }
     }
 
-    private val requiredTenantIdentifierError = FHIRError(
-        code = "RONIN_TNNT_ID_001",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "Tenant identifier is required",
-        location = LocationContext("", "identifier")
-    )
-    private val wrongTenantIdentifierTypeError = FHIRError(
-        code = "RONIN_TNNT_ID_002",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "Tenant identifier provided without proper CodeableConcept defined",
-        location = LocationContext("", "identifier")
-    )
-    private val requiredTenantIdentifierValueError = FHIRError(
-        code = "RONIN_TNNT_ID_003",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "Tenant identifier value is required",
-        location = LocationContext("", "identifier")
-    )
+    private val requiredTenantIdentifierError =
+        FHIRError(
+            code = "RONIN_TNNT_ID_001",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "Tenant identifier is required",
+            location = LocationContext("", "identifier"),
+        )
+    private val wrongTenantIdentifierTypeError =
+        FHIRError(
+            code = "RONIN_TNNT_ID_002",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "Tenant identifier provided without proper CodeableConcept defined",
+            location = LocationContext("", "identifier"),
+        )
+    private val requiredTenantIdentifierValueError =
+        FHIRError(
+            code = "RONIN_TNNT_ID_003",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "Tenant identifier value is required",
+            location = LocationContext("", "identifier"),
+        )
 
     private fun validateTenantIdentifier(
         identifier: List<Identifier>,
         parentContext: LocationContext,
-        validation: Validation
+        validation: Validation,
     ) {
         val tenantIdentifier = identifier.find { it.system == CodeSystem.RONIN_TENANT.uri }
         validation.apply {
@@ -225,36 +247,39 @@ abstract class ProfileValidator<R : Resource<R>> {
                 checkTrue(
                     tenantIdentifier.type == CodeableConcepts.RONIN_TENANT,
                     wrongTenantIdentifierTypeError,
-                    parentContext
+                    parentContext,
                 )
                 checkNotNull(tenantIdentifier.value, requiredTenantIdentifierValueError, parentContext)
             }
         }
     }
 
-    private val requiredFhirIdentifierError = FHIRError(
-        code = "RONIN_FHIR_ID_001",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "FHIR identifier is required",
-        location = LocationContext("", "identifier")
-    )
-    private val wrongFhirIdentifierTypeError = FHIRError(
-        code = "RONIN_FHIR_ID_002",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "FHIR identifier provided without proper CodeableConcept defined",
-        location = LocationContext("", "identifier")
-    )
-    private val requiredFhirIdentifierValueError = FHIRError(
-        code = "RONIN_FHIR_ID_003",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "FHIR identifier value is required",
-        location = LocationContext("", "identifier")
-    )
+    private val requiredFhirIdentifierError =
+        FHIRError(
+            code = "RONIN_FHIR_ID_001",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "FHIR identifier is required",
+            location = LocationContext("", "identifier"),
+        )
+    private val wrongFhirIdentifierTypeError =
+        FHIRError(
+            code = "RONIN_FHIR_ID_002",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "FHIR identifier provided without proper CodeableConcept defined",
+            location = LocationContext("", "identifier"),
+        )
+    private val requiredFhirIdentifierValueError =
+        FHIRError(
+            code = "RONIN_FHIR_ID_003",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "FHIR identifier value is required",
+            location = LocationContext("", "identifier"),
+        )
 
     private fun validateFhirIdentifier(
         identifier: List<Identifier>,
         parentContext: LocationContext,
-        validation: Validation
+        validation: Validation,
     ) {
         val fhirIdentifier = identifier.find { it.system == CodeSystem.RONIN_FHIR_ID.uri }
         validation.apply {
@@ -264,36 +289,39 @@ abstract class ProfileValidator<R : Resource<R>> {
                 checkTrue(
                     fhirIdentifier.type == CodeableConcepts.RONIN_FHIR_ID,
                     wrongFhirIdentifierTypeError,
-                    parentContext
+                    parentContext,
                 )
                 checkNotNull(fhirIdentifier.value, requiredFhirIdentifierValueError, parentContext)
             }
         }
     }
 
-    private val requiredDataAuthorityIdentifierError = FHIRError(
-        code = "RONIN_DAUTH_ID_001",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "Data Authority identifier is required",
-        location = LocationContext("", "identifier")
-    )
-    private val wrongDataAuthorityIdentifierTypeError = FHIRError(
-        code = "RONIN_DAUTH_ID_002",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "Data Authority identifier provided without proper CodeableConcept defined",
-        location = LocationContext("", "identifier")
-    )
-    private val requiredDataAuthorityIdentifierValueError = FHIRError(
-        code = "RONIN_DAUTH_ID_003",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "Data Authority identifier value is required",
-        location = LocationContext("", "identifier")
-    )
+    private val requiredDataAuthorityIdentifierError =
+        FHIRError(
+            code = "RONIN_DAUTH_ID_001",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "Data Authority identifier is required",
+            location = LocationContext("", "identifier"),
+        )
+    private val wrongDataAuthorityIdentifierTypeError =
+        FHIRError(
+            code = "RONIN_DAUTH_ID_002",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "Data Authority identifier provided without proper CodeableConcept defined",
+            location = LocationContext("", "identifier"),
+        )
+    private val requiredDataAuthorityIdentifierValueError =
+        FHIRError(
+            code = "RONIN_DAUTH_ID_003",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "Data Authority identifier value is required",
+            location = LocationContext("", "identifier"),
+        )
 
     private fun validateDataAuthorityIdentifier(
         identifier: List<Identifier>,
         parentContext: LocationContext,
-        validation: Validation
+        validation: Validation,
     ) {
         val dataAuthorityIdentifier = identifier.find { it.system == CodeSystem.RONIN_DATA_AUTHORITY.uri }
         validation.apply {
@@ -302,7 +330,7 @@ abstract class ProfileValidator<R : Resource<R>> {
                 checkTrue(
                     dataAuthorityIdentifier.type == CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
                     wrongDataAuthorityIdentifierTypeError,
-                    parentContext
+                    parentContext,
                 )
 
                 checkNotNull(dataAuthorityIdentifier.value, requiredDataAuthorityIdentifierValueError, parentContext)

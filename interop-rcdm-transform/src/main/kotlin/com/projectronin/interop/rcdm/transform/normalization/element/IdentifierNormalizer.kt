@@ -12,13 +12,17 @@ import kotlin.reflect.KClass
 class IdentifierNormalizer : ElementNormalizer<Identifier> {
     override val elementType: KClass<Identifier> = Identifier::class
 
-    override fun normalize(element: Identifier, tenant: Tenant): TransformResult<Identifier> {
+    override fun normalize(
+        element: Identifier,
+        tenant: Tenant,
+    ): TransformResult<Identifier> {
         val normalizedSystem = element.system?.normalizeIdentifier()
-        val normalizedIdentifier = if (normalizedSystem == element.system) {
-            element
-        } else {
-            element.copy(system = normalizedSystem)
-        }
+        val normalizedIdentifier =
+            if (normalizedSystem == element.system) {
+                element
+            } else {
+                element.copy(system = normalizedSystem)
+            }
         return TransformResult(normalizedIdentifier)
     }
 }

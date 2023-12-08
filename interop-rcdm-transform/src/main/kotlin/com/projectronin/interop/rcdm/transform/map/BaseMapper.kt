@@ -31,7 +31,7 @@ abstract class BaseMapper<C : Any>(protected val registryClient: NormalizationRe
         tenant: Tenant,
         parentContext: LocationContext,
         validation: Validation,
-        forceCacheReloadTS: LocalDateTime?
+        forceCacheReloadTS: LocalDateTime?,
     ): ConceptMapCodeableConcept? {
         val elementContext = LocationContext(elementProperty)
         return getConceptMapping(
@@ -41,7 +41,7 @@ abstract class BaseMapper<C : Any>(protected val registryClient: NormalizationRe
             tenant,
             parentContext,
             validation,
-            forceCacheReloadTS
+            forceCacheReloadTS,
         )
     }
 
@@ -55,15 +55,16 @@ abstract class BaseMapper<C : Any>(protected val registryClient: NormalizationRe
         tenant: Tenant,
         parentContext: LocationContext,
         validation: Validation,
-        forceCacheReloadTS: LocalDateTime?
+        forceCacheReloadTS: LocalDateTime?,
     ): ConceptMapCodeableConcept? {
-        val mappedCodeableConcept = registryClient.getConceptMapping(
-            tenant.mnemonic,
-            elementContext.toString(),
-            codeableConcept,
-            resource,
-            forceCacheReloadTS
-        )
+        val mappedCodeableConcept =
+            registryClient.getConceptMapping(
+                tenant.mnemonic,
+                elementContext.toString(),
+                codeableConcept,
+                resource,
+                forceCacheReloadTS,
+            )
 
         validation.apply {
             checkNotNull(
@@ -73,9 +74,9 @@ abstract class BaseMapper<C : Any>(protected val registryClient: NormalizationRe
                     codeableConcept.coding.mapNotNull { it.code?.value }
                         .joinToString(", "),
                     "any $elementContext concept map for tenant '${tenant.mnemonic}'",
-                    mappedCodeableConcept?.metadata
+                    mappedCodeableConcept?.metadata,
                 ),
-                parentContext
+                parentContext,
             )
         }
         return mappedCodeableConcept
@@ -93,20 +94,21 @@ abstract class BaseMapper<C : Any>(protected val registryClient: NormalizationRe
         tenant: Tenant,
         parentContext: LocationContext,
         validation: Validation,
-        forceCacheReloadTS: LocalDateTime?
+        forceCacheReloadTS: LocalDateTime?,
     ): ConceptMapCoding? where T : Enum<T>, T : CodedEnum<T> {
         val elementContext = LocationContext(elementProperty)
         val codingMapUri = RoninConceptMap.CODE_SYSTEMS.toUriString(tenant.mnemonic, elementContext.toString())
 
-        val mappedCoding = registryClient.getConceptMappingForEnum(
-            tenant.mnemonic,
-            elementName,
-            RoninConceptMap.CODE_SYSTEMS.toCoding(tenant.mnemonic, elementContext.toString(), value),
-            T::class,
-            extension.value,
-            resource,
-            forceCacheReloadTS
-        )
+        val mappedCoding =
+            registryClient.getConceptMappingForEnum(
+                tenant.mnemonic,
+                elementName,
+                RoninConceptMap.CODE_SYSTEMS.toCoding(tenant.mnemonic, elementContext.toString(), value),
+                T::class,
+                extension.value,
+                resource,
+                forceCacheReloadTS,
+            )
         validation.apply {
             checkNotNull(
                 mappedCoding,
@@ -114,9 +116,9 @@ abstract class BaseMapper<C : Any>(protected val registryClient: NormalizationRe
                     elementContext,
                     value,
                     codingMapUri,
-                    mappedCoding?.metadata
+                    mappedCoding?.metadata,
                 ),
-                parentContext
+                parentContext,
             )
         }
 
@@ -130,9 +132,9 @@ abstract class BaseMapper<C : Any>(protected val registryClient: NormalizationRe
                         codingMapUri,
                         value,
                         systemTarget,
-                        mappedCoding.metadata
+                        mappedCoding.metadata,
                     ),
-                    parentContext
+                    parentContext,
                 )
             }
             mappedCoding

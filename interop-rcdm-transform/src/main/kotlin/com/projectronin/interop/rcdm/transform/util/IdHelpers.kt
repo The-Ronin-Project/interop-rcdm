@@ -10,8 +10,7 @@ import com.projectronin.interop.rcdm.common.util.dataAuthorityIdentifier
 import com.projectronin.interop.rcdm.common.util.getIdentifiers
 import com.projectronin.interop.tenant.config.model.Tenant
 
-fun <T : Resource<T>> T.getFhirIdentifiers(): List<Identifier> =
-    id?.toFhirIdentifier()?.let { listOf(it) } ?: emptyList()
+fun <T : Resource<T>> T.getFhirIdentifiers(): List<Identifier> = id?.toFhirIdentifier()?.let { listOf(it) } ?: emptyList()
 
 /**
  * Converts this tenant into the appropriate FHIR [Identifier]
@@ -20,7 +19,7 @@ fun Tenant.toFhirIdentifier() =
     Identifier(
         type = CodeableConcepts.RONIN_TENANT,
         system = CodeSystem.RONIN_TENANT.uri,
-        value = FHIRString(mnemonic)
+        value = FHIRString(mnemonic),
     )
 
 fun <T : Resource<T>> T.getRoninIdentifiers(tenant: Tenant): List<Identifier> {

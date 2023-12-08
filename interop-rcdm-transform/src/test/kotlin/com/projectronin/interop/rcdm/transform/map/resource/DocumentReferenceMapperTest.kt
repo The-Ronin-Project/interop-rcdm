@@ -20,20 +20,23 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 
+@Suppress("ktlint:standard:max-line-length")
 class DocumentReferenceMapperTest {
     private val registryClient = mockk<NormalizationRegistryClient>()
     private val mapper = DocumentReferenceMapper(registryClient)
 
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "test"
-    }
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "test"
+        }
 
     @Test
     fun `no type provided`() {
-        val documentReference = DocumentReference(
-            status = DocumentReferenceStatus.CURRENT.asCode(),
-            type = null
-        )
+        val documentReference =
+            DocumentReference(
+                status = DocumentReferenceStatus.CURRENT.asCode(),
+                type = null,
+            )
         val (mappedResource, validation) = mapper.map(documentReference, tenant, null)
 
         assertEquals(documentReference, mappedResource)
@@ -42,15 +45,18 @@ class DocumentReferenceMapperTest {
 
     @Test
     fun `no concept mapping found for type`() {
-        val type = CodeableConcept(
-            coding = listOf(
-                Coding(system = Uri("http://loinc.org"), code = Code("34806-0"))
+        val type =
+            CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(system = Uri("http://loinc.org"), code = Code("34806-0")),
+                    ),
             )
-        )
-        val documentReference = DocumentReference(
-            status = DocumentReferenceStatus.CURRENT.asCode(),
-            type = type
-        )
+        val documentReference =
+            DocumentReference(
+                status = DocumentReferenceStatus.CURRENT.asCode(),
+                type = type,
+            )
 
         every {
             registryClient.getConceptMapping(
@@ -58,7 +64,7 @@ class DocumentReferenceMapperTest {
                 "DocumentReference.type",
                 type,
                 documentReference,
-                null
+                null,
             )
         } returns null
 
@@ -69,31 +75,37 @@ class DocumentReferenceMapperTest {
         assertEquals(1, validation.issues().size)
         assertEquals(
             "ERROR NOV_CONMAP_LOOKUP: Tenant source value '34806-0' has no target defined in any DocumentReference.type concept map for tenant 'test' @ DocumentReference.type",
-            validation.issues().first().toString()
+            validation.issues().first().toString(),
         )
     }
 
     @Test
     fun `concept mapping found for type`() {
-        val type = CodeableConcept(
-            coding = listOf(
-                Coding(system = Uri("http://loinc.org"), code = Code("34806-0"))
+        val type =
+            CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(system = Uri("http://loinc.org"), code = Code("34806-0")),
+                    ),
             )
-        )
-        val documentReference = DocumentReference(
-            status = DocumentReferenceStatus.CURRENT.asCode(),
-            type = type
-        )
+        val documentReference =
+            DocumentReference(
+                status = DocumentReferenceStatus.CURRENT.asCode(),
+                type = type,
+            )
 
-        val mappedType = CodeableConcept(
-            coding = listOf(
-                Coding(system = Uri("http://loinc.org"), code = Code("34806-1"))
+        val mappedType =
+            CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(system = Uri("http://loinc.org"), code = Code("34806-1")),
+                    ),
             )
-        )
-        val mappedExtension = Extension(
-            url = RoninExtension.TENANT_SOURCE_DOCUMENT_REFERENCE_TYPE.uri,
-            value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, type)
-        )
+        val mappedExtension =
+            Extension(
+                url = RoninExtension.TENANT_SOURCE_DOCUMENT_REFERENCE_TYPE.uri,
+                value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, type),
+            )
 
         every {
             registryClient.getConceptMapping(
@@ -101,7 +113,7 @@ class DocumentReferenceMapperTest {
                 "DocumentReference.type",
                 type,
                 documentReference,
-                null
+                null,
             )
         } returns ConceptMapCodeableConcept(mappedType, mappedExtension, listOf())
 
@@ -116,25 +128,31 @@ class DocumentReferenceMapperTest {
 
     @Test
     fun `honors forced cache reload`() {
-        val type = CodeableConcept(
-            coding = listOf(
-                Coding(system = Uri("http://loinc.org"), code = Code("34806-0"))
+        val type =
+            CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(system = Uri("http://loinc.org"), code = Code("34806-0")),
+                    ),
             )
-        )
-        val documentReference = DocumentReference(
-            status = DocumentReferenceStatus.CURRENT.asCode(),
-            type = type
-        )
+        val documentReference =
+            DocumentReference(
+                status = DocumentReferenceStatus.CURRENT.asCode(),
+                type = type,
+            )
 
-        val mappedType = CodeableConcept(
-            coding = listOf(
-                Coding(system = Uri("http://loinc.org"), code = Code("34806-1"))
+        val mappedType =
+            CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(system = Uri("http://loinc.org"), code = Code("34806-1")),
+                    ),
             )
-        )
-        val mappedExtension = Extension(
-            url = RoninExtension.TENANT_SOURCE_DOCUMENT_REFERENCE_TYPE.uri,
-            value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, type)
-        )
+        val mappedExtension =
+            Extension(
+                url = RoninExtension.TENANT_SOURCE_DOCUMENT_REFERENCE_TYPE.uri,
+                value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, type),
+            )
 
         val forceCacheReloadTS = LocalDateTime.now()
 
@@ -144,7 +162,7 @@ class DocumentReferenceMapperTest {
                 "DocumentReference.type",
                 type,
                 documentReference,
-                forceCacheReloadTS
+                forceCacheReloadTS,
             )
         } returns ConceptMapCodeableConcept(mappedType, mappedExtension, listOf())
 

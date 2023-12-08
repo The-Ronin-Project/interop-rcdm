@@ -27,7 +27,11 @@ class RoninBloodPressureValidator(registryClient: NormalizationRegistryClient) :
     private fun validDiastolicValueSet(): ValueSetList =
         registryClient.getRequiredValueSet("Observation.component:diastolic.code", profile.value)
 
-    override fun validateVitalSign(resource: Observation, parentContext: LocationContext, validation: Validation) {
+    override fun validateVitalSign(
+        resource: Observation,
+        parentContext: LocationContext,
+        validation: Validation,
+    ) {
         if (resource.dataAbsentReason == null) {
             val validSystolicValueSet = validSystolicValueSet()
             val validSystolicCodes = validSystolicValueSet.codes
@@ -35,19 +39,21 @@ class RoninBloodPressureValidator(registryClient: NormalizationRegistryClient) :
             val validDiastolicCodes = validDiastolicValueSet.codes
 
             val components = resource.component
-            val systolic = components.filter { comp ->
-                comp.code?.coding?.any { it.isInValueSet(validSystolicCodes) } ?: false
-            }
-            val diastolic = components.filter { comp ->
-                comp.code?.coding?.any { it.isInValueSet(validDiastolicCodes) } ?: false
-            }
+            val systolic =
+                components.filter { comp ->
+                    comp.code?.coding?.any { it.isInValueSet(validSystolicCodes) } ?: false
+                }
+            val diastolic =
+                components.filter { comp ->
+                    comp.code?.coding?.any { it.isInValueSet(validDiastolicCodes) } ?: false
+                }
 
             if (systolic.size == 1) {
                 validateVitalSignValue(
                     systolic.first().value,
                     validBloodPressureUnits,
                     validation,
-                    LocationContext("Observation", "component:systolic.value")
+                    LocationContext("Observation", "component:systolic.value"),
                 )
             }
             if (diastolic.size == 1) {
@@ -55,7 +61,7 @@ class RoninBloodPressureValidator(registryClient: NormalizationRegistryClient) :
                     diastolic.first().value,
                     validBloodPressureUnits,
                     validation,
-                    LocationContext("Observation", "component:diastolic.value")
+                    LocationContext("Observation", "component:diastolic.value"),
                 )
             }
             validation.apply {
@@ -66,12 +72,12 @@ class RoninBloodPressureValidator(registryClient: NormalizationRegistryClient) :
                         code = "USCORE_BPOBS_001",
                         severity = ValidationIssueSeverity.ERROR,
                         description = "Must match this system|code: ${
-                        validSystolicCodes.joinToString(", ") { "${it.system?.value}|${it.code?.value}" }
+                            validSystolicCodes.joinToString(", ") { "${it.system?.value}|${it.code?.value}" }
                         }",
                         location = componentSystolicCodeContext,
-                        metadata = validSystolicValueSet.metadata?.let { listOf(it) } ?: emptyList()
+                        metadata = validSystolicValueSet.metadata?.let { listOf(it) } ?: emptyList(),
                     ),
-                    parentContext
+                    parentContext,
                 )
                 checkTrue(
                     systolic.size <= 1,
@@ -80,9 +86,9 @@ class RoninBloodPressureValidator(registryClient: NormalizationRegistryClient) :
                         severity = ValidationIssueSeverity.ERROR,
                         description = "Only 1 entry is allowed for systolic blood pressure",
                         location = componentSystolicCodeContext,
-                        metadata = validSystolicValueSet.metadata?.let { listOf(it) } ?: emptyList()
+                        metadata = validSystolicValueSet.metadata?.let { listOf(it) } ?: emptyList(),
                     ),
-                    parentContext
+                    parentContext,
                 )
 
                 val componentDiastolicCodeContext = LocationContext("Observation", "component:diastolic.code")
@@ -92,12 +98,12 @@ class RoninBloodPressureValidator(registryClient: NormalizationRegistryClient) :
                         code = "USCORE_BPOBS_002",
                         severity = ValidationIssueSeverity.ERROR,
                         description = "Must match this system|code: ${
-                        validDiastolicCodes.joinToString(", ") { "${it.system?.value}|${it.code?.value}" }
+                            validDiastolicCodes.joinToString(", ") { "${it.system?.value}|${it.code?.value}" }
                         }",
                         location = componentDiastolicCodeContext,
-                        metadata = validDiastolicValueSet.metadata?.let { listOf(it) } ?: emptyList()
+                        metadata = validDiastolicValueSet.metadata?.let { listOf(it) } ?: emptyList(),
                     ),
-                    parentContext
+                    parentContext,
                 )
                 checkTrue(
                     diastolic.size <= 1,
@@ -106,9 +112,9 @@ class RoninBloodPressureValidator(registryClient: NormalizationRegistryClient) :
                         severity = ValidationIssueSeverity.ERROR,
                         description = "Only 1 entry is allowed for diastolic blood pressure",
                         location = componentDiastolicCodeContext,
-                        metadata = validDiastolicValueSet.metadata?.let { listOf(it) } ?: emptyList()
+                        metadata = validDiastolicValueSet.metadata?.let { listOf(it) } ?: emptyList(),
                     ),
-                    parentContext
+                    parentContext,
                 )
             }
         }

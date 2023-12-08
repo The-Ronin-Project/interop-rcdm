@@ -24,13 +24,19 @@ class Localizer : BaseGenericTransformer() {
     /**
      * Localizes the [element] for the [tenant]
      */
-    fun <T : Any> localize(element: T, tenant: Tenant): T {
+    fun <T : Any> localize(
+        element: T,
+        tenant: Tenant,
+    ): T {
         val localizedValues = getTransformedValues(element, tenant)
         return copy(element, localizedValues)
     }
 
     @Suppress("UNCHECKED_CAST")
-    override fun <T : Any> transformType(element: T, tenant: Tenant): TransformResult<T> {
+    override fun <T : Any> transformType(
+        element: T,
+        tenant: Tenant,
+    ): TransformResult<T> {
         val transformed =
             when (element) {
                 is DynamicValue<*> -> localizeDynamicValue(element as DynamicValue<Any>, tenant)
@@ -47,7 +53,7 @@ class Localizer : BaseGenericTransformer() {
      */
     private fun localizeDynamicValue(
         dynamicValue: DynamicValue<Any>,
-        tenant: Tenant
+        tenant: Tenant,
     ): DynamicValue<Any>? {
         val localizedValue = transformType(dynamicValue.value as Element<*>, tenant)
         return localizedValue.element?.let { DynamicValue(dynamicValue.type, it) }
@@ -56,12 +62,18 @@ class Localizer : BaseGenericTransformer() {
     /**
      * Localizes the [id] for the [tenant].
      */
-    private fun localizeId(id: Id, tenant: Tenant): Id = Id(id.value?.localize(tenant), id.id, id.extension)
+    private fun localizeId(
+        id: Id,
+        tenant: Tenant,
+    ): Id = Id(id.value?.localize(tenant), id.id, id.extension)
 
     /**
      * Localizes the [reference] for the [tenant].
      */
-    private fun localizeReference(reference: Reference, tenant: Tenant): Reference? {
+    private fun localizeReference(
+        reference: Reference,
+        tenant: Tenant,
+    ): Reference? {
         val nonReferenceLocalized = transformOrNull(reference, tenant) ?: reference
         return nonReferenceLocalized.localize(tenant)
     }
@@ -85,12 +97,13 @@ class Localizer : BaseGenericTransformer() {
             // Should we localize if there's a history?
             val (_, _, _, type, fhirId, history) = matchResult.destructured
             return copy(
-                reference = FHIRString(
-                    "$type/${fhirId.localize(tenant)}$history",
-                    reference?.id,
-                    reference?.extension ?: listOf()
-                ),
-                type = Uri(type, extension = dataAuthorityExtension)
+                reference =
+                    FHIRString(
+                        "$type/${fhirId.localize(tenant)}$history",
+                        reference?.id,
+                        reference?.extension ?: listOf(),
+                    ),
+                type = Uri(type, extension = dataAuthorityExtension),
             )
         } ?: return this
     }

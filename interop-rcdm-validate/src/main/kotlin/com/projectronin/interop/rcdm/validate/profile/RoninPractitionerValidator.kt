@@ -23,7 +23,12 @@ class RoninPractitionerValidator : ProfileValidator<Practitioner>() {
 
     private val requiredNameError = RequiredFieldError(Practitioner::name)
     private val requiredNameFamilyError = RequiredFieldError(HumanName::family)
-    override fun validate(resource: Practitioner, validation: Validation, context: LocationContext) {
+
+    override fun validate(
+        resource: Practitioner,
+        validation: Validation,
+        context: LocationContext,
+    ) {
         validation.apply {
             checkTrue(resource.name.isNotEmpty(), requiredNameError, context)
 

@@ -21,47 +21,50 @@ class ServiceRequestMapper(registryClient: NormalizationRegistryClient) :
     override fun map(
         resource: ServiceRequest,
         tenant: Tenant,
-        forceCacheReloadTS: LocalDateTime?
+        forceCacheReloadTS: LocalDateTime?,
     ): MapResponse<ServiceRequest> {
         val validation = Validation()
         val parentContext = LocationContext(ServiceRequest::class)
         val newExtensions = mutableListOf<Extension>()
 
-        val mappedCategory = resource.category.firstOrNull()?.let { category ->
-            getConceptMapping(
-                category,
-                ServiceRequest::category,
-                resource,
-                tenant,
-                parentContext,
-                validation,
-                forceCacheReloadTS
-            )?.let {
-                newExtensions.add(it.extension)
-                it.codeableConcept
-            }
-        } ?: resource.category.first()
+        val mappedCategory =
+            resource.category.firstOrNull()?.let { category ->
+                getConceptMapping(
+                    category,
+                    ServiceRequest::category,
+                    resource,
+                    tenant,
+                    parentContext,
+                    validation,
+                    forceCacheReloadTS,
+                )?.let {
+                    newExtensions.add(it.extension)
+                    it.codeableConcept
+                }
+            } ?: resource.category.first()
 
-        val mappedCode = resource.code?.let { code ->
-            getConceptMapping(
-                code,
-                ServiceRequest::code,
-                resource,
-                tenant,
-                parentContext,
-                validation,
-                forceCacheReloadTS
-            )?.let {
-                newExtensions.add(it.extension)
-                it.codeableConcept
-            }
-        } ?: resource.code
+        val mappedCode =
+            resource.code?.let { code ->
+                getConceptMapping(
+                    code,
+                    ServiceRequest::code,
+                    resource,
+                    tenant,
+                    parentContext,
+                    validation,
+                    forceCacheReloadTS,
+                )?.let {
+                    newExtensions.add(it.extension)
+                    it.codeableConcept
+                }
+            } ?: resource.code
 
-        val mappedServiceRequest = resource.copy(
-            code = mappedCode,
-            category = listOf(mappedCategory),
-            extension = resource.extension + newExtensions
-        )
+        val mappedServiceRequest =
+            resource.copy(
+                code = mappedCode,
+                category = listOf(mappedCategory),
+                extension = resource.extension + newExtensions,
+            )
 
         return MapResponse(mappedServiceRequest, validation)
     }

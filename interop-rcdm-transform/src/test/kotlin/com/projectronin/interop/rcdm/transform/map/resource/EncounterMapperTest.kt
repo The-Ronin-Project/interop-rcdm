@@ -21,9 +21,10 @@ class EncounterMapperTest {
     private val registryClient = mockk<NormalizationRegistryClient>()
     private val mapper = EncounterMapper(registryClient)
 
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "tenant"
-    }
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "tenant"
+        }
 
     @Test
     fun `supported resource is Encounter`() {
@@ -35,18 +36,21 @@ class EncounterMapperTest {
         val status = Code("input")
         val coding = Coding(FHIRString("coding"))
 
-        val encounter = Encounter(
-            status = status,
-            `class` = coding
-        )
-
-        val mappedExtension = Extension(
-            url = Uri(RoninExtension.TENANT_SOURCE_ENCOUNTER_CLASS.value),
-            value = DynamicValue(
-                type = DynamicValueType.CODING,
-                value = coding
+        val encounter =
+            Encounter(
+                status = status,
+                `class` = coding,
             )
-        )
+
+        val mappedExtension =
+            Extension(
+                url = Uri(RoninExtension.TENANT_SOURCE_ENCOUNTER_CLASS.value),
+                value =
+                    DynamicValue(
+                        type = DynamicValueType.CODING,
+                        value = coding,
+                    ),
+            )
 
         val (mappedResource, validation) = mapper.map(encounter, tenant, null)
         mappedResource!!

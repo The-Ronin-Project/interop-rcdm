@@ -22,9 +22,10 @@ class MedicationAdministrationMapperTest {
     private val registryClient = mockk<NormalizationRegistryClient>()
     private val mapper = MedicationAdministrationMapper(registryClient)
 
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "tenant"
-    }
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "tenant"
+        }
 
     @Test
     fun `supported resource is MedicationAdministration`() {
@@ -35,14 +36,16 @@ class MedicationAdministrationMapperTest {
     fun `concept mapping finds status`() {
         val status = Code("input")
 
-        val medAdmin = MedicationAdministration(
-            status = status
-        )
+        val medAdmin =
+            MedicationAdministration(
+                status = status,
+            )
 
-        val mappedExtension = Extension(
-            url = RoninExtension.TENANT_SOURCE_MEDICATION_ADMINISTRATION_STATUS.uri,
-            value = DynamicValue(DynamicValueType.CODING, status)
-        )
+        val mappedExtension =
+            Extension(
+                url = RoninExtension.TENANT_SOURCE_MEDICATION_ADMINISTRATION_STATUS.uri,
+                value = DynamicValue(DynamicValueType.CODING, status),
+            )
 
         val mappedStatus = Code("completed")
 
@@ -53,13 +56,14 @@ class MedicationAdministrationMapperTest {
                 coding = any(),
                 enumClass = MedicationAdministrationStatus::class,
                 enumExtensionUrl = RoninExtension.TENANT_SOURCE_MEDICATION_ADMINISTRATION_STATUS.value,
-                resource = medAdmin
+                resource = medAdmin,
             )
-        } returns ConceptMapCoding(
-            coding = Coding(code = Code("completed")),
-            extension = mappedExtension,
-            metadata = emptyList()
-        )
+        } returns
+            ConceptMapCoding(
+                coding = Coding(code = Code("completed")),
+                extension = mappedExtension,
+                metadata = emptyList(),
+            )
 
         val (mappedResource, validation) = mapper.map(medAdmin, tenant, null)
         mappedResource!!
@@ -73,9 +77,10 @@ class MedicationAdministrationMapperTest {
     fun `null status stays`() {
         val status = Code(value = null)
 
-        val medAdmin = MedicationAdministration(
-            status = status
-        )
+        val medAdmin =
+            MedicationAdministration(
+                status = status,
+            )
 
         val (mappedResource, validation) = mapper.map(medAdmin, tenant, null)
         mappedResource!!

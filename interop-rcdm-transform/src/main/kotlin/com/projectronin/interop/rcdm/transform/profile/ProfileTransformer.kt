@@ -23,7 +23,10 @@ abstract class ProfileTransformer<R : Resource<R>> {
     /**
      * Performs the internal transformation of the [original]. Note that Meta is guaranteed to be set by this class, so this method does not need to implement that functionality.
      */
-    abstract fun transformInternal(original: R, tenant: Tenant): TransformResponse<R>?
+    abstract fun transformInternal(
+        original: R,
+        tenant: Tenant,
+    ): TransformResponse<R>?
 
     /**
      * Returns true if [resource] qualifies for this particular profile.
@@ -33,7 +36,10 @@ abstract class ProfileTransformer<R : Resource<R>> {
     /**
      * Transforms the [original] to this profile for [tenant].
      */
-    fun transform(original: R, tenant: Tenant): TransformResponse<R>? {
+    fun transform(
+        original: R,
+        tenant: Tenant,
+    ): TransformResponse<R>? {
         val transformedResponse = transformInternal(original, tenant)
         return transformedResponse?.let {
             val transformedMeta = it.resource.meta.transform()
@@ -41,7 +47,7 @@ abstract class ProfileTransformer<R : Resource<R>> {
 
             TransformResponse(
                 resourceWithMeta,
-                it.embeddedResources
+                it.embeddedResources,
             )
         }
     }

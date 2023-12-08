@@ -17,9 +17,10 @@ import org.junit.jupiter.api.Test
 class RoninRequestGroupTransformerTest {
     private val transformer = RoninRequestGroupTransformer()
 
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "test"
-    }
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "test"
+        }
 
     @Test
     fun `returns supported resource`() {
@@ -45,20 +46,20 @@ class RoninRequestGroupTransformerTest {
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
                     system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
+                    value = "12345".asFHIR(),
                 ),
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
+                    value = "test".asFHIR(),
                 ),
                 Identifier(
                     type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
                     system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
+                    value = "EHR Data Authority".asFHIR(),
+                ),
             ),
-            transformed.identifier
+            transformed.identifier,
         )
     }
 }

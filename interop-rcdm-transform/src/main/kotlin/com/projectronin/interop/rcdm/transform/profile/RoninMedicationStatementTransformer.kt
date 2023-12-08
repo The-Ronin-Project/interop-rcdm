@@ -13,15 +13,16 @@ import kotlin.reflect.KClass
 
 @Component
 class RoninMedicationStatementTransformer(
-    private val medicationExtractor: MedicationExtractor
+    private val medicationExtractor: MedicationExtractor,
 ) : ProfileTransformer<MedicationStatement>() {
     override val supportedResource: KClass<MedicationStatement> = MedicationStatement::class
     override val profile: RoninProfile = RoninProfile.MEDICATION_STATEMENT
     override val rcdmVersion: RCDMVersion = RCDMVersion.V3_29_0
     override val profileVersion: Int = 3
+
     override fun transformInternal(
         original: MedicationStatement,
-        tenant: Tenant
+        tenant: Tenant,
     ): TransformResponse<MedicationStatement>? {
         val medicationExtraction =
             medicationExtractor.extractMedication(original.medication, original.contained, original)
@@ -30,12 +31,14 @@ class RoninMedicationStatementTransformer(
         val contained = medicationExtraction?.updatedContained ?: original.contained
         val embeddedMedications = medicationExtraction?.extractedMedication?.let { listOf(it) } ?: emptyList()
 
-        val transformed = original.copy(
-            identifier = original.getRoninIdentifiers(tenant),
-            medication = medication,
-            contained = contained,
-            extension = original.extension + populateExtensionWithReference(original.medication) // populate extension based on medication[x]
-        )
+        val transformed =
+            original.copy(
+                identifier = original.getRoninIdentifiers(tenant),
+                medication = medication,
+                contained = contained,
+                // populate extension based on medication[x]
+                extension = original.extension + populateExtensionWithReference(original.medication),
+            )
 
         return TransformResponse(transformed, embeddedMedications)
     }

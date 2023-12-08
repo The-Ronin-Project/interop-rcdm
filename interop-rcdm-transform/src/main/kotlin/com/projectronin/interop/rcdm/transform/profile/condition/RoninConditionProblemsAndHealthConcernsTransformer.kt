@@ -17,8 +17,9 @@ class RoninConditionProblemsAndHealthConcernsTransformer : BaseRoninConditionPro
     override val rcdmVersion: RCDMVersion = RCDMVersion.V3_19_0
     override val profileVersion: Int = 3
 
-    override fun getQualifyingCategories(): List<Coding> = listOf(
-        Coding(system = CodeSystem.CONDITION_CATEGORY.uri, code = Code("problem-list-item")),
-        Coding(system = CodeSystem.CONDITION_CATEGORY_HEALTH_CONCERN.uri, code = Code("health-concern"))
-    )
+    override fun getQualifyingCategories(): List<Coding> =
+        listOf(
+            Coding(system = CodeSystem.CONDITION_CATEGORY.uri, code = Code("problem-list-item")),
+            Coding(system = CodeSystem.CONDITION_CATEGORY_HEALTH_CONCERN.uri, code = Code("health-concern")),
+        )
 }

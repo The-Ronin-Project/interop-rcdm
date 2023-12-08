@@ -40,9 +40,10 @@ import org.junit.jupiter.api.Test
 class RoninAppointmentTransformerTest {
     private val transformer = RoninAppointmentTransformer()
 
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "test"
-    }
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "test"
+        }
 
     @Test
     fun `returns supported resource`() {
@@ -56,73 +57,85 @@ class RoninAppointmentTransformerTest {
 
     @Test
     fun `transforms appointment with all attributes`() {
-        val appointment = Appointment(
-            id = Id("12345"),
-            meta = Meta(
-                profile = listOf(Canonical("http://hl7.org/fhir/R4/appointment.html")),
-                source = Uri("source")
-            ),
-            implicitRules = Uri("implicit-rules"),
-            language = Code("en-US"),
-            text = Narrative(status = com.projectronin.interop.fhir.r4.valueset.NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()),
-            contained = listOf(Location(id = Id("67890"))),
-            extension = listOf(
-                Extension(
-                    url = Uri("http://hl7.org/extension-1"),
-                    value = DynamicValue(DynamicValueType.STRING, "value")
-                ),
-                Extension(
-                    url = Uri("http://hl7.org/extension-2"),
-                    value = DynamicValue(DynamicValueType.BOOLEAN, false)
-                ),
-                Extension(
-                    url = Uri("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceAppointmentStatus"),
-                    value = DynamicValue(
-                        type = DynamicValueType.CODING,
-                        value = Coding(
-                            system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
-                            code = Code(value = "input")
-                        )
-                    )
-                )
-            ),
-            modifierExtension = listOf(
-                Extension(
-                    url = Uri("http://localhost/modifier-extension"),
-                    value = DynamicValue(DynamicValueType.STRING, "Value")
-                )
-            ),
-            identifier = listOf(Identifier(value = "id".asFHIR())),
-            status = Code("cancelled"),
-            cancelationReason = CodeableConcept(text = "cancel reason".asFHIR()),
-            serviceCategory = listOf(CodeableConcept(text = "service category".asFHIR())),
-            serviceType = listOf(CodeableConcept(text = "service type".asFHIR())),
-            specialty = listOf(CodeableConcept(text = "specialty".asFHIR())),
-            appointmentType = CodeableConcept(text = "appointment type".asFHIR()),
-            reasonCode = listOf(CodeableConcept(text = "reason code".asFHIR())),
-            reasonReference = listOf(Reference(display = "reason reference".asFHIR())),
-            priority = UnsignedInt(1),
-            description = "appointment test".asFHIR(),
-            supportingInformation = listOf(Reference(display = "supporting info".asFHIR())),
-            start = Instant("2017-01-01T00:00:00Z"),
-            end = Instant("2017-01-01T01:00:00Z"),
-            minutesDuration = PositiveInt(15),
-            slot = listOf(Reference(display = "slot".asFHIR())),
-            created = DateTime("2021-11-16"),
-            comment = "comment".asFHIR(),
-            patientInstruction = "patient instruction".asFHIR(),
-            basedOn = listOf(Reference(display = "based on".asFHIR())),
-            participant = listOf(
-                Participant(
-                    actor = Reference(
-                        reference = "Practitioner/actor".asFHIR(),
-                        type = Uri("Practitioner", extension = dataAuthorityExtension)
+        val appointment =
+            Appointment(
+                id = Id("12345"),
+                meta =
+                    Meta(
+                        profile = listOf(Canonical("http://hl7.org/fhir/R4/appointment.html")),
+                        source = Uri("source"),
                     ),
-                    status = ParticipationStatus.ACCEPTED.asCode()
-                )
-            ),
-            requestedPeriod = listOf(Period(start = DateTime("2021-11-16")))
-        )
+                implicitRules = Uri("implicit-rules"),
+                language = Code("en-US"),
+                text =
+                    Narrative(
+                        status = com.projectronin.interop.fhir.r4.valueset.NarrativeStatus.GENERATED.asCode(),
+                        div = "div".asFHIR(),
+                    ),
+                contained = listOf(Location(id = Id("67890"))),
+                extension =
+                    listOf(
+                        Extension(
+                            url = Uri("http://hl7.org/extension-1"),
+                            value = DynamicValue(DynamicValueType.STRING, "value"),
+                        ),
+                        Extension(
+                            url = Uri("http://hl7.org/extension-2"),
+                            value = DynamicValue(DynamicValueType.BOOLEAN, false),
+                        ),
+                        Extension(
+                            url = Uri("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceAppointmentStatus"),
+                            value =
+                                DynamicValue(
+                                    type = DynamicValueType.CODING,
+                                    value =
+                                        Coding(
+                                            system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
+                                            code = Code(value = "input"),
+                                        ),
+                                ),
+                        ),
+                    ),
+                modifierExtension =
+                    listOf(
+                        Extension(
+                            url = Uri("http://localhost/modifier-extension"),
+                            value = DynamicValue(DynamicValueType.STRING, "Value"),
+                        ),
+                    ),
+                identifier = listOf(Identifier(value = "id".asFHIR())),
+                status = Code("cancelled"),
+                cancelationReason = CodeableConcept(text = "cancel reason".asFHIR()),
+                serviceCategory = listOf(CodeableConcept(text = "service category".asFHIR())),
+                serviceType = listOf(CodeableConcept(text = "service type".asFHIR())),
+                specialty = listOf(CodeableConcept(text = "specialty".asFHIR())),
+                appointmentType = CodeableConcept(text = "appointment type".asFHIR()),
+                reasonCode = listOf(CodeableConcept(text = "reason code".asFHIR())),
+                reasonReference = listOf(Reference(display = "reason reference".asFHIR())),
+                priority = UnsignedInt(1),
+                description = "appointment test".asFHIR(),
+                supportingInformation = listOf(Reference(display = "supporting info".asFHIR())),
+                start = Instant("2017-01-01T00:00:00Z"),
+                end = Instant("2017-01-01T01:00:00Z"),
+                minutesDuration = PositiveInt(15),
+                slot = listOf(Reference(display = "slot".asFHIR())),
+                created = DateTime("2021-11-16"),
+                comment = "comment".asFHIR(),
+                patientInstruction = "patient instruction".asFHIR(),
+                basedOn = listOf(Reference(display = "based on".asFHIR())),
+                participant =
+                    listOf(
+                        Participant(
+                            actor =
+                                Reference(
+                                    reference = "Practitioner/actor".asFHIR(),
+                                    type = Uri("Practitioner", extension = dataAuthorityExtension),
+                                ),
+                            status = ParticipationStatus.ACCEPTED.asCode(),
+                        ),
+                    ),
+                requestedPeriod = listOf(Period(start = DateTime("2021-11-16"))),
+            )
 
         val transformResponse = transformer.transform(appointment, tenant)
 
@@ -134,46 +147,51 @@ class RoninAppointmentTransformerTest {
         assertEquals(Id(value = "12345"), transformed.id)
         assertEquals(
             Meta(profile = listOf(Canonical(RoninProfile.APPOINTMENT.value)), source = Uri("source")),
-            transformed.meta
+            transformed.meta,
         )
         assertEquals(Uri("implicit-rules"), transformed.implicitRules)
         assertEquals(Code("en-US"), transformed.language)
-        assertEquals(Narrative(status = com.projectronin.interop.fhir.r4.valueset.NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()), transformed.text)
+        assertEquals(
+            Narrative(status = com.projectronin.interop.fhir.r4.valueset.NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()),
+            transformed.text,
+        )
         assertEquals(
             listOf(Location(id = Id("67890"))),
-            transformed.contained
+            transformed.contained,
         )
         assertEquals(
             listOf(
                 Extension(
                     url = Uri("http://hl7.org/extension-1"),
-                    value = DynamicValue(DynamicValueType.STRING, "value")
+                    value = DynamicValue(DynamicValueType.STRING, "value"),
                 ),
                 Extension(
                     url = Uri("http://hl7.org/extension-2"),
-                    value = DynamicValue(DynamicValueType.BOOLEAN, false)
+                    value = DynamicValue(DynamicValueType.BOOLEAN, false),
                 ),
                 Extension(
                     url = Uri("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceAppointmentStatus"),
-                    value = DynamicValue(
-                        type = DynamicValueType.CODING,
-                        value = Coding(
-                            system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
-                            code = Code(value = "input")
-                        )
-                    )
-                )
+                    value =
+                        DynamicValue(
+                            type = DynamicValueType.CODING,
+                            value =
+                                Coding(
+                                    system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
+                                    code = Code(value = "input"),
+                                ),
+                        ),
+                ),
             ),
-            transformed.extension
+            transformed.extension,
         )
         assertEquals(
             listOf(
                 Extension(
                     url = Uri("http://localhost/modifier-extension"),
-                    value = DynamicValue(DynamicValueType.STRING, "Value")
-                )
+                    value = DynamicValue(DynamicValueType.STRING, "Value"),
+                ),
             ),
-            transformed.modifierExtension
+            transformed.modifierExtension,
         )
         assertEquals(
             listOf(
@@ -181,20 +199,20 @@ class RoninAppointmentTransformerTest {
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
                     system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
+                    value = "12345".asFHIR(),
                 ),
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
+                    value = "test".asFHIR(),
                 ),
                 Identifier(
                     type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
                     system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
+                    value = "EHR Data Authority".asFHIR(),
+                ),
             ),
-            transformed.identifier
+            transformed.identifier,
         )
         assertEquals(Code("cancelled"), transformed.status)
         assertEquals(CodeableConcept(text = "cancel reason".asFHIR()), transformed.cancelationReason)
@@ -217,46 +235,53 @@ class RoninAppointmentTransformerTest {
         assertEquals(
             listOf(
                 Participant(
-                    actor = Reference(
-                        reference = "Practitioner/actor".asFHIR(),
-                        type = Uri("Practitioner", extension = dataAuthorityExtension)
-                    ),
-                    status = com.projectronin.interop.fhir.r4.valueset.ParticipationStatus.ACCEPTED.asCode()
-                )
+                    actor =
+                        Reference(
+                            reference = "Practitioner/actor".asFHIR(),
+                            type = Uri("Practitioner", extension = dataAuthorityExtension),
+                        ),
+                    status = com.projectronin.interop.fhir.r4.valueset.ParticipationStatus.ACCEPTED.asCode(),
+                ),
             ),
-            transformed.participant
+            transformed.participant,
         )
         assertEquals(listOf(Period(start = DateTime(value = "2021-11-16"))), transformed.requestedPeriod)
     }
 
     @Test
     fun `transform appointment with only required attributes`() {
-        val appointment = Appointment(
-            id = Id("12345"),
-            meta = Meta(source = Uri("source")),
-            extension = listOf(
-                Extension(
-                    url = Uri("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceAppointmentStatus"),
-                    value = DynamicValue(
-                        type = DynamicValueType.CODING,
-                        value = Coding(
-                            system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
-                            code = Code(value = "input")
-                        )
-                    )
-                )
-            ),
-            status = Code("cancelled"),
-            participant = listOf(
-                Participant(
-                    actor = Reference(
-                        reference = "Practitioner/actor".asFHIR(),
-                        type = Uri("Practitioner", extension = dataAuthorityExtension)
+        val appointment =
+            Appointment(
+                id = Id("12345"),
+                meta = Meta(source = Uri("source")),
+                extension =
+                    listOf(
+                        Extension(
+                            url = Uri("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceAppointmentStatus"),
+                            value =
+                                DynamicValue(
+                                    type = DynamicValueType.CODING,
+                                    value =
+                                        Coding(
+                                            system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
+                                            code = Code(value = "input"),
+                                        ),
+                                ),
+                        ),
                     ),
-                    status = ParticipationStatus.ACCEPTED.asCode()
-                )
+                status = Code("cancelled"),
+                participant =
+                    listOf(
+                        Participant(
+                            actor =
+                                Reference(
+                                    reference = "Practitioner/actor".asFHIR(),
+                                    type = Uri("Practitioner", extension = dataAuthorityExtension),
+                                ),
+                            status = ParticipationStatus.ACCEPTED.asCode(),
+                        ),
+                    ),
             )
-        )
 
         val transformResponse = transformer.transform(appointment, tenant)
 
@@ -269,7 +294,7 @@ class RoninAppointmentTransformerTest {
         assertEquals(Id(value = "12345"), transformed.id)
         assertEquals(
             Meta(profile = listOf(Canonical(RoninProfile.APPOINTMENT.value)), source = Uri("source")),
-            transformed.meta
+            transformed.meta,
         )
         assertNull(transformed.implicitRules)
         assertNull(transformed.language)
@@ -279,16 +304,18 @@ class RoninAppointmentTransformerTest {
             listOf(
                 Extension(
                     url = Uri("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceAppointmentStatus"),
-                    value = DynamicValue(
-                        type = DynamicValueType.CODING,
-                        value = Coding(
-                            system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
-                            code = Code(value = "input")
-                        )
-                    )
-                )
+                    value =
+                        DynamicValue(
+                            type = DynamicValueType.CODING,
+                            value =
+                                Coding(
+                                    system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
+                                    code = Code(value = "input"),
+                                ),
+                        ),
+                ),
             ),
-            transformed.extension
+            transformed.extension,
         )
         assertEquals(listOf<Extension>(), transformed.modifierExtension)
         assertEquals(
@@ -296,20 +323,20 @@ class RoninAppointmentTransformerTest {
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
                     system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
+                    value = "12345".asFHIR(),
                 ),
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
+                    value = "test".asFHIR(),
                 ),
                 Identifier(
                     type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
                     system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
+                    value = "EHR Data Authority".asFHIR(),
+                ),
             ),
-            transformed.identifier
+            transformed.identifier,
         )
         assertEquals(Code("cancelled"), transformed.status)
         assertNull(transformed.cancelationReason)
@@ -332,14 +359,15 @@ class RoninAppointmentTransformerTest {
         assertEquals(
             listOf(
                 Participant(
-                    actor = Reference(
-                        reference = "Practitioner/actor".asFHIR(),
-                        type = Uri("Practitioner", extension = dataAuthorityExtension)
-                    ),
-                    status = com.projectronin.interop.fhir.r4.valueset.ParticipationStatus.ACCEPTED.asCode()
-                )
+                    actor =
+                        Reference(
+                            reference = "Practitioner/actor".asFHIR(),
+                            type = Uri("Practitioner", extension = dataAuthorityExtension),
+                        ),
+                    status = com.projectronin.interop.fhir.r4.valueset.ParticipationStatus.ACCEPTED.asCode(),
+                ),
             ),
-            transformed.participant
+            transformed.participant,
         )
         assertEquals(listOf<Period>(), transformed.requestedPeriod)
     }

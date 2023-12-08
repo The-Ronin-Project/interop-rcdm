@@ -11,7 +11,10 @@ import kotlin.reflect.KClass
 class ContactPointNormalizer : ElementNormalizer<ContactPoint> {
     override val elementType: KClass<ContactPoint> = ContactPoint::class
 
-    override fun normalize(element: ContactPoint, tenant: Tenant): TransformResult<ContactPoint> {
+    override fun normalize(
+        element: ContactPoint,
+        tenant: Tenant,
+    ): TransformResult<ContactPoint> {
         return if (element.value == null || element.system == null) {
             TransformResult(null, true)
         } else {

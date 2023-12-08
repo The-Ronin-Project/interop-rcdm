@@ -19,7 +19,7 @@ class TransformManager(
     private val mappingService: MappingService,
     private val validationClient: ValidationClient,
     profileTransformers: List<ProfileTransformer<*>>,
-    private val localizer: Localizer
+    private val localizer: Localizer,
 ) {
     private val transformersByResource = profileTransformers.groupBy { it.supportedResource }
 
@@ -31,7 +31,7 @@ class TransformManager(
     fun <R : Resource<R>> transformResource(
         resource: R,
         tenant: Tenant,
-        forceCacheReloadTS: LocalDateTime? = null
+        forceCacheReloadTS: LocalDateTime? = null,
     ): TransformResponse<R>? {
         // Normalize ensures we have a standardized form for the resource before processing it.
         val normalizedResource = normalizer.normalize(resource, tenant)
@@ -47,7 +47,11 @@ class TransformManager(
         return TransformResponse(localizedResource, embeddedResources)
     }
 
-    private fun <R : Resource<R>> mapResource(resource: R, tenant: Tenant, forceCacheReloadTS: LocalDateTime?): R? {
+    private fun <R : Resource<R>> mapResource(
+        resource: R,
+        tenant: Tenant,
+        forceCacheReloadTS: LocalDateTime?,
+    ): R? {
         val (mappedResource, validation) = mappingService.map(resource, tenant, forceCacheReloadTS)
         if (validation.hasIssues()) {
             // If we did not get back a mapped resource, we need to report out against the original.
@@ -62,7 +66,10 @@ class TransformManager(
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun <R : Resource<R>> transformResource(resource: R, tenant: Tenant): TransformResponse<R>? {
+    private fun <R : Resource<R>> transformResource(
+        resource: R,
+        tenant: Tenant,
+    ): TransformResponse<R>? {
         val transformers = transformersByResource[resource::class] as List<ProfileTransformer<R>>
         val (defaultTransformers, nonDefaultTransformers) = transformers.partition { it.isDefault }
 

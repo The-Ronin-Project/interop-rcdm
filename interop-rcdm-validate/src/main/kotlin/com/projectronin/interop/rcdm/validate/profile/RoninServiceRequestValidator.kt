@@ -25,32 +25,40 @@ class RoninServiceRequestValidator : ProfileValidator<ServiceRequest>() {
     override val profileVersion = 1
 
     private val requiredSubjectError = RequiredFieldError(ServiceRequest::subject)
-    private val minimumExtensionError = FHIRError(
-        code = "RONIN_SERVREQ_001",
-        description = "Service Request must have at least two extensions",
-        severity = ValidationIssueSeverity.ERROR,
-        location = LocationContext(ServiceRequest::extension)
-    )
-    private val invalidTenantSourceServiceRequestCategoryError = FHIRError(
-        code = "RONIN_SERVREQ_002",
-        description = "Service Request extension Tenant Source Service Request Category is invalid",
-        severity = ValidationIssueSeverity.ERROR,
-        location = LocationContext(ServiceRequest::extension)
-    )
-    private val invalidTenantSourceServiceRequestCodeError = FHIRError(
-        code = "RONIN_SERVREQ_003",
-        description = "Service Request extension Tenant Source Service Request Code is invalid",
-        severity = ValidationIssueSeverity.ERROR,
-        location = LocationContext(ServiceRequest::extension)
-    )
-    private val invalidCategorySizeError = FHIRError(
-        code = "RONIN_SERVREQ_004",
-        description = "Service Request requires exactly 1 Category element",
-        severity = ValidationIssueSeverity.ERROR,
-        location = LocationContext(ServiceRequest::category)
-    )
+    private val minimumExtensionError =
+        FHIRError(
+            code = "RONIN_SERVREQ_001",
+            description = "Service Request must have at least two extensions",
+            severity = ValidationIssueSeverity.ERROR,
+            location = LocationContext(ServiceRequest::extension),
+        )
+    private val invalidTenantSourceServiceRequestCategoryError =
+        FHIRError(
+            code = "RONIN_SERVREQ_002",
+            description = "Service Request extension Tenant Source Service Request Category is invalid",
+            severity = ValidationIssueSeverity.ERROR,
+            location = LocationContext(ServiceRequest::extension),
+        )
+    private val invalidTenantSourceServiceRequestCodeError =
+        FHIRError(
+            code = "RONIN_SERVREQ_003",
+            description = "Service Request extension Tenant Source Service Request Code is invalid",
+            severity = ValidationIssueSeverity.ERROR,
+            location = LocationContext(ServiceRequest::extension),
+        )
+    private val invalidCategorySizeError =
+        FHIRError(
+            code = "RONIN_SERVREQ_004",
+            description = "Service Request requires exactly 1 Category element",
+            severity = ValidationIssueSeverity.ERROR,
+            location = LocationContext(ServiceRequest::category),
+        )
 
-    override fun validate(resource: ServiceRequest, validation: Validation, context: LocationContext) {
+    override fun validate(
+        resource: ServiceRequest,
+        validation: Validation,
+        context: LocationContext,
+    ) {
         validation.apply {
             // Must have at least 2 extensions
             checkTrue(resource.extension.size >= 2, minimumExtensionError, context)
@@ -62,7 +70,7 @@ class RoninServiceRequestValidator : ProfileValidator<ServiceRequest>() {
                 null,
                 ServiceRequest::category,
                 context,
-                this
+                this,
             )
 
             checkTrue(
@@ -71,7 +79,7 @@ class RoninServiceRequestValidator : ProfileValidator<ServiceRequest>() {
                         it.value?.type == DynamicValueType.CODEABLE_CONCEPT
                 },
                 invalidTenantSourceServiceRequestCategoryError,
-                context
+                context,
             )
 
             // Check the code field (R4 Requires a code).
@@ -81,7 +89,7 @@ class RoninServiceRequestValidator : ProfileValidator<ServiceRequest>() {
                         it.value?.type == DynamicValueType.CODEABLE_CONCEPT
                 } == 1,
                 invalidTenantSourceServiceRequestCodeError,
-                context
+                context,
             )
 
             checkNotNull(resource.subject, requiredSubjectError, context)
@@ -89,7 +97,7 @@ class RoninServiceRequestValidator : ProfileValidator<ServiceRequest>() {
                 resource.subject,
                 listOf(ResourceType.Patient),
                 LocationContext(ServiceRequest::subject),
-                validation
+                validation,
             )
         }
     }

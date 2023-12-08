@@ -23,34 +23,41 @@ class RoninMedicationAdministrationValidator : ProfileValidator<MedicationAdmini
     override val rcdmVersion: RCDMVersion = RCDMVersion.V3_31_0
     override val profileVersion: Int = 3
 
-    private val requiredCategoryError = FHIRError(
-        code = "RONIN_MEDADMIN_001",
-        description = "More than one category cannot be present if category is not null",
-        severity = ValidationIssueSeverity.ERROR,
-        location = LocationContext(MedicationAdministration::category)
-    )
+    private val requiredCategoryError =
+        FHIRError(
+            code = "RONIN_MEDADMIN_001",
+            description = "More than one category cannot be present if category is not null",
+            severity = ValidationIssueSeverity.ERROR,
+            location = LocationContext(MedicationAdministration::category),
+        )
 
-    private val requiredMedicationReferenceError = FHIRError(
-        code = "RONIN_MEDADMIN_002",
-        description = "Medication must be a Reference",
-        severity = ValidationIssueSeverity.ERROR,
-        location = LocationContext(MedicationAdministration::medication)
-    )
-    private val invalidMedicationAdministrationStatusExtensionError = FHIRError(
-        code = "RONIN_MEDADMIN_003",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "Tenant source medication administration status extension is missing or invalid",
-        location = LocationContext(MedicationAdministration::extension)
-    )
+    private val requiredMedicationReferenceError =
+        FHIRError(
+            code = "RONIN_MEDADMIN_002",
+            description = "Medication must be a Reference",
+            severity = ValidationIssueSeverity.ERROR,
+            location = LocationContext(MedicationAdministration::medication),
+        )
+    private val invalidMedicationAdministrationStatusExtensionError =
+        FHIRError(
+            code = "RONIN_MEDADMIN_003",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "Tenant source medication administration status extension is missing or invalid",
+            location = LocationContext(MedicationAdministration::extension),
+        )
 
-    override fun validate(resource: MedicationAdministration, validation: Validation, context: LocationContext) {
+    override fun validate(
+        resource: MedicationAdministration,
+        validation: Validation,
+        context: LocationContext,
+    ) {
         validation.apply {
             validateMedicationDatatype(resource.extension, context, this)
             resource.medication?.let { medication ->
                 checkTrue(
                     medication.type == DynamicValueType.REFERENCE,
                     requiredMedicationReferenceError,
-                    context
+                    context,
                 )
             }
 
@@ -60,7 +67,7 @@ class RoninMedicationAdministrationValidator : ProfileValidator<MedicationAdmini
                 checkTrue(
                     categorySize,
                     requiredCategoryError,
-                    context
+                    context,
                 )
             }
 
@@ -71,7 +78,7 @@ class RoninMedicationAdministrationValidator : ProfileValidator<MedicationAdmini
                         it.value?.type == DynamicValueType.CODING
                 },
                 invalidMedicationAdministrationStatusExtensionError,
-                context
+                context,
             )
         }
     }

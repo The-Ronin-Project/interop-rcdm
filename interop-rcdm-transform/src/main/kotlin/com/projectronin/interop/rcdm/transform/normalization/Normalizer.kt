@@ -15,13 +15,19 @@ class Normalizer(elementNormalizers: List<ElementNormalizer<*>>) : BaseGenericTr
     /**
      * Normalizes the [element] for the [tenant]
      */
-    fun <T : Any> normalize(element: T, tenant: Tenant): T {
+    fun <T : Any> normalize(
+        element: T,
+        tenant: Tenant,
+    ): T {
         val normalizedValues = getTransformedValues(element, tenant)
         return copy(element, normalizedValues)
     }
 
     @Suppress("UNCHECKED_CAST")
-    override fun <T : Any> transformType(element: T, tenant: Tenant): TransformResult<T>? {
+    override fun <T : Any> transformType(
+        element: T,
+        tenant: Tenant,
+    ): TransformResult<T>? {
         return when (element) {
             is Element<*> -> transformElement(element, tenant) as? TransformResult<T>
             else -> null
@@ -29,7 +35,10 @@ class Normalizer(elementNormalizers: List<ElementNormalizer<*>>) : BaseGenericTr
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun <E : Element<E>> transformElement(element: Element<E>, tenant: Tenant): TransformResult<E>? {
+    private fun <E : Element<E>> transformElement(
+        element: Element<E>,
+        tenant: Tenant,
+    ): TransformResult<E>? {
         val internallyNormalizedElement = (transformOrNull(element, tenant) ?: element) as E
 
         val normalizer = normalizersByElement[element::class] as? ElementNormalizer<E>

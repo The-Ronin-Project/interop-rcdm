@@ -15,7 +15,10 @@ class ExtensionNormalizer : ElementNormalizer<Extension> {
 
     override val elementType: KClass<Extension> = Extension::class
 
-    override fun normalize(element: Extension, tenant: Tenant): TransformResult<Extension> {
+    override fun normalize(
+        element: Extension,
+        tenant: Tenant,
+    ): TransformResult<Extension> {
         return if ((RoninExtension.values().find { it.value == element.url?.value } != null) ||
             (element.url != null && (element.value != null || element.extension.isNotEmpty()))
         ) {

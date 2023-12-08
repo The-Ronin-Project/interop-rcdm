@@ -17,9 +17,10 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class ContactPointMapperTest {
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "test"
-    }
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "test"
+        }
     private val patient = mockk<Patient>()
 
     private val registryClient = mockk<NormalizationRegistryClient>()
@@ -27,9 +28,10 @@ class ContactPointMapperTest {
 
     @Test
     fun `maps with null system`() {
-        val initial = ContactPoint(
-            system = null
-        )
+        val initial =
+            ContactPoint(
+                system = null,
+            )
         val validation = Validation()
 
         val mapped = mapper.map(initial, patient, tenant, LocationContext(Patient::class), validation, null)
@@ -39,9 +41,10 @@ class ContactPointMapperTest {
 
     @Test
     fun `maps with null system value`() {
-        val initial = ContactPoint(
-            system = Code(null)
-        )
+        val initial =
+            ContactPoint(
+                system = Code(null),
+            )
         val validation = Validation()
 
         val mapped = mapper.map(initial, patient, tenant, LocationContext(Patient::class), validation, null)
@@ -51,9 +54,10 @@ class ContactPointMapperTest {
 
     @Test
     fun `maps with system value that has no mapping`() {
-        val initial = ContactPoint(
-            system = Code("unmapped-system")
-        )
+        val initial =
+            ContactPoint(
+                system = Code("unmapped-system"),
+            )
         val validation = Validation()
 
         every {
@@ -64,7 +68,7 @@ class ContactPointMapperTest {
                 ContactPointSystem::class,
                 RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value,
                 patient,
-                null
+                null,
             )
         } returns null
 
@@ -75,9 +79,10 @@ class ContactPointMapperTest {
 
     @Test
     fun `maps with system value that is mapped`() {
-        val initial = ContactPoint(
-            system = Code("mapped-system")
-        )
+        val initial =
+            ContactPoint(
+                system = Code("mapped-system"),
+            )
         val validation = Validation()
 
         val mockExtension = mockk<Extension>()
@@ -89,28 +94,31 @@ class ContactPointMapperTest {
                 ContactPointSystem::class,
                 RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value,
                 patient,
-                null
+                null,
             )
-        } returns mockk {
-            every { coding.code?.value } returns "email"
-            every { extension } returns mockExtension
-            every { metadata } returns listOf()
-        }
+        } returns
+            mockk {
+                every { coding.code?.value } returns "email"
+                every { extension } returns mockExtension
+                every { metadata } returns listOf()
+            }
 
         val mapped = mapper.map(initial, patient, tenant, LocationContext(Patient::class), validation, null)
 
-        val expected = ContactPoint(
-            system = Code(value = "email", extension = listOf(mockExtension))
-        )
+        val expected =
+            ContactPoint(
+                system = Code(value = "email", extension = listOf(mockExtension)),
+            )
         assertEquals(expected, mapped)
         assertEquals(0, validation.issues().size)
     }
 
     @Test
     fun `maps with null use`() {
-        val initial = ContactPoint(
-            use = null
-        )
+        val initial =
+            ContactPoint(
+                use = null,
+            )
         val validation = Validation()
 
         val mapped = mapper.map(initial, patient, tenant, LocationContext(Patient::class), validation, null)
@@ -120,9 +128,10 @@ class ContactPointMapperTest {
 
     @Test
     fun `maps with null use value`() {
-        val initial = ContactPoint(
-            use = Code(null)
-        )
+        val initial =
+            ContactPoint(
+                use = Code(null),
+            )
         val validation = Validation()
 
         val mapped = mapper.map(initial, patient, tenant, LocationContext(Patient::class), validation, null)
@@ -132,9 +141,10 @@ class ContactPointMapperTest {
 
     @Test
     fun `maps with use value that has no mapping`() {
-        val initial = ContactPoint(
-            use = Code("unmapped-use")
-        )
+        val initial =
+            ContactPoint(
+                use = Code("unmapped-use"),
+            )
         val validation = Validation()
 
         every {
@@ -145,7 +155,7 @@ class ContactPointMapperTest {
                 ContactPointUse::class,
                 RoninExtension.TENANT_SOURCE_TELECOM_USE.value,
                 patient,
-                null
+                null,
             )
         } returns null
 
@@ -156,9 +166,10 @@ class ContactPointMapperTest {
 
     @Test
     fun `maps with use value that is mapped`() {
-        val initial = ContactPoint(
-            use = Code("mapped-use")
-        )
+        val initial =
+            ContactPoint(
+                use = Code("mapped-use"),
+            )
         val validation = Validation()
 
         val mockExtension = mockk<Extension>()
@@ -170,29 +181,32 @@ class ContactPointMapperTest {
                 ContactPointUse::class,
                 RoninExtension.TENANT_SOURCE_TELECOM_USE.value,
                 patient,
-                null
+                null,
             )
-        } returns mockk {
-            every { coding.code?.value } returns "temp"
-            every { extension } returns mockExtension
-            every { metadata } returns listOf()
-        }
+        } returns
+            mockk {
+                every { coding.code?.value } returns "temp"
+                every { extension } returns mockExtension
+                every { metadata } returns listOf()
+            }
 
         val mapped = mapper.map(initial, patient, tenant, LocationContext(Patient::class), validation, null)
 
-        val expected = ContactPoint(
-            use = Code(value = "temp", extension = listOf(mockExtension))
-        )
+        val expected =
+            ContactPoint(
+                use = Code(value = "temp", extension = listOf(mockExtension)),
+            )
         assertEquals(expected, mapped)
         assertEquals(0, validation.issues().size)
     }
 
     @Test
     fun `maps with use and system that are mapped`() {
-        val initial = ContactPoint(
-            system = Code("mapped-system"),
-            use = Code("mapped-use")
-        )
+        val initial =
+            ContactPoint(
+                system = Code("mapped-system"),
+                use = Code("mapped-use"),
+            )
         val validation = Validation()
 
         val mockSystemExtension = mockk<Extension>()
@@ -204,13 +218,14 @@ class ContactPointMapperTest {
                 ContactPointSystem::class,
                 RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value,
                 patient,
-                null
+                null,
             )
-        } returns mockk {
-            every { coding.code?.value } returns "email"
-            every { extension } returns mockSystemExtension
-            every { metadata } returns listOf()
-        }
+        } returns
+            mockk {
+                every { coding.code?.value } returns "email"
+                every { extension } returns mockSystemExtension
+                every { metadata } returns listOf()
+            }
 
         val mockUseExtension = mockk<Extension>()
         every {
@@ -221,20 +236,22 @@ class ContactPointMapperTest {
                 ContactPointUse::class,
                 RoninExtension.TENANT_SOURCE_TELECOM_USE.value,
                 patient,
-                null
+                null,
             )
-        } returns mockk {
-            every { coding.code?.value } returns "temp"
-            every { extension } returns mockUseExtension
-            every { metadata } returns listOf()
-        }
+        } returns
+            mockk {
+                every { coding.code?.value } returns "temp"
+                every { extension } returns mockUseExtension
+                every { metadata } returns listOf()
+            }
 
         val mapped = mapper.map(initial, patient, tenant, LocationContext(Patient::class), validation, null)
 
-        val expected = ContactPoint(
-            system = Code(value = "email", extension = listOf(mockSystemExtension)),
-            use = Code(value = "temp", extension = listOf(mockUseExtension))
-        )
+        val expected =
+            ContactPoint(
+                system = Code(value = "email", extension = listOf(mockSystemExtension)),
+                use = Code(value = "temp", extension = listOf(mockUseExtension)),
+            )
         assertEquals(expected, mapped)
         assertEquals(0, validation.issues().size)
     }

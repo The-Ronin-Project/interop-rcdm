@@ -22,7 +22,7 @@ import kotlin.reflect.jvm.jvmErasure
 @Component
 class MappingService(
     resourceMappers: List<ResourceMapper<*>>,
-    elementMappers: List<ElementMapper<*>>
+    elementMappers: List<ElementMapper<*>>,
 ) {
     private val mappersByResource = resourceMappers.associateBy { it.supportedResource }
     private val mappersByElement = elementMappers.associateBy { it.supportedElement }
@@ -30,7 +30,11 @@ class MappingService(
     /**
      * Maps the [resource] for the [tenant].
      */
-    fun <R : Resource<R>> map(resource: R, tenant: Tenant, forceCacheReloadTS: LocalDateTime?): MapResponse<R> {
+    fun <R : Resource<R>> map(
+        resource: R,
+        tenant: Tenant,
+        forceCacheReloadTS: LocalDateTime?,
+    ): MapResponse<R> {
         // First we map the resource itself. This relies on a specific ResourceMapper for the resource type.
         val (resourceMapped, validation) = mapResource(resource, tenant, forceCacheReloadTS)
 
@@ -46,10 +50,11 @@ class MappingService(
     private fun <R : Resource<R>> mapResource(
         resource: R,
         tenant: Tenant,
-        forceCacheReloadTS: LocalDateTime?
+        forceCacheReloadTS: LocalDateTime?,
     ): MapResponse<R> {
-        val resourceMapper = mappersByResource[resource::class] as? ResourceMapper<R>
-            ?: throw IllegalStateException("No ResourceMapper defined for ${resource.resourceType}")
+        val resourceMapper =
+            mappersByResource[resource::class] as? ResourceMapper<R>
+                ?: throw IllegalStateException("No ResourceMapper defined for ${resource.resourceType}")
         return resourceMapper.map(resource, tenant, forceCacheReloadTS)
     }
 
@@ -60,7 +65,7 @@ class MappingService(
         resource: R,
         tenant: Tenant,
         validation: Validation,
-        forceCacheReloadTS: LocalDateTime?
+        forceCacheReloadTS: LocalDateTime?,
     ): R {
         val resourceContext = LocationContext(resource::class)
 
@@ -76,7 +81,7 @@ class MappingService(
                 tenant,
                 validation,
                 resourceContext,
-                forceCacheReloadTS
+                forceCacheReloadTS,
             )?.let { newValue ->
                 mappedResource = copy(mappedResource, mapOf(property.name to newValue))
             }
@@ -95,17 +100,18 @@ class MappingService(
         tenant: Tenant,
         elementContext: LocationContext,
         validation: Validation,
-        forceCacheReloadTS: LocalDateTime?
+        forceCacheReloadTS: LocalDateTime?,
     ): Element<E>? {
         val elementMapper = mappersByElement[element::class] as? ElementMapper<E>
         val currentElement = element as E
 
         // Map the element itself against any ElementMapper configured for this element type.
-        val mappedElement = if (elementMapper == null) {
-            currentElement
-        } else {
-            elementMapper.map(currentElement, resource, tenant, elementContext, validation, forceCacheReloadTS)
-        }
+        val mappedElement =
+            if (elementMapper == null) {
+                currentElement
+            } else {
+                elementMapper.map(currentElement, resource, tenant, elementContext, validation, forceCacheReloadTS)
+            }
 
         return mappedElement?.let {
             // If the element did not fail mapping, we need to attempt to map its properties as well to handle any nested values.
@@ -122,7 +128,7 @@ class MappingService(
         tenant: Tenant,
         parentContext: LocationContext,
         validation: Validation,
-        forceCacheReloadTS: LocalDateTime?
+        forceCacheReloadTS: LocalDateTime?,
     ): Element<E> {
         var mappedElement = element
         element.javaClass.kotlin.memberProperties.forEach { property ->
@@ -133,7 +139,7 @@ class MappingService(
                 tenant,
                 validation,
                 parentContext,
-                forceCacheReloadTS
+                forceCacheReloadTS,
             )?.let { newValue ->
                 mappedElement = copy(mappedElement, mapOf(property.name to newValue))
             }
@@ -152,19 +158,20 @@ class MappingService(
         tenant: Tenant,
         validation: Validation,
         parentContext: LocationContext,
-        forceCacheReloadTS: LocalDateTime?
+        forceCacheReloadTS: LocalDateTime?,
     ): Any? {
         val kotlinType = property.returnType.jvmErasure
 
         return if (kotlinType.isSubclassOf(Collection::class)) {
             val collection = property.get(element) as? Collection<*>
             collection?.let {
-                val mappedCollection = collection.mapIndexed { index, item ->
-                    val indexedContext = parentContext.append(LocationContext("", "${property.name}[$index]"))
-                    item?.let {
-                        handleValue(item, resource, tenant, validation, indexedContext, forceCacheReloadTS) ?: item
+                val mappedCollection =
+                    collection.mapIndexed { index, item ->
+                        val indexedContext = parentContext.append(LocationContext("", "${property.name}[$index]"))
+                        item?.let {
+                            handleValue(item, resource, tenant, validation, indexedContext, forceCacheReloadTS) ?: item
+                        }
                     }
-                }
                 if (mappedCollection == collection) null else mappedCollection
             }
         } else {
@@ -184,7 +191,7 @@ class MappingService(
         tenant: Tenant,
         validation: Validation,
         valueContext: LocationContext,
-        forceCacheReloadTS: LocalDateTime?
+        forceCacheReloadTS: LocalDateTime?,
     ): Any? {
         val kotlinType = value::class
 
@@ -207,7 +214,7 @@ class MappingService(
                             tenant,
                             valueContext,
                             validation,
-                            forceCacheReloadTS
+                            forceCacheReloadTS,
                         )?.let { element ->
                             DynamicValue(dynamicValue.type, element)
                         }

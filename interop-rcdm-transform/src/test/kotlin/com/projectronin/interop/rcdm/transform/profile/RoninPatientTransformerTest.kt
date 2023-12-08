@@ -55,29 +55,32 @@ import org.junit.jupiter.api.Test
 class RoninPatientTransformerTest {
     private val transformer = RoninPatientTransformer()
 
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "test"
-    }
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "test"
+        }
 
-    private val identifierList = listOf(
-        Identifier(
-            type = CodeableConcept(
-                text = "MRN".asFHIR()
+    private val identifierList =
+        listOf(
+            Identifier(
+                type =
+                    CodeableConcept(
+                        text = "MRN".asFHIR(),
+                    ),
+                system = Uri("mrnSystem"),
+                value = "An MRN".asFHIR(),
             ),
-            system = Uri("mrnSystem"),
-            value = "An MRN".asFHIR()
-        ),
-        Identifier(
-            type = CodeableConcepts.RONIN_FHIR_ID,
-            system = CodeSystem.RONIN_FHIR_ID.uri,
-            value = "12345".asFHIR()
-        ),
-        Identifier(
-            type = CodeableConcepts.RONIN_MRN,
-            system = CodeSystem.RONIN_MRN.uri,
-            value = "An MRN".asFHIR()
+            Identifier(
+                type = CodeableConcepts.RONIN_FHIR_ID,
+                system = CodeSystem.RONIN_FHIR_ID.uri,
+                value = "12345".asFHIR(),
+            ),
+            Identifier(
+                type = CodeableConcepts.RONIN_MRN,
+                system = CodeSystem.RONIN_MRN.uri,
+                value = "An MRN".asFHIR(),
+            ),
         )
-    )
 
     @Test
     fun `returns supported resource`() {
@@ -91,74 +94,82 @@ class RoninPatientTransformerTest {
 
     @Test
     fun `transforms patient with all attributes`() {
-        val telecom = listOf(
-            ContactPoint(
-                id = "12345".asFHIR(),
-                extension = listOf(
-                    Extension(
-                        url = Uri("http://localhost/extension"),
-                        value = DynamicValue(DynamicValueType.STRING, "Value".asFHIR())
-                    )
+        val telecom =
+            listOf(
+                ContactPoint(
+                    id = "12345".asFHIR(),
+                    extension =
+                        listOf(
+                            Extension(
+                                url = Uri("http://localhost/extension"),
+                                value = DynamicValue(DynamicValueType.STRING, "Value".asFHIR()),
+                            ),
+                        ),
+                    system = ContactPointSystem.PHONE.asCode(),
+                    use = ContactPointUse.MOBILE.asCode(),
+                    value = "8675309".asFHIR(),
+                    rank = PositiveInt(1),
+                    period =
+                        Period(
+                            start = DateTime("2021-11-18"),
+                            end = DateTime("2022-11-17"),
+                        ),
                 ),
-                system = ContactPointSystem.PHONE.asCode(),
-                use = ContactPointUse.MOBILE.asCode(),
-                value = "8675309".asFHIR(),
-                rank = PositiveInt(1),
-                period = Period(
-                    start = DateTime("2021-11-18"),
-                    end = DateTime("2022-11-17")
-                )
-            ),
-            ContactPoint(
-                system = Code("telephone"),
-                value = "1112223333".asFHIR()
+                ContactPoint(
+                    system = Code("telephone"),
+                    value = "1112223333".asFHIR(),
+                ),
             )
-        )
 
-        val patient = Patient(
-            id = Id("12345"),
-            meta = Meta(
-                profile = listOf(Canonical("https://www.hl7.org/fhir/patient")),
-                source = Uri("source")
-            ),
-            implicitRules = Uri("implicit-rules"),
-            language = Code("en-US"),
-            text = Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()),
-            contained = listOf(Location(id = Id("67890"))),
-            extension = listOf(
-                Extension(
-                    url = Uri("http://localhost/extension"),
-                    value = DynamicValue(DynamicValueType.STRING, "Value".asFHIR())
-                )
-            ),
-            modifierExtension = listOf(
-                Extension(
-                    url = Uri("http://localhost/modifier-extension"),
-                    value = DynamicValue(DynamicValueType.STRING, "Value".asFHIR())
-                )
-            ),
-            identifier = identifierList,
-            active = FHIRBoolean.TRUE,
-            name = listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))),
-            telecom = telecom,
-            gender = AdministrativeGender.FEMALE.asCode(),
-            birthDate = Date("1975-07-05"),
-            deceased = DynamicValue(DynamicValueType.BOOLEAN, FHIRBoolean.FALSE),
-            address = listOf(Address(country = "USA".asFHIR())),
-            maritalStatus = CodeableConcept(text = "M".asFHIR()),
-            multipleBirth = DynamicValue(DynamicValueType.INTEGER, FHIRInteger(2)),
-            photo = listOf(Attachment(contentType = Code("text"), data = Base64Binary("abcd"))),
-            contact = listOf(PatientContact(name = HumanName(text = "Jane Doe".asFHIR()))),
-            communication = listOf(PatientCommunication(language = CodeableConcept(text = "English".asFHIR()))),
-            generalPractitioner = listOf(Reference(display = "GP".asFHIR())),
-            managingOrganization = Reference(display = "organization".asFHIR()),
-            link = listOf(
-                PatientLink(
-                    other = Reference(display = "other patient".asFHIR()),
-                    type = LinkType.REPLACES.asCode()
-                )
+        val patient =
+            Patient(
+                id = Id("12345"),
+                meta =
+                    Meta(
+                        profile = listOf(Canonical("https://www.hl7.org/fhir/patient")),
+                        source = Uri("source"),
+                    ),
+                implicitRules = Uri("implicit-rules"),
+                language = Code("en-US"),
+                text = Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()),
+                contained = listOf(Location(id = Id("67890"))),
+                extension =
+                    listOf(
+                        Extension(
+                            url = Uri("http://localhost/extension"),
+                            value = DynamicValue(DynamicValueType.STRING, "Value".asFHIR()),
+                        ),
+                    ),
+                modifierExtension =
+                    listOf(
+                        Extension(
+                            url = Uri("http://localhost/modifier-extension"),
+                            value = DynamicValue(DynamicValueType.STRING, "Value".asFHIR()),
+                        ),
+                    ),
+                identifier = identifierList,
+                active = FHIRBoolean.TRUE,
+                name = listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))),
+                telecom = telecom,
+                gender = AdministrativeGender.FEMALE.asCode(),
+                birthDate = Date("1975-07-05"),
+                deceased = DynamicValue(DynamicValueType.BOOLEAN, FHIRBoolean.FALSE),
+                address = listOf(Address(country = "USA".asFHIR())),
+                maritalStatus = CodeableConcept(text = "M".asFHIR()),
+                multipleBirth = DynamicValue(DynamicValueType.INTEGER, FHIRInteger(2)),
+                photo = listOf(Attachment(contentType = Code("text"), data = Base64Binary("abcd"))),
+                contact = listOf(PatientContact(name = HumanName(text = "Jane Doe".asFHIR()))),
+                communication = listOf(PatientCommunication(language = CodeableConcept(text = "English".asFHIR()))),
+                generalPractitioner = listOf(Reference(display = "GP".asFHIR())),
+                managingOrganization = Reference(display = "organization".asFHIR()),
+                link =
+                    listOf(
+                        PatientLink(
+                            other = Reference(display = "other patient".asFHIR()),
+                            type = LinkType.REPLACES.asCode(),
+                        ),
+                    ),
             )
-        )
 
         val transformResponse = transformer.transform(patient, tenant)
 
@@ -170,32 +181,32 @@ class RoninPatientTransformerTest {
         assertEquals(Id("12345"), transformed.id)
         assertEquals(
             Meta(profile = listOf(RoninProfile.PATIENT.canonical), source = Uri("source")),
-            transformed.meta
+            transformed.meta,
         )
         assertEquals(Uri("implicit-rules"), transformed.implicitRules)
         assertEquals(Code("en-US"), transformed.language)
         assertEquals(Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()), transformed.text)
         assertEquals(
             listOf(Location(id = Id("67890"))),
-            transformed.contained
+            transformed.contained,
         )
         assertEquals(
             listOf(
                 Extension(
                     url = Uri("http://localhost/extension"),
-                    value = DynamicValue(DynamicValueType.STRING, "Value".asFHIR())
-                )
+                    value = DynamicValue(DynamicValueType.STRING, "Value".asFHIR()),
+                ),
             ),
-            transformed.extension
+            transformed.extension,
         )
         assertEquals(
             listOf(
                 Extension(
                     url = Uri("http://localhost/modifier-extension"),
-                    value = DynamicValue(DynamicValueType.STRING, "Value".asFHIR())
-                )
+                    value = DynamicValue(DynamicValueType.STRING, "Value".asFHIR()),
+                ),
             ),
-            transformed.modifierExtension
+            transformed.modifierExtension,
         )
         assertEquals(
             identifierList +
@@ -203,15 +214,15 @@ class RoninPatientTransformerTest {
                     Identifier(
                         type = CodeableConcepts.RONIN_TENANT,
                         system = CodeSystem.RONIN_TENANT.uri,
-                        value = "test".asFHIR()
+                        value = "test".asFHIR(),
                     ),
                     Identifier(
                         type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
                         system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                        value = "EHR Data Authority".asFHIR()
-                    )
+                        value = "EHR Data Authority".asFHIR(),
+                    ),
                 ),
-            transformed.identifier
+            transformed.identifier,
         )
         assertEquals(FHIRBoolean.TRUE, transformed.active)
         assertEquals(listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))), transformed.name)
@@ -223,15 +234,15 @@ class RoninPatientTransformerTest {
         assertEquals(CodeableConcept(text = "M".asFHIR()), transformed.maritalStatus)
         assertEquals(
             DynamicValue(type = DynamicValueType.INTEGER, value = FHIRInteger(2)),
-            transformed.multipleBirth
+            transformed.multipleBirth,
         )
         assertEquals(
             listOf(Attachment(contentType = Code("text"), data = Base64Binary("abcd"))),
-            transformed.photo
+            transformed.photo,
         )
         assertEquals(
             listOf(PatientCommunication(language = CodeableConcept(text = "English".asFHIR()))),
-            transformed.communication
+            transformed.communication,
         )
         assertEquals(listOf(Reference(display = "GP".asFHIR())), transformed.generalPractitioner)
         assertEquals(Reference(display = "organization".asFHIR()), transformed.managingOrganization)
@@ -239,24 +250,25 @@ class RoninPatientTransformerTest {
             listOf(
                 PatientLink(
                     other = Reference(display = "other patient".asFHIR()),
-                    type = LinkType.REPLACES.asCode()
-                )
+                    type = LinkType.REPLACES.asCode(),
+                ),
             ),
-            transformed.link
+            transformed.link,
         )
     }
 
     @Test
     fun `transform adds data absent reason extension when identifier does not have a system value`() {
         val identifiers = identifierList + Identifier(system = null, value = "something".asFHIR())
-        val patient = Patient(
-            id = Id("12345"),
-            meta = Meta(source = Uri("fake-source-fake-url")),
-            identifier = identifiers,
-            name = listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))),
-            gender = AdministrativeGender.FEMALE.asCode(),
-            birthDate = Date("1975-07-05")
-        )
+        val patient =
+            Patient(
+                id = Id("12345"),
+                meta = Meta(source = Uri("fake-source-fake-url")),
+                identifier = identifiers,
+                name = listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))),
+                gender = AdministrativeGender.FEMALE.asCode(),
+                birthDate = Date("1975-07-05"),
+            )
 
         val transformResponse = transformer.transform(patient, tenant)
 
@@ -271,41 +283,43 @@ class RoninPatientTransformerTest {
                         system = Uri(value = null, extension = dataAbsentReasonExtension),
                         value = "something".asFHIR(),
                         id = null,
-                        extension = emptyList()
+                        extension = emptyList(),
                     ),
                     Identifier(
                         type = CodeableConcepts.RONIN_TENANT,
                         system = CodeSystem.RONIN_TENANT.uri,
-                        value = "test".asFHIR()
+                        value = "test".asFHIR(),
                     ),
                     Identifier(
                         type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
                         system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                        value = "EHR Data Authority".asFHIR()
-                    )
+                        value = "EHR Data Authority".asFHIR(),
+                    ),
                 ),
-            transformed.identifier
+            transformed.identifier,
         )
     }
 
     @Test
     fun `transforms patient with minimum attributes`() {
-        val patient = Patient(
-            id = Id("12345"),
-            meta = Meta(source = Uri("source")),
-            identifier = identifierList,
-            name = listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))),
-            gender = AdministrativeGender.FEMALE.asCode(),
-            birthDate = Date("1975-07-05")
-        )
+        val patient =
+            Patient(
+                id = Id("12345"),
+                meta = Meta(source = Uri("source")),
+                identifier = identifierList,
+                name = listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))),
+                gender = AdministrativeGender.FEMALE.asCode(),
+                birthDate = Date("1975-07-05"),
+            )
 
         val transformResponse = transformer.transform(patient, tenant)
 
-        val defaultCoding = Coding(
-            system = CodeSystem.NULL_FLAVOR.uri,
-            code = Code("NI"),
-            display = "NoInformation".asFHIR()
-        )
+        val defaultCoding =
+            Coding(
+                system = CodeSystem.NULL_FLAVOR.uri,
+                code = Code("NI"),
+                display = "NoInformation".asFHIR(),
+            )
 
         transformResponse!!
         assertEquals(0, transformResponse.embeddedResources.size)
@@ -315,7 +329,7 @@ class RoninPatientTransformerTest {
         assertEquals(Id("12345"), transformed.id)
         assertEquals(
             Meta(profile = listOf(RoninProfile.PATIENT.canonical), source = Uri("source")),
-            transformed.meta
+            transformed.meta,
         )
         assertNull(transformed.implicitRules)
         assertNull(transformed.language)
@@ -329,15 +343,15 @@ class RoninPatientTransformerTest {
                     Identifier(
                         type = CodeableConcepts.RONIN_TENANT,
                         system = CodeSystem.RONIN_TENANT.uri,
-                        value = "test".asFHIR()
+                        value = "test".asFHIR(),
                     ),
                     Identifier(
                         type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
                         system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                        value = "EHR Data Authority".asFHIR()
-                    )
+                        value = "EHR Data Authority".asFHIR(),
+                    ),
                 ),
-            transformed.identifier
+            transformed.identifier,
         )
         assertNull(transformed.active)
         assertEquals(listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))), transformed.name)
@@ -357,38 +371,43 @@ class RoninPatientTransformerTest {
 
     @Test
     fun `transforms patient with value extensions`() {
-        val identifierWithExtension = Identifier(
-            use = IdentifierUse.USUAL.asCode(),
-            system = Uri("urn:oid:2.16.840.1.113883.4.1"),
-            value = FHIRString(
-                value = null,
-                extension = listOf(
-                    Extension(
-                        url = Uri("http://hl7.org/fhir/StructureDefinition/rendered-value"),
-                        value = DynamicValue(DynamicValueType.STRING, "xxx-xx-1234".asFHIR())
-                    )
-                )
+        val identifierWithExtension =
+            Identifier(
+                use = IdentifierUse.USUAL.asCode(),
+                system = Uri("urn:oid:2.16.840.1.113883.4.1"),
+                value =
+                    FHIRString(
+                        value = null,
+                        extension =
+                            listOf(
+                                Extension(
+                                    url = Uri("http://hl7.org/fhir/StructureDefinition/rendered-value"),
+                                    value = DynamicValue(DynamicValueType.STRING, "xxx-xx-1234".asFHIR()),
+                                ),
+                            ),
+                    ),
             )
-        )
 
         val identifiers = identifierList + identifierWithExtension
 
-        val patient = Patient(
-            id = Id("12345"),
-            meta = Meta(source = Uri("source")),
-            identifier = identifiers,
-            name = listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))),
-            gender = AdministrativeGender.FEMALE.asCode(),
-            birthDate = Date("1975-07-05")
-        )
+        val patient =
+            Patient(
+                id = Id("12345"),
+                meta = Meta(source = Uri("source")),
+                identifier = identifiers,
+                name = listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))),
+                gender = AdministrativeGender.FEMALE.asCode(),
+                birthDate = Date("1975-07-05"),
+            )
 
         val transformResponse = transformer.transform(patient, tenant)
 
-        val defaultCoding = Coding(
-            system = CodeSystem.NULL_FLAVOR.uri,
-            code = Code("NI"),
-            display = "NoInformation".asFHIR()
-        )
+        val defaultCoding =
+            Coding(
+                system = CodeSystem.NULL_FLAVOR.uri,
+                code = Code("NI"),
+                display = "NoInformation".asFHIR(),
+            )
 
         transformResponse!!
         assertEquals(0, transformResponse.embeddedResources.size)
@@ -398,7 +417,7 @@ class RoninPatientTransformerTest {
         assertEquals(Id("12345"), transformed.id)
         assertEquals(
             Meta(profile = listOf(RoninProfile.PATIENT.canonical), source = Uri("source")),
-            transformed.meta
+            transformed.meta,
         )
         assertNull(transformed.implicitRules)
         assertNull(transformed.language)
@@ -413,15 +432,15 @@ class RoninPatientTransformerTest {
                     Identifier(
                         type = CodeableConcepts.RONIN_TENANT,
                         system = CodeSystem.RONIN_TENANT.uri,
-                        value = "test".asFHIR()
+                        value = "test".asFHIR(),
                     ),
                     Identifier(
                         type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
                         system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                        value = "EHR Data Authority".asFHIR()
-                    )
+                        value = "EHR Data Authority".asFHIR(),
+                    ),
                 ),
-            transformed.identifier
+            transformed.identifier,
         )
         assertNull(transformed.active)
         assertEquals(listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))), transformed.name)
@@ -441,22 +460,24 @@ class RoninPatientTransformerTest {
 
     @Test
     fun `transforms gender with data absent reason into an Unknown gender`() {
-        val patient = Patient(
-            id = Id("12345"),
-            meta = Meta(source = Uri("source")),
-            identifier = identifierList,
-            name = listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))),
-            gender = Code(value = null, extension = dataAbsentReasonExtension),
-            birthDate = Date("1975-07-05")
-        )
+        val patient =
+            Patient(
+                id = Id("12345"),
+                meta = Meta(source = Uri("source")),
+                identifier = identifierList,
+                name = listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))),
+                gender = Code(value = null, extension = dataAbsentReasonExtension),
+                birthDate = Date("1975-07-05"),
+            )
 
         val transformResponse = transformer.transform(patient, tenant)
 
-        val defaultCoding = Coding(
-            system = CodeSystem.NULL_FLAVOR.uri,
-            code = Code("NI"),
-            display = "NoInformation".asFHIR()
-        )
+        val defaultCoding =
+            Coding(
+                system = CodeSystem.NULL_FLAVOR.uri,
+                code = Code("NI"),
+                display = "NoInformation".asFHIR(),
+            )
 
         transformResponse!!
         assertEquals(0, transformResponse.embeddedResources.size)
@@ -466,7 +487,7 @@ class RoninPatientTransformerTest {
         assertEquals(Id("12345"), transformed.id)
         assertEquals(
             Meta(profile = listOf(RoninProfile.PATIENT.canonical), source = Uri("source")),
-            transformed.meta
+            transformed.meta,
         )
         assertNull(transformed.implicitRules)
         assertNull(transformed.language)
@@ -480,15 +501,15 @@ class RoninPatientTransformerTest {
                     Identifier(
                         type = CodeableConcepts.RONIN_TENANT,
                         system = CodeSystem.RONIN_TENANT.uri,
-                        value = "test".asFHIR()
+                        value = "test".asFHIR(),
                     ),
                     Identifier(
                         type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
                         system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                        value = "EHR Data Authority".asFHIR()
-                    )
+                        value = "EHR Data Authority".asFHIR(),
+                    ),
                 ),
-            transformed.identifier
+            transformed.identifier,
         )
         assertNull(transformed.active)
         assertEquals(listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))), transformed.name)

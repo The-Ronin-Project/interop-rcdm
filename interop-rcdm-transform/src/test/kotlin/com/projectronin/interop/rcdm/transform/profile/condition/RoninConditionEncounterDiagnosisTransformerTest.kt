@@ -25,9 +25,10 @@ import org.junit.jupiter.api.Test
 class RoninConditionEncounterDiagnosisTransformerTest {
     private val transformer = RoninConditionEncounterDiagnosisTransformer()
 
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "tenant"
-    }
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "tenant"
+        }
 
     @Test
     fun `returns correct profile`() {
@@ -36,92 +37,105 @@ class RoninConditionEncounterDiagnosisTransformerTest {
 
     @Test
     fun `qualifies for encounter-diagnosis category`() {
-        val condition = Condition(
-            id = Id("12345"),
-            subject = Reference(display = FHIRString("subject")),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.CONDITION_CATEGORY.uri,
-                            code = Code("encounter-diagnosis")
-                        )
-                    )
-                )
+        val condition =
+            Condition(
+                id = Id("12345"),
+                subject = Reference(display = FHIRString("subject")),
+                category =
+                    listOf(
+                        CodeableConcept(
+                            coding =
+                                listOf(
+                                    Coding(
+                                        system = CodeSystem.CONDITION_CATEGORY.uri,
+                                        code = Code("encounter-diagnosis"),
+                                    ),
+                                ),
+                        ),
+                    ),
             )
-        )
 
         assertTrue(transformer.qualifies(condition))
     }
 
     @Test
     fun `does not qualify for unsupported category`() {
-        val condition = Condition(
-            id = Id("12345"),
-            subject = Reference(display = FHIRString("subject")),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.CONDITION_CATEGORY.uri,
-                            code = Code("problem-list-item")
-                        )
-                    )
-                )
+        val condition =
+            Condition(
+                id = Id("12345"),
+                subject = Reference(display = FHIRString("subject")),
+                category =
+                    listOf(
+                        CodeableConcept(
+                            coding =
+                                listOf(
+                                    Coding(
+                                        system = CodeSystem.CONDITION_CATEGORY.uri,
+                                        code = Code("problem-list-item"),
+                                    ),
+                                ),
+                        ),
+                    ),
             )
-        )
 
         assertFalse(transformer.qualifies(condition))
     }
 
     @Test
     fun `transforms required fields`() {
-        val condition = Condition(
-            id = Id("12345"),
-            subject = Reference(display = FHIRString("subject")),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.CONDITION_CATEGORY.uri,
-                            code = Code("encounter-diagnosis")
-                        )
-                    )
-                )
+        val condition =
+            Condition(
+                id = Id("12345"),
+                subject = Reference(display = FHIRString("subject")),
+                category =
+                    listOf(
+                        CodeableConcept(
+                            coding =
+                                listOf(
+                                    Coding(
+                                        system = CodeSystem.CONDITION_CATEGORY.uri,
+                                        code = Code("encounter-diagnosis"),
+                                    ),
+                                ),
+                        ),
+                    ),
             )
-        )
 
         val response = transformer.transform(condition, tenant)
         response!!
 
-        val expectedCondition = Condition(
-            id = Id("12345"),
-            meta = Meta(profile = listOf(RoninProfile.CONDITION_ENCOUNTER_DIAGNOSIS.canonical)),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = FHIRString("12345")
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = FHIRString("tenant")
-                ),
-                dataAuthorityIdentifier
-            ),
-            subject = Reference(display = FHIRString("subject")),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.CONDITION_CATEGORY.uri,
-                            code = Code("encounter-diagnosis")
-                        )
-                    )
-                )
+        val expectedCondition =
+            Condition(
+                id = Id("12345"),
+                meta = Meta(profile = listOf(RoninProfile.CONDITION_ENCOUNTER_DIAGNOSIS.canonical)),
+                identifier =
+                    listOf(
+                        Identifier(
+                            type = CodeableConcepts.RONIN_FHIR_ID,
+                            system = CodeSystem.RONIN_FHIR_ID.uri,
+                            value = FHIRString("12345"),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_TENANT,
+                            system = CodeSystem.RONIN_TENANT.uri,
+                            value = FHIRString("tenant"),
+                        ),
+                        dataAuthorityIdentifier,
+                    ),
+                subject = Reference(display = FHIRString("subject")),
+                category =
+                    listOf(
+                        CodeableConcept(
+                            coding =
+                                listOf(
+                                    Coding(
+                                        system = CodeSystem.CONDITION_CATEGORY.uri,
+                                        code = Code("encounter-diagnosis"),
+                                    ),
+                                ),
+                        ),
+                    ),
             )
-        )
 
         assertEquals(expectedCondition, response.resource)
         assertEquals(listOf<Resource<*>>(), response.embeddedResources)

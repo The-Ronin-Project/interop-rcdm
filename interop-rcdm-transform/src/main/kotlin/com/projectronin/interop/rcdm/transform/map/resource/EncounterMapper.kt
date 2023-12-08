@@ -17,10 +17,11 @@ import kotlin.reflect.KClass
 class EncounterMapper(registryClient: NormalizationRegistryClient) :
     ResourceMapper<Encounter>, BaseMapper<Encounter>(registryClient) {
     override val supportedResource: KClass<Encounter> = Encounter::class
+
     override fun map(
         resource: Encounter,
         tenant: Tenant,
-        forceCacheReloadTS: LocalDateTime?
+        forceCacheReloadTS: LocalDateTime?,
     ): MapResponse<Encounter> {
         val validation = Validation()
         val classExtension = resource.`class`.getExtensionOrEmptyList(RoninExtension.TENANT_SOURCE_ENCOUNTER_CLASS)
@@ -28,10 +29,10 @@ class EncounterMapper(registryClient: NormalizationRegistryClient) :
         return MapResponse(
             resource.let {
                 resource.copy(
-                    extension = resource.extension + classExtension
+                    extension = resource.extension + classExtension,
                 )
             },
-            validation
+            validation,
         )
     }
 }

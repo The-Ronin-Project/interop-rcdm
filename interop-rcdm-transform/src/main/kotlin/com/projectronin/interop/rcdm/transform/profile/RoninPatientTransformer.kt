@@ -27,29 +27,36 @@ class RoninPatientTransformer : ProfileTransformer<Patient>() {
     override val rcdmVersion: RCDMVersion = RCDMVersion.V3_19_0
     override val profileVersion: Int = 3
 
-    override fun transformInternal(original: Patient, tenant: Tenant): TransformResponse<Patient>? {
-        val maritalStatus = original.maritalStatus ?: CodeableConcept(
-            coding = listOf(
-                Coding(
-                    system = CodeSystem.NULL_FLAVOR.uri,
-                    code = Code("NI"),
-                    display = FHIRString("NoInformation")
-                )
+    override fun transformInternal(
+        original: Patient,
+        tenant: Tenant,
+    ): TransformResponse<Patient>? {
+        val maritalStatus =
+            original.maritalStatus ?: CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(
+                            system = CodeSystem.NULL_FLAVOR.uri,
+                            code = Code("NI"),
+                            display = FHIRString("NoInformation"),
+                        ),
+                    ),
             )
-        )
-        val gender = original.gender.takeIf { !it.hasDataAbsentReason() } ?: Code(
-            AdministrativeGender.UNKNOWN.code,
-            original.gender!!.id,
-            original.gender!!.extension
-        )
+        val gender =
+            original.gender.takeIf { !it.hasDataAbsentReason() } ?: Code(
+                AdministrativeGender.UNKNOWN.code,
+                original.gender!!.id,
+                original.gender!!.extension,
+            )
 
         val originalIdentifiers = normalizeIdentifierSystems(original.identifier)
 
-        val transformed = original.copy(
-            gender = gender,
-            identifier = originalIdentifiers + tenant.toFhirIdentifier() + dataAuthorityIdentifier,
-            maritalStatus = maritalStatus
-        )
+        val transformed =
+            original.copy(
+                gender = gender,
+                identifier = originalIdentifiers + tenant.toFhirIdentifier() + dataAuthorityIdentifier,
+                maritalStatus = maritalStatus,
+            )
         return TransformResponse(transformed)
     }
 

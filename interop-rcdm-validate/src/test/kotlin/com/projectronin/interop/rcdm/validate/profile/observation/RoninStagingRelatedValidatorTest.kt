@@ -31,17 +31,18 @@ class RoninStagingRelatedValidatorTest {
         Coding(
             system = CodeSystem.LOINC.uri,
             display = "Staging".asFHIR(),
-            code = Code("1234-5")
+            code = Code("1234-5"),
         )
 
-    private val registryClient = mockk<NormalizationRegistryClient> {
-        every {
-            getRequiredValueSet(
-                "Observation.code",
-                RoninProfile.OBSERVATION_STAGING_RELATED.value
-            )
-        } returns ValueSetList(listOf(stagingCoding), mockk())
-    }
+    private val registryClient =
+        mockk<NormalizationRegistryClient> {
+            every {
+                getRequiredValueSet(
+                    "Observation.code",
+                    RoninProfile.OBSERVATION_STAGING_RELATED.value,
+                )
+            } returns ValueSetList(listOf(stagingCoding), mockk())
+        }
     private val validator = RoninStagingRelatedValidator(registryClient)
 
     @Test
@@ -51,80 +52,88 @@ class RoninStagingRelatedValidatorTest {
 
     @Test
     fun `validate fails for no category`() {
-        val respiratoryRate = Observation(
-            id = Id("1234"),
-            meta = Meta(profile = listOf(RoninProfile.OBSERVATION_STAGING_RELATED.canonical), source = Uri("source")),
-            identifier = requiredIdentifiers,
-            extension = listOf(
-                Extension(
-                    url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
-                    value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "code".asFHIR()))
-                )
-            ),
-            status = com.projectronin.interop.fhir.r4.valueset.ObservationStatus.FINAL.asCode(),
-            code = CodeableConcept(coding = listOf(stagingCoding)),
-            subject = Reference(reference = FHIRString("Patient/1234")),
-            category = listOf()
-        )
+        val respiratoryRate =
+            Observation(
+                id = Id("1234"),
+                meta = Meta(profile = listOf(RoninProfile.OBSERVATION_STAGING_RELATED.canonical), source = Uri("source")),
+                identifier = requiredIdentifiers,
+                extension =
+                    listOf(
+                        Extension(
+                            url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
+                            value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "code".asFHIR())),
+                        ),
+                    ),
+                status = com.projectronin.interop.fhir.r4.valueset.ObservationStatus.FINAL.asCode(),
+                code = CodeableConcept(coding = listOf(stagingCoding)),
+                subject = Reference(reference = FHIRString("Patient/1234")),
+                category = listOf(),
+            )
         val validation = validator.validate(respiratoryRate, LocationContext(Observation::class))
         assertEquals(1, validation.issues().size)
         assertEquals(
             "ERROR RONIN_STAGING_OBS_002: Coding is required @ Observation.category",
-            validation.issues().first().toString()
+            validation.issues().first().toString(),
         )
     }
 
     @Test
     fun `validate fails for no categories with codings`() {
-        val respiratoryRate = Observation(
-            id = Id("1234"),
-            meta = Meta(profile = listOf(RoninProfile.OBSERVATION_STAGING_RELATED.canonical), source = Uri("source")),
-            identifier = requiredIdentifiers,
-            extension = listOf(
-                Extension(
-                    url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
-                    value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "code".asFHIR()))
-                )
-            ),
-            status = com.projectronin.interop.fhir.r4.valueset.ObservationStatus.FINAL.asCode(),
-            code = CodeableConcept(coding = listOf(stagingCoding)),
-            subject = Reference(reference = FHIRString("Patient/1234")),
-            category = listOf(CodeableConcept(coding = listOf()))
-        )
+        val respiratoryRate =
+            Observation(
+                id = Id("1234"),
+                meta = Meta(profile = listOf(RoninProfile.OBSERVATION_STAGING_RELATED.canonical), source = Uri("source")),
+                identifier = requiredIdentifiers,
+                extension =
+                    listOf(
+                        Extension(
+                            url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
+                            value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "code".asFHIR())),
+                        ),
+                    ),
+                status = com.projectronin.interop.fhir.r4.valueset.ObservationStatus.FINAL.asCode(),
+                code = CodeableConcept(coding = listOf(stagingCoding)),
+                subject = Reference(reference = FHIRString("Patient/1234")),
+                category = listOf(CodeableConcept(coding = listOf())),
+            )
         val validation = validator.validate(respiratoryRate, LocationContext(Observation::class))
         assertEquals(1, validation.issues().size)
         assertEquals(
             "ERROR RONIN_STAGING_OBS_002: Coding is required @ Observation.category",
-            validation.issues().first().toString()
+            validation.issues().first().toString(),
         )
     }
 
     @Test
     fun `validate succeeds`() {
-        val respiratoryRate = Observation(
-            id = Id("1234"),
-            meta = Meta(profile = listOf(RoninProfile.OBSERVATION_STAGING_RELATED.canonical), source = Uri("source")),
-            identifier = requiredIdentifiers,
-            extension = listOf(
-                Extension(
-                    url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
-                    value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "code".asFHIR()))
-                )
-            ),
-            status = com.projectronin.interop.fhir.r4.valueset.ObservationStatus.FINAL.asCode(),
-            code = CodeableConcept(coding = listOf(stagingCoding)),
-            subject = Reference(reference = FHIRString("Patient/1234")),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = Code("other-observation")
-                        )
-                    )
-                )
+        val respiratoryRate =
+            Observation(
+                id = Id("1234"),
+                meta = Meta(profile = listOf(RoninProfile.OBSERVATION_STAGING_RELATED.canonical), source = Uri("source")),
+                identifier = requiredIdentifiers,
+                extension =
+                    listOf(
+                        Extension(
+                            url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
+                            value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "code".asFHIR())),
+                        ),
+                    ),
+                status = com.projectronin.interop.fhir.r4.valueset.ObservationStatus.FINAL.asCode(),
+                code = CodeableConcept(coding = listOf(stagingCoding)),
+                subject = Reference(reference = FHIRString("Patient/1234")),
+                category =
+                    listOf(
+                        CodeableConcept(
+                            coding =
+                                listOf(
+                                    Coding(
+                                        system = CodeSystem.OBSERVATION_CATEGORY.uri,
+                                        code = Code("other-observation"),
+                                    ),
+                                ),
+                        ),
+                    ),
             )
-        )
         val validation = validator.validate(respiratoryRate, LocationContext(Observation::class))
         assertEquals(0, validation.issues().size)
     }

@@ -14,15 +14,20 @@ import kotlin.reflect.KClass
 class MetaValidator : ElementValidator<Meta> {
     override val supportedElement: KClass<Meta> = Meta::class
 
-    private val requiredMetaProfile = FHIRError(
-        code = "RONIN_META_001",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "Missing expected profiles",
-        location = LocationContext(Meta::profile)
-    )
+    private val requiredMetaProfile =
+        FHIRError(
+            code = "RONIN_META_001",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "Missing expected profiles",
+            location = LocationContext(Meta::profile),
+        )
     private val requiredMetaSource = RequiredFieldError(Meta::source)
 
-    override fun validate(element: Meta, profiles: List<RoninProfile>, parentContext: LocationContext): Validation =
+    override fun validate(
+        element: Meta,
+        profiles: List<RoninProfile>,
+        parentContext: LocationContext,
+    ): Validation =
         Validation().apply {
             checkTrue(profiles.all { element.profile.contains(it.canonical) }, requiredMetaProfile, parentContext) {
                 "one or more expected profiles are missing. Expected: ${profiles.joinToString(", ") { it.value }}"

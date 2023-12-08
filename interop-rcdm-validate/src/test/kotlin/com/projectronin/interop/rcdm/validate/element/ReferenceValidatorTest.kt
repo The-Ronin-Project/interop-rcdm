@@ -14,6 +14,7 @@ import com.projectronin.interop.rcdm.common.util.dataAuthorityExtension
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
+@Suppress("ktlint:standard:max-line-length")
 class ReferenceValidatorTest {
     private val validator = ReferenceValidator()
 
@@ -24,9 +25,10 @@ class ReferenceValidatorTest {
 
     @Test
     fun `validates if no type`() {
-        val reference = Reference(
-            type = null
-        )
+        val reference =
+            Reference(
+                type = null,
+            )
 
         val validation =
             validator.validate(reference, listOf(RoninProfile.PATIENT), LocationContext(Patient::managingOrganization))
@@ -35,10 +37,11 @@ class ReferenceValidatorTest {
 
     @Test
     fun `validates with type and no reference`() {
-        val reference = Reference(
-            type = Uri("Organization"),
-            reference = null
-        )
+        val reference =
+            Reference(
+                type = Uri("Organization"),
+                reference = null,
+            )
 
         val validation =
             validator.validate(reference, listOf(RoninProfile.PATIENT), LocationContext(Patient::managingOrganization))
@@ -47,45 +50,49 @@ class ReferenceValidatorTest {
 
     @Test
     fun `fails if no extension with type and reference`() {
-        val reference = Reference(
-            type = Uri("Organization", extension = listOf()),
-            reference = FHIRString("Organization/1234")
-        )
+        val reference =
+            Reference(
+                type = Uri("Organization", extension = listOf()),
+                reference = FHIRString("Organization/1234"),
+            )
 
         val validation =
             validator.validate(reference, listOf(RoninProfile.PATIENT), LocationContext(Patient::managingOrganization))
         assertEquals(1, validation.issues().size)
         assertEquals(
             "ERROR RONIN_DAUTH_EX_001: Data Authority extension identifier is required for reference @ Patient.managingOrganization.type.extension",
-            validation.issues().first().toString()
+            validation.issues().first().toString(),
         )
     }
 
     @Test
     fun `fails if extension is not the data authority extension with type and reference`() {
-        val reference = Reference(
-            type = Uri(
-                "Organization",
-                extension = listOf(Extension(value = DynamicValue(DynamicValueType.BOOLEAN, FHIRBoolean.TRUE)))
-            ),
-            reference = FHIRString("Organization/1234")
-        )
+        val reference =
+            Reference(
+                type =
+                    Uri(
+                        "Organization",
+                        extension = listOf(Extension(value = DynamicValue(DynamicValueType.BOOLEAN, FHIRBoolean.TRUE))),
+                    ),
+                reference = FHIRString("Organization/1234"),
+            )
 
         val validation =
             validator.validate(reference, listOf(RoninProfile.PATIENT), LocationContext(Patient::managingOrganization))
         assertEquals(1, validation.issues().size)
         assertEquals(
             "ERROR RONIN_DAUTH_EX_001: Data Authority extension identifier is required for reference @ Patient.managingOrganization.type.extension",
-            validation.issues().first().toString()
+            validation.issues().first().toString(),
         )
     }
 
     @Test
     fun `validates with type, reference and data authority extension`() {
-        val reference = Reference(
-            type = Uri("Organization", extension = dataAuthorityExtension),
-            reference = FHIRString("Organization/1234")
-        )
+        val reference =
+            Reference(
+                type = Uri("Organization", extension = dataAuthorityExtension),
+                reference = FHIRString("Organization/1234"),
+            )
 
         val validation =
             validator.validate(reference, listOf(RoninProfile.PATIENT), LocationContext(Patient::managingOrganization))

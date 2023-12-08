@@ -10,10 +10,14 @@ import kotlin.reflect.KClass
 abstract class BaseRoninDiagnosticReportProfileTransformer : ProfileTransformer<DiagnosticReport>() {
     override val supportedResource: KClass<DiagnosticReport> = DiagnosticReport::class
 
-    override fun transformInternal(original: DiagnosticReport, tenant: Tenant): TransformResponse<DiagnosticReport>? {
-        val transformed = original.copy(
-            identifier = original.getRoninIdentifiers(tenant)
-        )
+    override fun transformInternal(
+        original: DiagnosticReport,
+        tenant: Tenant,
+    ): TransformResponse<DiagnosticReport>? {
+        val transformed =
+            original.copy(
+                identifier = original.getRoninIdentifiers(tenant),
+            )
         return TransformResponse(transformed)
     }
 }

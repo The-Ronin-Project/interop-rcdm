@@ -23,32 +23,40 @@ class RoninProcedureValidator : ProfileValidator<Procedure>() {
     override val rcdmVersion = RCDMVersion.V3_28_0
     override val profileVersion = 1
 
-    private val requiredExtensionCodeError = FHIRError(
-        code = "RONIN_PROC_001",
-        description = "Tenant source procedure code extension is missing or invalid",
-        severity = ValidationIssueSeverity.ERROR,
-        location = LocationContext(Procedure::extension)
-    )
-    private val requiredExtensionCategoryError = FHIRError(
-        code = "RONIN_PROC_002",
-        description = "Tenant source procedure category extension is invalid",
-        severity = ValidationIssueSeverity.ERROR,
-        location = LocationContext(Procedure::extension)
-    )
-    private val requiredPerformedError = FHIRError(
-        code = "USCORE_PROC_001",
-        description = "Performed SHALL be present if the status is 'completed' or 'in-progress'",
-        severity = ValidationIssueSeverity.ERROR,
-        location = LocationContext(Procedure::performed)
-    )
-    private val requiredCodeError = FHIRError(
-        code = "USCORE_PROC_002",
-        description = "Procedure code is missing or invalid",
-        severity = ValidationIssueSeverity.ERROR,
-        location = LocationContext(Procedure::code)
-    )
+    private val requiredExtensionCodeError =
+        FHIRError(
+            code = "RONIN_PROC_001",
+            description = "Tenant source procedure code extension is missing or invalid",
+            severity = ValidationIssueSeverity.ERROR,
+            location = LocationContext(Procedure::extension),
+        )
+    private val requiredExtensionCategoryError =
+        FHIRError(
+            code = "RONIN_PROC_002",
+            description = "Tenant source procedure category extension is invalid",
+            severity = ValidationIssueSeverity.ERROR,
+            location = LocationContext(Procedure::extension),
+        )
+    private val requiredPerformedError =
+        FHIRError(
+            code = "USCORE_PROC_001",
+            description = "Performed SHALL be present if the status is 'completed' or 'in-progress'",
+            severity = ValidationIssueSeverity.ERROR,
+            location = LocationContext(Procedure::performed),
+        )
+    private val requiredCodeError =
+        FHIRError(
+            code = "USCORE_PROC_002",
+            description = "Procedure code is missing or invalid",
+            severity = ValidationIssueSeverity.ERROR,
+            location = LocationContext(Procedure::code),
+        )
 
-    override fun validate(resource: Procedure, validation: Validation, context: LocationContext) {
+    override fun validate(
+        resource: Procedure,
+        validation: Validation,
+        context: LocationContext,
+    ) {
         validation.apply {
             if (resource.status?.value == EventStatus.COMPLETED.code || resource.status?.value == EventStatus.IN_PROGRESS.code) {
                 checkNotNull(resource.performed, requiredPerformedError, context)
@@ -62,13 +70,13 @@ class RoninProcedureValidator : ProfileValidator<Procedure>() {
                         it.value?.type == DynamicValueType.CODEABLE_CONCEPT
                 },
                 requiredExtensionCodeError,
-                context
+                context,
             )
             // extension may include procedure category
             checkTrue(
                 resource.extension.filter { it.url == RoninExtension.TENANT_SOURCE_PROCEDURE_CATEGORY.uri }.size <= 1,
                 requiredExtensionCategoryError,
-                context
+                context,
             )
         }
     }

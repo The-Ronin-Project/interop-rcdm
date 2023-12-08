@@ -20,31 +20,32 @@ class DocumentReferenceMapper(registryClient: NormalizationRegistryClient) : Res
     override fun map(
         resource: DocumentReference,
         tenant: Tenant,
-        forceCacheReloadTS: LocalDateTime?
+        forceCacheReloadTS: LocalDateTime?,
     ): MapResponse<DocumentReference> {
         val validation = Validation()
         val parentContext = LocationContext(DocumentReference::class)
 
-        val mappedType = resource.type?.let {
-            getConceptMapping(
-                it,
-                DocumentReference::type,
-                resource,
-                tenant,
-                parentContext,
-                validation,
-                forceCacheReloadTS
-            )
-        }
+        val mappedType =
+            resource.type?.let {
+                getConceptMapping(
+                    it,
+                    DocumentReference::type,
+                    resource,
+                    tenant,
+                    parentContext,
+                    validation,
+                    forceCacheReloadTS,
+                )
+            }
 
         return MapResponse(
             mappedType?.let {
                 resource.copy(
                     type = it.codeableConcept,
-                    extension = resource.extension + it.extension
+                    extension = resource.extension + it.extension,
                 )
             } ?: resource,
-            validation
+            validation,
         )
     }
 }

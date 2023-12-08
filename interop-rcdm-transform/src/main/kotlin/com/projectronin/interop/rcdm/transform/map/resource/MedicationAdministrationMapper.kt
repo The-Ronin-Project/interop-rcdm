@@ -18,34 +18,36 @@ import kotlin.reflect.KClass
 class MedicationAdministrationMapper(registryClient: NormalizationRegistryClient) : ResourceMapper<MedicationAdministration>,
     BaseMapper<MedicationAdministration>(registryClient) {
     override val supportedResource: KClass<MedicationAdministration> = MedicationAdministration::class
+
     override fun map(
         resource: MedicationAdministration,
         tenant: Tenant,
-        forceCacheReloadTS: LocalDateTime?
+        forceCacheReloadTS: LocalDateTime?,
     ): MapResponse<MedicationAdministration> {
         val validation = Validation()
         val parentContext = LocationContext(MedicationAdministration::class)
-        val mappedStatus = resource.status?.value?.let {
-            getConceptMappingForEnum<MedicationAdministrationStatus, MedicationAdministration>(
-                it,
-                MedicationAdministration::status,
-                "${parentContext.element}.status",
-                resource,
-                RoninExtension.TENANT_SOURCE_MEDICATION_ADMINISTRATION_STATUS,
-                tenant,
-                parentContext,
-                validation,
-                forceCacheReloadTS
-            )
-        }
+        val mappedStatus =
+            resource.status?.value?.let {
+                getConceptMappingForEnum<MedicationAdministrationStatus, MedicationAdministration>(
+                    it,
+                    MedicationAdministration::status,
+                    "${parentContext.element}.status",
+                    resource,
+                    RoninExtension.TENANT_SOURCE_MEDICATION_ADMINISTRATION_STATUS,
+                    tenant,
+                    parentContext,
+                    validation,
+                    forceCacheReloadTS,
+                )
+            }
         return MapResponse(
             mappedStatus?.let {
                 resource.copy(
                     status = it.coding.code,
-                    extension = resource.extension + it.extension
+                    extension = resource.extension + it.extension,
                 )
             } ?: resource,
-            validation
+            validation,
         )
     }
 }

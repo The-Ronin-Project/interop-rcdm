@@ -32,14 +32,16 @@ class RoninPractitionerRoleValidatorTest {
 
     @Test
     fun `validate succeeds with required`() {
-        val practitionerRole = PractitionerRole(
-            id = Id("12345"),
-            meta = Meta(
-                profile = listOf(Canonical(RoninProfile.PRACTITIONER_ROLE.value)),
-                source = Uri("source")
-            ),
-            identifier = requiredIdentifiers
-        )
+        val practitionerRole =
+            PractitionerRole(
+                id = Id("12345"),
+                meta =
+                    Meta(
+                        profile = listOf(Canonical(RoninProfile.PRACTITIONER_ROLE.value)),
+                        source = Uri("source"),
+                    ),
+                identifier = requiredIdentifiers,
+            )
 
         val validation = validator.validate(practitionerRole, LocationContext(PractitionerRole::class))
         assertEquals(0, validation.issues().size)

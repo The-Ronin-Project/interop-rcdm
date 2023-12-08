@@ -21,7 +21,12 @@ class RoninOrganizationValidator : ProfileValidator<Organization>() {
 
     private val requiredActiveFieldError = RequiredFieldError(Organization::active)
     private val requiredNameFieldError = RequiredFieldError(Organization::name)
-    override fun validate(resource: Organization, validation: Validation, context: LocationContext) {
+
+    override fun validate(
+        resource: Organization,
+        validation: Validation,
+        context: LocationContext,
+    ) {
         validation.apply {
             checkNotNull(resource.active, requiredActiveFieldError, context)
 

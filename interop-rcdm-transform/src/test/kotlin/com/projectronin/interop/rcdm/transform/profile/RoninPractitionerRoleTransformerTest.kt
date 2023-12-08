@@ -41,9 +41,10 @@ import org.junit.jupiter.api.Test
 class RoninPractitionerRoleTransformerTest {
     private val transformer = RoninPractitionerRoleTransformer()
 
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "test"
-    }
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "test"
+        }
 
     @Test
     fun `returns supported resource`() {
@@ -57,12 +58,13 @@ class RoninPractitionerRoleTransformerTest {
 
     @Test
     fun `transforms practitioner role with only required attributes`() {
-        val practitionerRole = PractitionerRole(
-            id = Id("12345"),
-            meta = Meta(source = Uri("source")),
-            practitioner = Reference(reference = "Practitioner/1234".asFHIR()),
-            organization = Reference(reference = "Organization/5678".asFHIR())
-        )
+        val practitionerRole =
+            PractitionerRole(
+                id = Id("12345"),
+                meta = Meta(source = Uri("source")),
+                practitioner = Reference(reference = "Practitioner/1234".asFHIR()),
+                organization = Reference(reference = "Organization/5678".asFHIR()),
+            )
 
         val transformResponse = transformer.transform(practitionerRole, tenant)
 
@@ -74,7 +76,7 @@ class RoninPractitionerRoleTransformerTest {
         assertEquals(Id("12345"), transformed.id)
         assertEquals(
             Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER_ROLE.value)), source = Uri("source")),
-            transformed.meta
+            transformed.meta,
         )
         assertNull(transformed.implicitRules)
         assertNull(transformed.language)
@@ -87,20 +89,20 @@ class RoninPractitionerRoleTransformerTest {
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
                     system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
+                    value = "12345".asFHIR(),
                 ),
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
+                    value = "test".asFHIR(),
                 ),
                 Identifier(
                     type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
                     system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
+                    value = "EHR Data Authority".asFHIR(),
+                ),
             ),
-            transformed.identifier
+            transformed.identifier,
         )
         assertNull(transformed.active)
         assertNull(transformed.period)
@@ -119,67 +121,78 @@ class RoninPractitionerRoleTransformerTest {
 
     @Test
     fun `transforms practitioner role with all attributes`() {
-        val telecom = listOf(
-            ContactPoint(
-                id = "12345".asFHIR(),
-                extension = listOf(
-                    Extension(
-                        url = Uri("http://localhost/extension"),
-                        value = DynamicValue(DynamicValueType.STRING, "Value".asFHIR())
-                    )
+        val telecom =
+            listOf(
+                ContactPoint(
+                    id = "12345".asFHIR(),
+                    extension =
+                        listOf(
+                            Extension(
+                                url = Uri("http://localhost/extension"),
+                                value = DynamicValue(DynamicValueType.STRING, "Value".asFHIR()),
+                            ),
+                        ),
+                    system = ContactPointSystem.PHONE.asCode(),
+                    use = ContactPointUse.MOBILE.asCode(),
+                    value = "8675309".asFHIR(),
+                    rank = PositiveInt(1),
+                    period =
+                        Period(
+                            start = DateTime("2021-11-18"),
+                            end = DateTime("2022-11-17"),
+                        ),
                 ),
-                system = ContactPointSystem.PHONE.asCode(),
-                use = ContactPointUse.MOBILE.asCode(),
-                value = "8675309".asFHIR(),
-                rank = PositiveInt(1),
-                period = Period(
-                    start = DateTime("2021-11-18"),
-                    end = DateTime("2022-11-17")
-                )
-            ),
-            ContactPoint(
-                system = Code("telephone"),
-                value = "1112223333".asFHIR()
+                ContactPoint(
+                    system = Code("telephone"),
+                    value = "1112223333".asFHIR(),
+                ),
             )
-        )
 
-        val practitionerRole = PractitionerRole(
-            id = Id("12345"),
-            meta = Meta(
-                profile = listOf(Canonical("https://www.hl7.org/fhir/practitioner-role")),
-                source = Uri("source")
-            ),
-            implicitRules = Uri("implicit-rules"),
-            language = Code("en-US"),
-            text = Narrative(status = com.projectronin.interop.fhir.r4.valueset.NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()),
-            contained = listOf(Location(id = Id("67890"))),
-            extension = listOf(
-                Extension(
-                    url = Uri("http://localhost/extension"),
-                    value = DynamicValue(DynamicValueType.STRING, "Value")
-                )
-            ),
-            modifierExtension = listOf(
-                Extension(
-                    url = Uri("http://localhost/modifier-extension"),
-                    value = DynamicValue(DynamicValueType.STRING, "Value")
-                )
-            ),
-            identifier = listOf(Identifier(value = "id".asFHIR())),
-            active = FHIRBoolean.TRUE,
-            period = Period(end = DateTime("2022")),
-            practitioner = Reference(reference = "Practitioner/1234".asFHIR()),
-            organization = Reference(reference = "Organization/5678".asFHIR()),
-            code = listOf(CodeableConcept(text = "code".asFHIR())),
-            specialty = listOf(CodeableConcept(text = "specialty".asFHIR())),
-            location = listOf(Reference(reference = "Location/9012".asFHIR())),
-            healthcareService = listOf(Reference(reference = "HealthcareService/3456".asFHIR())),
-            telecom = telecom,
-            availableTime = listOf(AvailableTime(allDay = FHIRBoolean.FALSE)),
-            notAvailable = listOf(NotAvailable(description = "Not available now".asFHIR())),
-            availabilityExceptions = "exceptions".asFHIR(),
-            endpoint = listOf(Reference(reference = "Endpoint/1357".asFHIR()))
-        )
+        val practitionerRole =
+            PractitionerRole(
+                id = Id("12345"),
+                meta =
+                    Meta(
+                        profile = listOf(Canonical("https://www.hl7.org/fhir/practitioner-role")),
+                        source = Uri("source"),
+                    ),
+                implicitRules = Uri("implicit-rules"),
+                language = Code("en-US"),
+                text =
+                    Narrative(
+                        status = com.projectronin.interop.fhir.r4.valueset.NarrativeStatus.GENERATED.asCode(),
+                        div = "div".asFHIR(),
+                    ),
+                contained = listOf(Location(id = Id("67890"))),
+                extension =
+                    listOf(
+                        Extension(
+                            url = Uri("http://localhost/extension"),
+                            value = DynamicValue(DynamicValueType.STRING, "Value"),
+                        ),
+                    ),
+                modifierExtension =
+                    listOf(
+                        Extension(
+                            url = Uri("http://localhost/modifier-extension"),
+                            value = DynamicValue(DynamicValueType.STRING, "Value"),
+                        ),
+                    ),
+                identifier = listOf(Identifier(value = "id".asFHIR())),
+                active = FHIRBoolean.TRUE,
+                period = Period(end = DateTime("2022")),
+                practitioner = Reference(reference = "Practitioner/1234".asFHIR()),
+                organization = Reference(reference = "Organization/5678".asFHIR()),
+                code = listOf(CodeableConcept(text = "code".asFHIR())),
+                specialty = listOf(CodeableConcept(text = "specialty".asFHIR())),
+                location = listOf(Reference(reference = "Location/9012".asFHIR())),
+                healthcareService = listOf(Reference(reference = "HealthcareService/3456".asFHIR())),
+                telecom = telecom,
+                availableTime = listOf(AvailableTime(allDay = FHIRBoolean.FALSE)),
+                notAvailable = listOf(NotAvailable(description = "Not available now".asFHIR())),
+                availabilityExceptions = "exceptions".asFHIR(),
+                endpoint = listOf(Reference(reference = "Endpoint/1357".asFHIR())),
+            )
 
         val transformResponse = transformer.transform(practitionerRole, tenant)
 
@@ -191,32 +204,32 @@ class RoninPractitionerRoleTransformerTest {
         assertEquals(Id("12345"), transformed.id)
         assertEquals(
             Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER_ROLE.value)), source = Uri("source")),
-            transformed.meta
+            transformed.meta,
         )
         assertEquals(Uri("implicit-rules"), transformed.implicitRules)
         assertEquals(Code("en-US"), transformed.language)
         assertEquals(Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()), transformed.text)
         assertEquals(
             listOf(Location(id = Id("67890"))),
-            transformed.contained
+            transformed.contained,
         )
         assertEquals(
             listOf(
                 Extension(
                     url = Uri("http://localhost/extension"),
-                    value = DynamicValue(DynamicValueType.STRING, "Value")
-                )
+                    value = DynamicValue(DynamicValueType.STRING, "Value"),
+                ),
             ),
-            transformed.extension
+            transformed.extension,
         )
         assertEquals(
             listOf(
                 Extension(
                     url = Uri("http://localhost/modifier-extension"),
-                    value = DynamicValue(DynamicValueType.STRING, "Value")
-                )
+                    value = DynamicValue(DynamicValueType.STRING, "Value"),
+                ),
             ),
-            transformed.modifierExtension
+            transformed.modifierExtension,
         )
         assertEquals(
             listOf(
@@ -224,20 +237,20 @@ class RoninPractitionerRoleTransformerTest {
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
                     system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
+                    value = "12345".asFHIR(),
                 ),
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
+                    value = "test".asFHIR(),
                 ),
                 Identifier(
                     type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
                     system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
+                    value = "EHR Data Authority".asFHIR(),
+                ),
             ),
-            transformed.identifier
+            transformed.identifier,
         )
         assertEquals(FHIRBoolean.TRUE, transformed.active)
         assertEquals(Period(end = DateTime("2022")), transformed.period)
@@ -248,7 +261,7 @@ class RoninPractitionerRoleTransformerTest {
         assertEquals(listOf(Reference(reference = "Location/9012".asFHIR())), transformed.location)
         assertEquals(
             listOf(Reference(reference = "HealthcareService/3456".asFHIR())),
-            transformed.healthcareService
+            transformed.healthcareService,
         )
         assertEquals(telecom, transformed.telecom)
         assertEquals(listOf(AvailableTime(allDay = FHIRBoolean.FALSE)), transformed.availableTime)

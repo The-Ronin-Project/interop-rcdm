@@ -5,5 +5,5 @@ import com.projectronin.interop.fhir.validate.Validation
 
 data class MapResponse<R : Resource<R>>(
     val mappedResource: R?,
-    val validation: Validation
+    val validation: Validation,
 )

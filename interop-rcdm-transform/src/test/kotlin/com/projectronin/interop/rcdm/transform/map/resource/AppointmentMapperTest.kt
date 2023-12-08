@@ -22,9 +22,10 @@ class AppointmentMapperTest {
     private val registryClient = mockk<NormalizationRegistryClient>()
     private val mapper = AppointmentMapper(registryClient)
 
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "tenant"
-    }
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "tenant"
+        }
 
     @Test
     fun `supported resource is Appointment`() {
@@ -35,15 +36,17 @@ class AppointmentMapperTest {
     fun `concept mapping finds status`() {
         val status = Code("input")
 
-        val appointment = Appointment(
-            status = status,
-            participant = emptyList()
-        )
+        val appointment =
+            Appointment(
+                status = status,
+                participant = emptyList(),
+            )
 
-        val mappedExtension = Extension(
-            url = RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS.uri,
-            value = DynamicValue(DynamicValueType.CODING, status)
-        )
+        val mappedExtension =
+            Extension(
+                url = RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS.uri,
+                value = DynamicValue(DynamicValueType.CODING, status),
+            )
 
         val mappedStatus = Code("booked")
 
@@ -54,13 +57,14 @@ class AppointmentMapperTest {
                 coding = any(),
                 enumClass = AppointmentStatus::class,
                 enumExtensionUrl = RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS.value,
-                resource = appointment
+                resource = appointment,
             )
-        } returns ConceptMapCoding(
-            coding = Coding(code = Code("booked")),
-            extension = mappedExtension,
-            metadata = emptyList()
-        )
+        } returns
+            ConceptMapCoding(
+                coding = Coding(code = Code("booked")),
+                extension = mappedExtension,
+                metadata = emptyList(),
+            )
 
         val (mappedResource, validation) = mapper.map(appointment, tenant, null)
         mappedResource!!
@@ -74,10 +78,11 @@ class AppointmentMapperTest {
     fun `null status stays`() {
         val status = Code(value = null)
 
-        val appointment = Appointment(
-            status = status,
-            participant = emptyList()
-        )
+        val appointment =
+            Appointment(
+                status = status,
+                participant = emptyList(),
+            )
 
         val (mappedResource, validation) = mapper.map(appointment, tenant, null)
         mappedResource!!

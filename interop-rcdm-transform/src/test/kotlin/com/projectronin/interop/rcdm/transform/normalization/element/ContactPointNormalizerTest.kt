@@ -23,9 +23,10 @@ class ContactPointNormalizerTest {
 
     @Test
     fun `purges a ContactPoint with no value`() {
-        val contactPoint = ContactPoint(
-            system = Code("system")
-        )
+        val contactPoint =
+            ContactPoint(
+                system = Code("system"),
+            )
 
         val response = normalizer.normalize(contactPoint, tenant)
         assertNull(response.element)
@@ -34,9 +35,10 @@ class ContactPointNormalizerTest {
 
     @Test
     fun `purges a ContactPoint with no system`() {
-        val contactPoint = ContactPoint(
-            value = FHIRString("value")
-        )
+        val contactPoint =
+            ContactPoint(
+                value = FHIRString("value"),
+            )
 
         val response = normalizer.normalize(contactPoint, tenant)
         assertNull(response.element)
@@ -45,10 +47,11 @@ class ContactPointNormalizerTest {
 
     @Test
     fun `returns original element if it has a system and value`() {
-        val contactPoint = ContactPoint(
-            system = Code("system"),
-            value = FHIRString("value")
-        )
+        val contactPoint =
+            ContactPoint(
+                system = Code("system"),
+                value = FHIRString("value"),
+            )
 
         val response = normalizer.normalize(contactPoint, tenant)
         assertEquals(contactPoint, response.element)

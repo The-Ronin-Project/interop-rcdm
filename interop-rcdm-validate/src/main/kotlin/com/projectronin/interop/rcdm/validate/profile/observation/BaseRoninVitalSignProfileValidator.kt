@@ -27,17 +27,22 @@ abstract class BaseRoninVitalSignProfileValidator(registryClient: NormalizationR
     /**
      * Validates the details for the specific vital sign. This does not need to include any details that are validated generically for all Vital Signs.
      */
-    abstract fun validateVitalSign(resource: Observation, parentContext: LocationContext, validation: Validation)
-
-    private val acceptedEffectiveTypes = listOf(
-        DynamicValueType.DATE_TIME,
-        DynamicValueType.PERIOD
+    abstract fun validateVitalSign(
+        resource: Observation,
+        parentContext: LocationContext,
+        validation: Validation,
     )
+
+    private val acceptedEffectiveTypes =
+        listOf(
+            DynamicValueType.DATE_TIME,
+            DynamicValueType.PERIOD,
+        )
 
     override fun validateSpecificObservation(
         resource: Observation,
         parentContext: LocationContext,
-        validation: Validation
+        validation: Validation,
     ) {
         validation.apply {
             resource.effective?.let { data ->
@@ -46,9 +51,9 @@ abstract class BaseRoninVitalSignProfileValidator(registryClient: NormalizationR
                     RoninInvalidDynamicValueError(
                         Observation::effective,
                         acceptedEffectiveTypes,
-                        profile.value
+                        profile.value,
                     ),
-                    parentContext
+                    parentContext,
                 )
             }
 
@@ -60,12 +65,13 @@ abstract class BaseRoninVitalSignProfileValidator(registryClient: NormalizationR
     private val requiredQuantityUnitError = RequiredFieldError(LocationContext(Quantity::unit))
     private val requiredQuantityCodeError = RequiredFieldError(LocationContext(Quantity::code))
 
-    private val invalidQuantitySystemError = FHIRError(
-        code = "USCORE_VSOBS_002",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "Quantity system must be UCUM",
-        location = LocationContext(Quantity::system)
-    )
+    private val invalidQuantitySystemError =
+        FHIRError(
+            code = "USCORE_VSOBS_002",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "Quantity system must be UCUM",
+            location = LocationContext(Quantity::system),
+        )
 
     /**
      * Validates the dynamic [value] against Ronin rules for vital sign quantities.
@@ -76,7 +82,7 @@ abstract class BaseRoninVitalSignProfileValidator(registryClient: NormalizationR
         value: DynamicValue<Any>?,
         validUnitCodeList: List<String>,
         validation: Validation,
-        parentContext: LocationContext = LocationContext(Observation::value)
+        parentContext: LocationContext = LocationContext(Observation::value),
     ) {
         validation.apply {
             value?.let {
@@ -92,7 +98,7 @@ abstract class BaseRoninVitalSignProfileValidator(registryClient: NormalizationR
                         checkTrue(
                             quantity.system == CodeSystem.UCUM.uri,
                             invalidQuantitySystemError,
-                            quantityContext
+                            quantityContext,
                         )
                     }
 
@@ -103,9 +109,9 @@ abstract class BaseRoninVitalSignProfileValidator(registryClient: NormalizationR
                             validUnitCodeList.contains(quantityCode.value),
                             InvalidValueSetError(
                                 LocationContext(Quantity::code),
-                                quantityCode.value ?: ""
+                                quantityCode.value ?: "",
                             ),
-                            quantityContext
+                            quantityContext,
                         )
                     }
                 }

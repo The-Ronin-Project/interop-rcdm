@@ -7,5 +7,5 @@ import com.projectronin.interop.rcdm.common.metadata.ConceptMapMetadata
 data class ConceptMapCodeableConcept(
     val codeableConcept: CodeableConcept,
     val extension: Extension,
-    val metadata: List<ConceptMapMetadata>
+    val metadata: List<ConceptMapMetadata>,
 )

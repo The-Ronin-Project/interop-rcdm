@@ -21,16 +21,20 @@ import kotlin.reflect.KClass
 import kotlin.reflect.full.findAnnotation
 
 class ProfileTransformerTest {
-    private val transformer = object : ProfileTransformer<Patient>() {
-        var response: TransformResponse<Patient>? = null
+    private val transformer =
+        object : ProfileTransformer<Patient>() {
+            var response: TransformResponse<Patient>? = null
 
-        override fun transformInternal(original: Patient, tenant: Tenant): TransformResponse<Patient>? = response
+            override fun transformInternal(
+                original: Patient,
+                tenant: Tenant,
+            ): TransformResponse<Patient>? = response
 
-        override val supportedResource: KClass<Patient> = Patient::class
-        override val profile: RoninProfile = RoninProfile.PATIENT
-        override val rcdmVersion: RCDMVersion = RCDMVersion.V3_19_0
-        override val profileVersion: Int = 1
-    }
+            override val supportedResource: KClass<Patient> = Patient::class
+            override val profile: RoninProfile = RoninProfile.PATIENT
+            override val rcdmVersion: RCDMVersion = RCDMVersion.V3_19_0
+            override val profileVersion: Int = 1
+        }
 
     private val tenant = mockk<Tenant>()
 
@@ -60,9 +64,10 @@ class ProfileTransformerTest {
 
     @Test
     fun `transforms meta with no Ronin profiles`() {
-        val patient = Patient(
-            meta = Meta(profile = listOf(Canonical("http://example.org/profile")))
-        )
+        val patient =
+            Patient(
+                meta = Meta(profile = listOf(Canonical("http://example.org/profile"))),
+            )
 
         transformer.response = TransformResponse(patient)
 
@@ -76,9 +81,10 @@ class ProfileTransformerTest {
 
     @Test
     fun `transforms meta with prior Ronin profiles`() {
-        val patient = Patient(
-            meta = Meta(profile = listOf(RoninProfile.APPOINTMENT.canonical))
-        )
+        val patient =
+            Patient(
+                meta = Meta(profile = listOf(RoninProfile.APPOINTMENT.canonical)),
+            )
 
         transformer.response = TransformResponse(patient)
 

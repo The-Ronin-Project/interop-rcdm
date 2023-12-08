@@ -21,49 +21,52 @@ class ProcedureMapper(registryClient: NormalizationRegistryClient) :
     override fun map(
         resource: Procedure,
         tenant: Tenant,
-        forceCacheReloadTS: LocalDateTime?
+        forceCacheReloadTS: LocalDateTime?,
     ): MapResponse<Procedure> {
         val validation = Validation()
         val parentContext = LocationContext(Procedure::class)
         val newExtensions = mutableListOf<Extension>()
 
         // Procedure.code is a single CodeableConcept
-        val mappedCodePair = resource.code?.let { code ->
-            getConceptMapping(
-                code,
-                Procedure::code,
-                resource,
-                tenant,
-                parentContext,
-                validation,
-                forceCacheReloadTS
-            )?.let {
-                newExtensions.add(it.extension)
-                it.codeableConcept
-            }
-        } ?: resource.code
+        val mappedCodePair =
+            resource.code?.let { code ->
+                getConceptMapping(
+                    code,
+                    Procedure::code,
+                    resource,
+                    tenant,
+                    parentContext,
+                    validation,
+                    forceCacheReloadTS,
+                )?.let {
+                    newExtensions.add(it.extension)
+                    it.codeableConcept
+                }
+            } ?: resource.code
 
         // Procedure.category is a single CodeableConcept
-        val mappedCategoryPair = resource.category?.let { category ->
-            getConceptMapping(
-                category,
-                Procedure::category,
-                resource,
-                tenant,
-                parentContext,
-                validation,
-                forceCacheReloadTS
-            )?.let {
-                newExtensions.add(it.extension)
-                it.codeableConcept
-            }
-        } ?: resource.category
+        val mappedCategoryPair =
+            resource.category?.let { category ->
+                getConceptMapping(
+                    category,
+                    Procedure::category,
+                    resource,
+                    tenant,
+                    parentContext,
+                    validation,
+                    forceCacheReloadTS,
+                )?.let {
+                    newExtensions.add(it.extension)
+                    it.codeableConcept
+                }
+            } ?: resource.category
 
-        val mappedProcedure = resource.copy(
-            code = mappedCodePair,
-            category = mappedCategoryPair,
-            extension = resource.extension + newExtensions
-        )
+        val mappedProcedure =
+            resource.copy(
+                code = mappedCodePair,
+                category = mappedCategoryPair,
+                extension = resource.extension + newExtensions,
+            )
 
         return MapResponse(mappedProcedure, validation)
     }

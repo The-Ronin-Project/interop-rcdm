@@ -22,9 +22,10 @@ class CodeableConceptNormalizerTest {
 
     @Test
     fun `text is non-null and non-empty`() {
-        val codeableConcept = CodeableConcept(
-            text = FHIRString("concept text")
-        )
+        val codeableConcept =
+            CodeableConcept(
+                text = FHIRString("concept text"),
+            )
 
         val response = normalizer.normalize(codeableConcept, tenant)
         assertEquals(codeableConcept, response.element)
@@ -33,17 +34,19 @@ class CodeableConceptNormalizerTest {
 
     @Test
     fun `text is empty`() {
-        val codeableConcept = CodeableConcept(
-            text = FHIRString(""),
-            coding = listOf(Coding(display = FHIRString("coding")))
-        )
+        val codeableConcept =
+            CodeableConcept(
+                text = FHIRString(""),
+                coding = listOf(Coding(display = FHIRString("coding"))),
+            )
 
         val response = normalizer.normalize(codeableConcept, tenant)
 
-        val expectedCodeableConcept = CodeableConcept(
-            text = FHIRString("coding"),
-            coding = listOf(Coding(display = FHIRString("coding")))
-        )
+        val expectedCodeableConcept =
+            CodeableConcept(
+                text = FHIRString("coding"),
+                coding = listOf(Coding(display = FHIRString("coding"))),
+            )
 
         assertEquals(expectedCodeableConcept, response.element)
         assertFalse(response.removeFromElement)
@@ -51,17 +54,19 @@ class CodeableConceptNormalizerTest {
 
     @Test
     fun `text value is null`() {
-        val codeableConcept = CodeableConcept(
-            text = FHIRString(null),
-            coding = listOf(Coding(display = FHIRString("coding")))
-        )
+        val codeableConcept =
+            CodeableConcept(
+                text = FHIRString(null),
+                coding = listOf(Coding(display = FHIRString("coding"))),
+            )
 
         val response = normalizer.normalize(codeableConcept, tenant)
 
-        val expectedCodeableConcept = CodeableConcept(
-            text = FHIRString("coding"),
-            coding = listOf(Coding(display = FHIRString("coding")))
-        )
+        val expectedCodeableConcept =
+            CodeableConcept(
+                text = FHIRString("coding"),
+                coding = listOf(Coding(display = FHIRString("coding"))),
+            )
 
         assertEquals(expectedCodeableConcept, response.element)
         assertFalse(response.removeFromElement)
@@ -69,17 +74,19 @@ class CodeableConceptNormalizerTest {
 
     @Test
     fun `text is null`() {
-        val codeableConcept = CodeableConcept(
-            text = null,
-            coding = listOf(Coding(display = FHIRString("coding")))
-        )
+        val codeableConcept =
+            CodeableConcept(
+                text = null,
+                coding = listOf(Coding(display = FHIRString("coding"))),
+            )
 
         val response = normalizer.normalize(codeableConcept, tenant)
 
-        val expectedCodeableConcept = CodeableConcept(
-            text = FHIRString("coding"),
-            coding = listOf(Coding(display = FHIRString("coding")))
-        )
+        val expectedCodeableConcept =
+            CodeableConcept(
+                text = FHIRString("coding"),
+                coding = listOf(Coding(display = FHIRString("coding"))),
+            )
 
         assertEquals(expectedCodeableConcept, response.element)
         assertFalse(response.removeFromElement)
@@ -87,10 +94,11 @@ class CodeableConceptNormalizerTest {
 
     @Test
     fun `no coding`() {
-        val codeableConcept = CodeableConcept(
-            text = null,
-            coding = listOf()
-        )
+        val codeableConcept =
+            CodeableConcept(
+                text = null,
+                coding = listOf(),
+            )
 
         val response = normalizer.normalize(codeableConcept, tenant)
 
@@ -100,17 +108,19 @@ class CodeableConceptNormalizerTest {
 
     @Test
     fun `single user selected coding`() {
-        val codeableConcept = CodeableConcept(
-            text = null,
-            coding = listOf(Coding(userSelected = FHIRBoolean.TRUE, display = FHIRString("coding")))
-        )
+        val codeableConcept =
+            CodeableConcept(
+                text = null,
+                coding = listOf(Coding(userSelected = FHIRBoolean.TRUE, display = FHIRString("coding"))),
+            )
 
         val response = normalizer.normalize(codeableConcept, tenant)
 
-        val expectedCodeableConcept = CodeableConcept(
-            text = FHIRString("coding"),
-            coding = listOf(Coding(userSelected = FHIRBoolean.TRUE, display = FHIRString("coding")))
-        )
+        val expectedCodeableConcept =
+            CodeableConcept(
+                text = FHIRString("coding"),
+                coding = listOf(Coding(userSelected = FHIRBoolean.TRUE, display = FHIRString("coding"))),
+            )
 
         assertEquals(expectedCodeableConcept, response.element)
         assertFalse(response.removeFromElement)
@@ -118,13 +128,15 @@ class CodeableConceptNormalizerTest {
 
     @Test
     fun `multiple user selected codings`() {
-        val codeableConcept = CodeableConcept(
-            text = null,
-            coding = listOf(
-                Coding(userSelected = FHIRBoolean.TRUE, display = FHIRString("coding")),
-                Coding(userSelected = FHIRBoolean.TRUE, display = FHIRString("other-coding"))
+        val codeableConcept =
+            CodeableConcept(
+                text = null,
+                coding =
+                    listOf(
+                        Coding(userSelected = FHIRBoolean.TRUE, display = FHIRString("coding")),
+                        Coding(userSelected = FHIRBoolean.TRUE, display = FHIRString("other-coding")),
+                    ),
             )
-        )
 
         val response = normalizer.normalize(codeableConcept, tenant)
 
@@ -134,13 +146,15 @@ class CodeableConceptNormalizerTest {
 
     @Test
     fun `multiple non-user selected codings`() {
-        val codeableConcept = CodeableConcept(
-            text = null,
-            coding = listOf(
-                Coding(userSelected = FHIRBoolean.FALSE, display = FHIRString("coding")),
-                Coding(userSelected = FHIRBoolean.FALSE, display = FHIRString("other-coding"))
+        val codeableConcept =
+            CodeableConcept(
+                text = null,
+                coding =
+                    listOf(
+                        Coding(userSelected = FHIRBoolean.FALSE, display = FHIRString("coding")),
+                        Coding(userSelected = FHIRBoolean.FALSE, display = FHIRString("other-coding")),
+                    ),
             )
-        )
 
         val response = normalizer.normalize(codeableConcept, tenant)
 
@@ -150,10 +164,11 @@ class CodeableConceptNormalizerTest {
 
     @Test
     fun `coding with null display`() {
-        val codeableConcept = CodeableConcept(
-            text = null,
-            coding = listOf(Coding(display = null))
-        )
+        val codeableConcept =
+            CodeableConcept(
+                text = null,
+                coding = listOf(Coding(display = null)),
+            )
 
         val response = normalizer.normalize(codeableConcept, tenant)
 
@@ -163,10 +178,11 @@ class CodeableConceptNormalizerTest {
 
     @Test
     fun `coding with display with null value`() {
-        val codeableConcept = CodeableConcept(
-            text = null,
-            coding = listOf(Coding(display = FHIRString(null)))
-        )
+        val codeableConcept =
+            CodeableConcept(
+                text = null,
+                coding = listOf(Coding(display = FHIRString(null))),
+            )
 
         val response = normalizer.normalize(codeableConcept, tenant)
 
@@ -176,10 +192,11 @@ class CodeableConceptNormalizerTest {
 
     @Test
     fun `coding with empty display`() {
-        val codeableConcept = CodeableConcept(
-            text = null,
-            coding = listOf(Coding(display = FHIRString("")))
-        )
+        val codeableConcept =
+            CodeableConcept(
+                text = null,
+                coding = listOf(Coding(display = FHIRString(""))),
+            )
 
         val response = normalizer.normalize(codeableConcept, tenant)
 

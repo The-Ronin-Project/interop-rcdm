@@ -40,67 +40,72 @@ class RoninRequestGroupValidatorTest {
 
     @Test
     fun `validation fails without subject`() {
-        val requestGroup = RequestGroup(
-            id = Id("12345"),
-            meta = Meta(profile = listOf(Canonical(RoninProfile.REQUEST_GROUP.value)), source = Uri("source")),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            status = RequestGroupStatus.DRAFT.asCode(),
-            intent = RequestGroupIntent.OPTION.asCode()
-        )
+        val requestGroup =
+            RequestGroup(
+                id = Id("12345"),
+                meta = Meta(profile = listOf(Canonical(RoninProfile.REQUEST_GROUP.value)), source = Uri("source")),
+                identifier =
+                    listOf(
+                        Identifier(
+                            type = CodeableConcepts.RONIN_FHIR_ID,
+                            system = CodeSystem.RONIN_FHIR_ID.uri,
+                            value = "12345".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_TENANT,
+                            system = CodeSystem.RONIN_TENANT.uri,
+                            value = "test".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                            system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                            value = "EHR Data Authority".asFHIR(),
+                        ),
+                    ),
+                status = RequestGroupStatus.DRAFT.asCode(),
+                intent = RequestGroupIntent.OPTION.asCode(),
+            )
 
         val validation = validator.validate(requestGroup, LocationContext(RequestGroup::class))
         assertEquals(1, validation.issues().size)
         assertEquals(
             "ERROR REQ_FIELD: subject is a required element @ RequestGroup.subject",
-            validation.issues().first().toString()
+            validation.issues().first().toString(),
         )
     }
 
     @Test
     fun `validate profile - succeeds`() {
-        val requestGroup = RequestGroup(
-            id = Id("12345"),
-            meta = Meta(profile = listOf(Canonical(RoninProfile.REQUEST_GROUP.value)), source = Uri("source")),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "Data Authority Identifier.asFHIR".asFHIR()
-                )
-            ),
-            status = RequestGroupStatus.DRAFT.asCode(),
-            intent = RequestGroupIntent.OPTION.asCode(),
-            subject = Reference(
-                reference = "Patient/1234".asFHIR(),
-                type = Uri("Patient", extension = dataAuthorityExtension)
+        val requestGroup =
+            RequestGroup(
+                id = Id("12345"),
+                meta = Meta(profile = listOf(Canonical(RoninProfile.REQUEST_GROUP.value)), source = Uri("source")),
+                identifier =
+                    listOf(
+                        Identifier(
+                            type = CodeableConcepts.RONIN_FHIR_ID,
+                            system = CodeSystem.RONIN_FHIR_ID.uri,
+                            value = "12345".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_TENANT,
+                            system = CodeSystem.RONIN_TENANT.uri,
+                            value = "test".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                            system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                            value = "Data Authority Identifier.asFHIR".asFHIR(),
+                        ),
+                    ),
+                status = RequestGroupStatus.DRAFT.asCode(),
+                intent = RequestGroupIntent.OPTION.asCode(),
+                subject =
+                    Reference(
+                        reference = "Patient/1234".asFHIR(),
+                        type = Uri("Patient", extension = dataAuthorityExtension),
+                    ),
             )
-        )
         val validation = validator.validate(requestGroup, LocationContext(RequestGroup::class))
         assertEquals(0, validation.issues().size)
     }

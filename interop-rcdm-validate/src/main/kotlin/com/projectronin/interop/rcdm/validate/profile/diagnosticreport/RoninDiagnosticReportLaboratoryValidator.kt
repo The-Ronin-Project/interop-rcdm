@@ -22,7 +22,11 @@ class RoninDiagnosticReportLaboratoryValidator : BaseRoninDiagnosticReportProfil
     private val qualifyingCategories =
         listOf(Coding(system = CodeSystem.DIAGNOSTIC_REPORT_LABORATORY.uri, code = Code("LAB")))
 
-    override fun validateProfile(resource: DiagnosticReport, validation: Validation, context: LocationContext) {
+    override fun validateProfile(
+        resource: DiagnosticReport,
+        validation: Validation,
+        context: LocationContext,
+    ) {
         validation.apply {
             checkTrue(
                 resource.category.qualifiesForValueSet(qualifyingCategories),
@@ -30,11 +34,11 @@ class RoninDiagnosticReportLaboratoryValidator : BaseRoninDiagnosticReportProfil
                     code = "USCORE_DX_RPT_001",
                     severity = ValidationIssueSeverity.ERROR,
                     description = "Must match this system|code: ${
-                    qualifyingCategories.joinToString(", ") { "${it.system?.value}|${it.code?.value}" }
+                        qualifyingCategories.joinToString(", ") { "${it.system?.value}|${it.code?.value}" }
                     }",
-                    location = LocationContext(DiagnosticReport::category)
+                    location = LocationContext(DiagnosticReport::category),
                 ),
-                context
+                context,
             )
         }
     }

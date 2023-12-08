@@ -16,10 +16,14 @@ class RoninDocumentReferenceTransformer : ProfileTransformer<DocumentReference>(
     override val rcdmVersion: RCDMVersion = RCDMVersion.V3_25_0
     override val profileVersion: Int = 5
 
-    override fun transformInternal(original: DocumentReference, tenant: Tenant): TransformResponse<DocumentReference>? {
-        val transformed = original.copy(
-            identifier = original.getRoninIdentifiers(tenant)
-        )
+    override fun transformInternal(
+        original: DocumentReference,
+        tenant: Tenant,
+    ): TransformResponse<DocumentReference>? {
+        val transformed =
+            original.copy(
+                identifier = original.getRoninIdentifiers(tenant),
+            )
 
         return TransformResponse(transformed)
     }

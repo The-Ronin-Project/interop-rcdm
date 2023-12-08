@@ -18,7 +18,11 @@ class RoninPractitionerRoleValidator : ProfileValidator<PractitionerRole>() {
     override val rcdmVersion = RCDMVersion.V3_19_0
     override val profileVersion = 2
 
-    override fun validate(resource: PractitionerRole, validation: Validation, context: LocationContext) {
+    override fun validate(
+        resource: PractitionerRole,
+        validation: Validation,
+        context: LocationContext,
+    ) {
         // Nothing explicit to validate
     }
 }

@@ -28,98 +28,107 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.findAnnotation
 
+@Suppress("ktlint:standard:max-line-length")
 class BaseMapperTest {
     private val registryClient = mockk<NormalizationRegistryClient>()
-    private val nonReifiedMapper = object : BaseMapper<Patient>(registryClient) {
-        fun <R : Resource<R>> conceptMap(
-            codeableConcept: CodeableConcept,
-            elementProperty: KProperty1<Patient, *>,
-            resource: R,
-            tenant: Tenant,
-            parentContext: LocationContext,
-            validation: Validation,
-            forceCacheReloadTS: LocalDateTime?
-        ): ConceptMapCodeableConcept? {
-            return getConceptMapping(
-                codeableConcept,
-                elementProperty,
-                resource,
-                tenant,
-                parentContext,
-                validation,
-                forceCacheReloadTS
-            )
+    private val nonReifiedMapper =
+        object : BaseMapper<Patient>(registryClient) {
+            fun <R : Resource<R>> conceptMap(
+                codeableConcept: CodeableConcept,
+                elementProperty: KProperty1<Patient, *>,
+                resource: R,
+                tenant: Tenant,
+                parentContext: LocationContext,
+                validation: Validation,
+                forceCacheReloadTS: LocalDateTime?,
+            ): ConceptMapCodeableConcept? {
+                return getConceptMapping(
+                    codeableConcept,
+                    elementProperty,
+                    resource,
+                    tenant,
+                    parentContext,
+                    validation,
+                    forceCacheReloadTS,
+                )
+            }
         }
-    }
 
-    private val contactPointMapper = object : BaseMapper<ContactPoint>(registryClient) {
-        fun conceptMapUse(
-            value: String,
-            elementProperty: KProperty1<ContactPoint, *>,
-            elementName: String,
-            resource: Patient,
-            extension: RoninExtension,
-            tenant: Tenant,
-            parentContext: LocationContext,
-            validation: Validation,
-            forceCacheReloadTS: LocalDateTime?
-        ): ConceptMapCoding? {
-            return getConceptMappingForEnum<ContactPointUse, Patient>(
-                value,
-                elementProperty,
-                elementName,
-                resource,
-                extension,
-                tenant,
-                parentContext,
-                validation,
-                forceCacheReloadTS
-            )
+    private val contactPointMapper =
+        object : BaseMapper<ContactPoint>(registryClient) {
+            fun conceptMapUse(
+                value: String,
+                elementProperty: KProperty1<ContactPoint, *>,
+                elementName: String,
+                resource: Patient,
+                extension: RoninExtension,
+                tenant: Tenant,
+                parentContext: LocationContext,
+                validation: Validation,
+                forceCacheReloadTS: LocalDateTime?,
+            ): ConceptMapCoding? {
+                return getConceptMappingForEnum<ContactPointUse, Patient>(
+                    value,
+                    elementProperty,
+                    elementName,
+                    resource,
+                    extension,
+                    tenant,
+                    parentContext,
+                    validation,
+                    forceCacheReloadTS,
+                )
+            }
         }
-    }
 
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "test"
-    }
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "test"
+        }
 
     @Test
     fun `getConceptMapping returns the concept mapping from registry client`() {
-        val initialCodeableContext = mockk<CodeableConcept> {
-            every { coding } returns listOf(
-                mockk {
-                    every { code?.value } returns "value"
-                }
-            )
-        }
+        val initialCodeableContext =
+            mockk<CodeableConcept> {
+                every { coding } returns
+                    listOf(
+                        mockk {
+                            every { code?.value } returns "value"
+                        },
+                    )
+            }
         val property = Patient::maritalStatus
         val patient = mockk<Patient>()
         val context = LocationContext(Patient::class)
         val validation = Validation()
 
-        val mappedResult = mockk<ConceptMapCodeableConcept> {
-            every { metadata } returns listOf(
-                mockk()
-            )
-        }
+        val mappedResult =
+            mockk<ConceptMapCodeableConcept> {
+                every { metadata } returns
+                    listOf(
+                        mockk(),
+                    )
+            }
         every {
             registryClient.getConceptMapping(
                 "test",
                 "Patient.maritalStatus",
                 initialCodeableContext,
                 patient,
-                null
+                null,
             )
         } returns mappedResult
 
-        val result = nonReifiedMapper.conceptMap(
-            initialCodeableContext,
-            property,
-            patient,
-            tenant,
-            context,
-            validation,
-            null
-        )
+        val result =
+            nonReifiedMapper.conceptMap(
+                initialCodeableContext,
+                property,
+                patient,
+                tenant,
+                context,
+                validation,
+                null,
+            )
         assertEquals(mappedResult, result)
 
         assertEquals(0, validation.issues().size)
@@ -127,13 +136,15 @@ class BaseMapperTest {
 
     @Test
     fun `getConceptMapping reports a validation error if lookup fails`() {
-        val initialCodeableContext = mockk<CodeableConcept> {
-            every { coding } returns listOf(
-                mockk {
-                    every { code?.value } returns "value"
-                }
-            )
-        }
+        val initialCodeableContext =
+            mockk<CodeableConcept> {
+                every { coding } returns
+                    listOf(
+                        mockk {
+                            every { code?.value } returns "value"
+                        },
+                    )
+            }
         val property = Patient::maritalStatus
         val patient = mockk<Patient>()
         val context = LocationContext(Patient::class)
@@ -145,25 +156,26 @@ class BaseMapperTest {
                 "Patient.maritalStatus",
                 initialCodeableContext,
                 patient,
-                null
+                null,
             )
         } returns null
 
-        val result = nonReifiedMapper.conceptMap(
-            initialCodeableContext,
-            property,
-            patient,
-            tenant,
-            context,
-            validation,
-            null
-        )
+        val result =
+            nonReifiedMapper.conceptMap(
+                initialCodeableContext,
+                property,
+                patient,
+                tenant,
+                context,
+                validation,
+                null,
+            )
         assertNull(result)
 
         assertEquals(1, validation.issues().size)
         assertEquals(
             "ERROR NOV_CONMAP_LOOKUP: Tenant source value 'value' has no target defined in any Patient.maritalStatus concept map for tenant 'test' @ Patient.maritalStatus",
-            validation.issues().first().toString()
+            validation.issues().first().toString(),
         )
     }
 
@@ -177,10 +189,11 @@ class BaseMapperTest {
         val context = LocationContext("Patient", "telecom[0]")
         val validation = Validation()
 
-        val valueCoding = Coding(
-            system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
-            code = Code(value = value)
-        )
+        val valueCoding =
+            Coding(
+                system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
+                code = Code(value = value),
+            )
         every {
             registryClient.getConceptMappingForEnum(
                 "test",
@@ -189,27 +202,28 @@ class BaseMapperTest {
                 ContactPointUse::class,
                 extension.value,
                 patient,
-                null
+                null,
             )
         } returns null
 
-        val response = contactPointMapper.conceptMapUse(
-            value,
-            property,
-            elementName,
-            patient,
-            extension,
-            tenant,
-            context,
-            validation,
-            null
-        )
+        val response =
+            contactPointMapper.conceptMapUse(
+                value,
+                property,
+                elementName,
+                patient,
+                extension,
+                tenant,
+                context,
+                validation,
+                null,
+            )
         assertNull(response)
 
         assertEquals(1, validation.issues().size)
         assertEquals(
             "ERROR NOV_CONMAP_LOOKUP: Tenant source value '$value' has no target defined in http://projectronin.io/fhir/CodeSystem/test/ContactPointUse @ Patient.telecom[0].use",
-            validation.issues().first().toString()
+            validation.issues().first().toString(),
         )
     }
 
@@ -223,17 +237,20 @@ class BaseMapperTest {
         val context = LocationContext("Patient", "telecom[0]")
         val validation = Validation()
 
-        val valueCoding = Coding(
-            system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
-            code = Code(value = value)
-        )
-
-        val conceptMapCoding = mockk<ConceptMapCoding> {
-            every { coding.code?.value } returns "still-invalid-use"
-            every { metadata } returns listOf(
-                mockk()
+        val valueCoding =
+            Coding(
+                system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
+                code = Code(value = value),
             )
-        }
+
+        val conceptMapCoding =
+            mockk<ConceptMapCoding> {
+                every { coding.code?.value } returns "still-invalid-use"
+                every { metadata } returns
+                    listOf(
+                        mockk(),
+                    )
+            }
         every {
             registryClient.getConceptMappingForEnum(
                 "test",
@@ -242,27 +259,28 @@ class BaseMapperTest {
                 ContactPointUse::class,
                 extension.value,
                 patient,
-                null
+                null,
             )
         } returns conceptMapCoding
 
-        val response = contactPointMapper.conceptMapUse(
-            value,
-            property,
-            elementName,
-            patient,
-            extension,
-            tenant,
-            context,
-            validation,
-            null
-        )
+        val response =
+            contactPointMapper.conceptMapUse(
+                value,
+                property,
+                elementName,
+                patient,
+                extension,
+                tenant,
+                context,
+                validation,
+                null,
+            )
         assertEquals(conceptMapCoding, response)
 
         assertEquals(1, validation.issues().size)
         assertEquals(
             "ERROR INV_CONMAP_VALUE_SET: http://projectronin.io/fhir/CodeSystem/test/ContactPointUse mapped '$value' to 'still-invalid-use' which is outside of required value set @ Patient.telecom[0].use",
-            validation.issues().first().toString()
+            validation.issues().first().toString(),
         )
     }
 
@@ -276,17 +294,20 @@ class BaseMapperTest {
         val context = LocationContext("Patient", "telecom[0]")
         val validation = Validation()
 
-        val valueCoding = Coding(
-            system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
-            code = Code(value = value)
-        )
-
-        val conceptMapCoding = mockk<ConceptMapCoding> {
-            every { coding.code?.value } returns ContactPointUse.HOME.code
-            every { metadata } returns listOf(
-                mockk()
+        val valueCoding =
+            Coding(
+                system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
+                code = Code(value = value),
             )
-        }
+
+        val conceptMapCoding =
+            mockk<ConceptMapCoding> {
+                every { coding.code?.value } returns ContactPointUse.HOME.code
+                every { metadata } returns
+                    listOf(
+                        mockk(),
+                    )
+            }
         every {
             registryClient.getConceptMappingForEnum(
                 "test",
@@ -295,21 +316,22 @@ class BaseMapperTest {
                 ContactPointUse::class,
                 extension.value,
                 patient,
-                null
+                null,
             )
         } returns conceptMapCoding
 
-        val response = contactPointMapper.conceptMapUse(
-            value,
-            property,
-            elementName,
-            patient,
-            extension,
-            tenant,
-            context,
-            validation,
-            null
-        )
+        val response =
+            contactPointMapper.conceptMapUse(
+                value,
+                property,
+                elementName,
+                patient,
+                extension,
+                tenant,
+                context,
+                validation,
+                null,
+            )
         assertEquals(conceptMapCoding, response)
 
         assertEquals(0, validation.issues().size)

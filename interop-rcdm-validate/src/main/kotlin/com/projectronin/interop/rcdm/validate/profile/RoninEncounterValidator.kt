@@ -30,14 +30,19 @@ class RoninEncounterValidator : ProfileValidator<Encounter>() {
     private val requiredIdentifierSystemError = RequiredFieldError(Identifier::system)
     private val requiredIdentifierValueError = RequiredFieldError(Identifier::value)
 
-    private val requiredExtensionClassError = FHIRError(
-        code = "RONIN_ENC_001",
-        description = "Tenant source encounter class extension is missing or invalid",
-        severity = ValidationIssueSeverity.ERROR,
-        location = LocationContext(Encounter::extension)
-    )
+    private val requiredExtensionClassError =
+        FHIRError(
+            code = "RONIN_ENC_001",
+            description = "Tenant source encounter class extension is missing or invalid",
+            severity = ValidationIssueSeverity.ERROR,
+            location = LocationContext(Encounter::extension),
+        )
 
-    override fun validate(resource: Encounter, validation: Validation, context: LocationContext) {
+    override fun validate(
+        resource: Encounter,
+        validation: Validation,
+        context: LocationContext,
+    ) {
         validation.apply {
             checkTrue(
                 resource.extension.any {
@@ -45,7 +50,7 @@ class RoninEncounterValidator : ProfileValidator<Encounter>() {
                         it.value?.type == DynamicValueType.CODING
                 },
                 requiredExtensionClassError,
-                context
+                context,
             )
 
             checkTrue(resource.type.isNotEmpty(), requiredTypeError, context)

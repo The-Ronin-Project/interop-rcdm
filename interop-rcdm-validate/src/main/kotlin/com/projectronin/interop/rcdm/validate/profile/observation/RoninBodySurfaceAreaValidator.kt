@@ -15,7 +15,11 @@ class RoninBodySurfaceAreaValidator(registryClient: NormalizationRegistryClient)
     override val rcdmVersion: RCDMVersion = RCDMVersion.V3_26_1
     override val profileVersion: Int = 3
 
-    override fun validateVitalSign(resource: Observation, parentContext: LocationContext, validation: Validation) {
+    override fun validateVitalSign(
+        resource: Observation,
+        parentContext: LocationContext,
+        validation: Validation,
+    ) {
         validateVitalSignValue(resource.value, listOf("m2"), validation)
     }
 }

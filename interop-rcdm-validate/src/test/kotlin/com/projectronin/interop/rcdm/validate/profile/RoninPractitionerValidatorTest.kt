@@ -36,132 +36,141 @@ class RoninPractitionerValidatorTest {
 
     @Test
     fun `validate fails if no name`() {
-        val practitioner = Practitioner(
-            id = Id("12345"),
-            meta = Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER.value)), source = Uri("source")),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            name = listOf()
-        )
+        val practitioner =
+            Practitioner(
+                id = Id("12345"),
+                meta = Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER.value)), source = Uri("source")),
+                identifier =
+                    listOf(
+                        Identifier(
+                            type = CodeableConcepts.RONIN_TENANT,
+                            system = CodeSystem.RONIN_TENANT.uri,
+                            value = "test".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_FHIR_ID,
+                            system = CodeSystem.RONIN_FHIR_ID.uri,
+                            value = "12345".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                            system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                            value = "EHR Data Authority".asFHIR(),
+                        ),
+                    ),
+                name = listOf(),
+            )
 
         val validation = validator.validate(practitioner, LocationContext(Practitioner::class))
         assertEquals(1, validation.issues().size)
         assertEquals(
             "ERROR REQ_FIELD: name is a required element @ Practitioner.name",
-            validation.issues().first().toString()
+            validation.issues().first().toString(),
         )
     }
 
     @Test
     fun `validate fails if no family name`() {
-        val practitioner = Practitioner(
-            id = Id("12345"),
-            meta = Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER.value)), source = Uri("source")),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            name = listOf(HumanName(given = listOf("George".asFHIR())))
-        )
+        val practitioner =
+            Practitioner(
+                id = Id("12345"),
+                meta = Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER.value)), source = Uri("source")),
+                identifier =
+                    listOf(
+                        Identifier(
+                            type = CodeableConcepts.RONIN_TENANT,
+                            system = CodeSystem.RONIN_TENANT.uri,
+                            value = "test".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_FHIR_ID,
+                            system = CodeSystem.RONIN_FHIR_ID.uri,
+                            value = "12345".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                            system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                            value = "EHR Data Authority".asFHIR(),
+                        ),
+                    ),
+                name = listOf(HumanName(given = listOf("George".asFHIR()))),
+            )
 
         val validation = validator.validate(practitioner, LocationContext(Practitioner::class))
         assertEquals(1, validation.issues().size)
         assertEquals(
             "ERROR REQ_FIELD: family is a required element @ Practitioner.name[0].family",
-            validation.issues().first().toString()
+            validation.issues().first().toString(),
         )
     }
 
     @Test
     fun `validate fails for multiple names with no family name`() {
-        val practitioner = Practitioner(
-            id = Id("12345"),
-            meta = Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER.value)), source = Uri("source")),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            name = listOf(
-                HumanName(given = listOf("George").asFHIR()),
-                HumanName(family = "Smith".asFHIR()),
-                HumanName(given = listOf("John").asFHIR())
+        val practitioner =
+            Practitioner(
+                id = Id("12345"),
+                meta = Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER.value)), source = Uri("source")),
+                identifier =
+                    listOf(
+                        Identifier(
+                            type = CodeableConcepts.RONIN_TENANT,
+                            system = CodeSystem.RONIN_TENANT.uri,
+                            value = "test".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_FHIR_ID,
+                            system = CodeSystem.RONIN_FHIR_ID.uri,
+                            value = "12345".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                            system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                            value = "EHR Data Authority".asFHIR(),
+                        ),
+                    ),
+                name =
+                    listOf(
+                        HumanName(given = listOf("George").asFHIR()),
+                        HumanName(family = "Smith".asFHIR()),
+                        HumanName(given = listOf("John").asFHIR()),
+                    ),
             )
-        )
 
         val validation = validator.validate(practitioner, LocationContext(Practitioner::class))
         assertEquals(2, validation.issues().size)
         assertEquals(
             "[ERROR REQ_FIELD: family is a required element @ Practitioner.name[0].family, " +
                 "ERROR REQ_FIELD: family is a required element @ Practitioner.name[2].family]",
-            validation.issues().toString()
+            validation.issues().toString(),
         )
     }
 
     @Test
     fun `validate succeeds`() {
-        val practitioner = Practitioner(
-            id = Id("12345"),
-            meta = Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER.value)), source = Uri("source")),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            name = listOf(HumanName(family = "Doe".asFHIR()))
-        )
+        val practitioner =
+            Practitioner(
+                id = Id("12345"),
+                meta = Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER.value)), source = Uri("source")),
+                identifier =
+                    listOf(
+                        Identifier(
+                            type = CodeableConcepts.RONIN_TENANT,
+                            system = CodeSystem.RONIN_TENANT.uri,
+                            value = "test".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_FHIR_ID,
+                            system = CodeSystem.RONIN_FHIR_ID.uri,
+                            value = "12345".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                            system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                            value = "EHR Data Authority".asFHIR(),
+                        ),
+                    ),
+                name = listOf(HumanName(family = "Doe".asFHIR())),
+            )
 
         val validation = validator.validate(practitioner, LocationContext(Practitioner::class))
         assertEquals(0, validation.issues().size)

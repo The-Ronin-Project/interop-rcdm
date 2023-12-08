@@ -17,14 +17,19 @@ class RoninBodyWeightValidator(registryClient: NormalizationRegistryClient) :
     override val rcdmVersion: RCDMVersion = RCDMVersion.V3_26_1
     override val profileVersion: Int = 3
 
-    private val noBodySiteError = FHIRError(
-        code = "RONIN_WTOBS_001",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "bodySite not allowed for Body Weight observation",
-        location = LocationContext(Observation::bodySite)
-    )
+    private val noBodySiteError =
+        FHIRError(
+            code = "RONIN_WTOBS_001",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "bodySite not allowed for Body Weight observation",
+            location = LocationContext(Observation::bodySite),
+        )
 
-    override fun validateVitalSign(resource: Observation, parentContext: LocationContext, validation: Validation) {
+    override fun validateVitalSign(
+        resource: Observation,
+        parentContext: LocationContext,
+        validation: Validation,
+    ) {
         validation.apply {
             validateVitalSignValue(resource.value, listOf("kg", "[lb_av]", "g"), this)
 

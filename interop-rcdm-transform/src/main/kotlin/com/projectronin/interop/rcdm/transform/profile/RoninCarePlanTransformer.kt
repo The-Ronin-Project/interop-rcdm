@@ -20,18 +20,23 @@ class RoninCarePlanTransformer : ProfileTransformer<CarePlan>() {
     override val rcdmVersion: RCDMVersion = RCDMVersion.V3_27_0
     override val profileVersion: Int = 7
 
-    override fun transformInternal(original: CarePlan, tenant: Tenant): TransformResponse<CarePlan>? {
-        val categoryExtensions = original.category.map {
-            Extension(
-                url = RoninExtension.TENANT_SOURCE_CARE_PLAN_CATEGORY.uri,
-                value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, it)
-            )
-        }
+    override fun transformInternal(
+        original: CarePlan,
+        tenant: Tenant,
+    ): TransformResponse<CarePlan>? {
+        val categoryExtensions =
+            original.category.map {
+                Extension(
+                    url = RoninExtension.TENANT_SOURCE_CARE_PLAN_CATEGORY.uri,
+                    value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, it),
+                )
+            }
 
-        val transformed = original.copy(
-            identifier = original.getRoninIdentifiers(tenant),
-            extension = original.extension + categoryExtensions
-        )
+        val transformed =
+            original.copy(
+                identifier = original.getRoninIdentifiers(tenant),
+                extension = original.extension + categoryExtensions,
+            )
         return TransformResponse(transformed)
     }
 }

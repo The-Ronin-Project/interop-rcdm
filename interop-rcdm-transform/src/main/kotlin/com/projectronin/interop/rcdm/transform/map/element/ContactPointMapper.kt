@@ -27,43 +27,45 @@ class ContactPointMapper(registryClient: NormalizationRegistryClient) : ElementM
         tenant: Tenant,
         parentContext: LocationContext,
         validation: Validation,
-        forceCacheReloadTS: LocalDateTime?
+        forceCacheReloadTS: LocalDateTime?,
     ): ContactPoint? {
-        val mappedSystem = element.system?.value?.let {
-            getConceptMappingForEnum<ContactPointSystem, R>(
-                it,
-                ContactPoint::system,
-                "${parentContext.element}.telecom.system",
-                resource,
-                RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM,
-                tenant,
-                parentContext,
-                validation,
-                forceCacheReloadTS
-            )?.let { response ->
-                Code(value = response.coding.code?.value, extension = listOf(response.extension))
-            }
-        } ?: element.system
+        val mappedSystem =
+            element.system?.value?.let {
+                getConceptMappingForEnum<ContactPointSystem, R>(
+                    it,
+                    ContactPoint::system,
+                    "${parentContext.element}.telecom.system",
+                    resource,
+                    RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM,
+                    tenant,
+                    parentContext,
+                    validation,
+                    forceCacheReloadTS,
+                )?.let { response ->
+                    Code(value = response.coding.code?.value, extension = listOf(response.extension))
+                }
+            } ?: element.system
 
-        val mappedUse = element.use?.value?.let {
-            getConceptMappingForEnum<ContactPointUse, R>(
-                it,
-                ContactPoint::use,
-                "${parentContext.element}.telecom.use",
-                resource,
-                RoninExtension.TENANT_SOURCE_TELECOM_USE,
-                tenant,
-                parentContext,
-                validation,
-                forceCacheReloadTS
-            )?.let { response ->
-                Code(value = response.coding.code?.value, extension = listOf(response.extension))
-            }
-        } ?: element.use
+        val mappedUse =
+            element.use?.value?.let {
+                getConceptMappingForEnum<ContactPointUse, R>(
+                    it,
+                    ContactPoint::use,
+                    "${parentContext.element}.telecom.use",
+                    resource,
+                    RoninExtension.TENANT_SOURCE_TELECOM_USE,
+                    tenant,
+                    parentContext,
+                    validation,
+                    forceCacheReloadTS,
+                )?.let { response ->
+                    Code(value = response.coding.code?.value, extension = listOf(response.extension))
+                }
+            } ?: element.use
 
         return element.copy(
             system = mappedSystem,
-            use = mappedUse
+            use = mappedUse,
         )
     }
 }

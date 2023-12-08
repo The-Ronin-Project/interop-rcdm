@@ -20,7 +20,7 @@ class RoninStagingRelatedValidator(registryClient: NormalizationRegistryClient) 
     override fun validateSpecificObservation(
         resource: Observation,
         parentContext: LocationContext,
-        validation: Validation
+        validation: Validation,
     ) {
         validation.apply {
             checkTrue(
@@ -29,9 +29,9 @@ class RoninStagingRelatedValidator(registryClient: NormalizationRegistryClient) 
                     code = "RONIN_STAGING_OBS_002",
                     severity = ValidationIssueSeverity.ERROR,
                     description = "Coding is required",
-                    location = LocationContext(Observation::category)
+                    location = LocationContext(Observation::category),
                 ),
-                parentContext
+                parentContext,
             )
         }
     }

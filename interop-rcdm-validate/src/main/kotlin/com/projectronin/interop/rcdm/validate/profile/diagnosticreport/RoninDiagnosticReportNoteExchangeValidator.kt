@@ -13,5 +13,9 @@ class RoninDiagnosticReportNoteExchangeValidator : BaseRoninDiagnosticReportProf
     override val rcdmVersion: RCDMVersion = RCDMVersion.V3_19_0
     override val profileVersion: Int = 2
 
-    override fun validateProfile(resource: DiagnosticReport, validation: Validation, context: LocationContext) {}
+    override fun validateProfile(
+        resource: DiagnosticReport,
+        validation: Validation,
+        context: LocationContext,
+    ) {}
 }

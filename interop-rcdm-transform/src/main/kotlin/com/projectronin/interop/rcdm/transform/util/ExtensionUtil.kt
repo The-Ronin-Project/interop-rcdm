@@ -17,11 +17,12 @@ fun CodeableConcept?.getExtensionOrEmptyList(roninExtension: RoninExtension): Li
         listOf(
             Extension(
                 url = Uri(roninExtension.value),
-                value = DynamicValue(
-                    type = DynamicValueType.CODEABLE_CONCEPT,
-                    value = this
-                )
-            )
+                value =
+                    DynamicValue(
+                        type = DynamicValueType.CODEABLE_CONCEPT,
+                        value = this,
+                    ),
+            ),
         )
     } ?: emptyList()
 }
@@ -35,11 +36,12 @@ fun Coding?.getExtensionOrEmptyList(url: RoninExtension): List<Extension> {
         listOf(
             Extension(
                 url = Uri(url.value),
-                value = DynamicValue(
-                    type = DynamicValueType.CODING,
-                    value = this
-                )
-            )
+                value =
+                    DynamicValue(
+                        type = DynamicValueType.CODING,
+                        value = this,
+                    ),
+            ),
         )
     } ?: emptyList()
 }

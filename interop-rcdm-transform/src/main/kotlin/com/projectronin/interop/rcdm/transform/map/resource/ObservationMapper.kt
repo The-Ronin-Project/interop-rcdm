@@ -25,107 +25,113 @@ class ObservationMapper(registryClient: NormalizationRegistryClient) : ResourceM
     override fun map(
         resource: Observation,
         tenant: Tenant,
-        forceCacheReloadTS: LocalDateTime?
+        forceCacheReloadTS: LocalDateTime?,
     ): MapResponse<Observation> {
         val validation = Validation()
         val parentContext = LocationContext(Observation::class)
 
         val newExtensions = mutableListOf<Extension>()
 
-        val mappedCode = resource.code?.let { code ->
-            getConceptMapping(
-                code,
-                Observation::code,
-                resource,
-                tenant,
-                parentContext,
-                validation,
-                forceCacheReloadTS
-            )?.let {
-                newExtensions.add(it.extension)
-                it.codeableConcept
-            }
-        } ?: resource.code
-
-        val mappedValue = resource.value?.let { value ->
-            if (value.type == DynamicValueType.CODEABLE_CONCEPT) {
-                val valueCodeableConcept = value.value as CodeableConcept
-
+        val mappedCode =
+            resource.code?.let { code ->
                 getConceptMapping(
-                    valueCodeableConcept,
-                    LocationContext("Observation", "valueCodeableConcept"),
+                    code,
+                    Observation::code,
                     resource,
                     tenant,
                     parentContext,
                     validation,
-                    forceCacheReloadTS
+                    forceCacheReloadTS,
                 )?.let {
                     newExtensions.add(it.extension)
-                    DynamicValue(DynamicValueType.CODEABLE_CONCEPT, it.codeableConcept)
-                }
-            } else {
-                null
-            }
-        } ?: resource.value
-
-        val mappedComponents = resource.component.mapIndexed { index, component ->
-            val componentContext = parentContext.append(LocationContext("", "component[$index]"))
-
-            val newComponentExtensions = mutableListOf<Extension>()
-
-            val mappedComponentCode = component.code?.let { code ->
-                getConceptMapping(
-                    code,
-                    LocationContext("Observation.component", "code"),
-                    resource,
-                    tenant,
-                    componentContext,
-                    validation,
-                    forceCacheReloadTS
-                )?.let {
-                    newComponentExtensions.add(it.extension)
                     it.codeableConcept
                 }
-            } ?: component.code
+            } ?: resource.code
 
-            val mappedComponentValue = component.value?.let { value ->
+        val mappedValue =
+            resource.value?.let { value ->
                 if (value.type == DynamicValueType.CODEABLE_CONCEPT) {
                     val valueCodeableConcept = value.value as CodeableConcept
 
                     getConceptMapping(
                         valueCodeableConcept,
-                        LocationContext("Observation.component", "valueCodeableConcept"),
+                        LocationContext("Observation", "valueCodeableConcept"),
                         resource,
                         tenant,
-                        componentContext,
+                        parentContext,
                         validation,
-                        forceCacheReloadTS
+                        forceCacheReloadTS,
                     )?.let {
-                        newComponentExtensions.add(it.extension)
+                        newExtensions.add(it.extension)
                         DynamicValue(DynamicValueType.CODEABLE_CONCEPT, it.codeableConcept)
                     }
                 } else {
                     null
                 }
-            } ?: component.value
+            } ?: resource.value
 
-            if (newComponentExtensions.isEmpty()) {
-                component
-            } else {
-                component.copy(
-                    code = mappedComponentCode,
-                    value = mappedComponentValue,
-                    extension = component.extension + newComponentExtensions
-                )
+        val mappedComponents =
+            resource.component.mapIndexed { index, component ->
+                val componentContext = parentContext.append(LocationContext("", "component[$index]"))
+
+                val newComponentExtensions = mutableListOf<Extension>()
+
+                val mappedComponentCode =
+                    component.code?.let { code ->
+                        getConceptMapping(
+                            code,
+                            LocationContext("Observation.component", "code"),
+                            resource,
+                            tenant,
+                            componentContext,
+                            validation,
+                            forceCacheReloadTS,
+                        )?.let {
+                            newComponentExtensions.add(it.extension)
+                            it.codeableConcept
+                        }
+                    } ?: component.code
+
+                val mappedComponentValue =
+                    component.value?.let { value ->
+                        if (value.type == DynamicValueType.CODEABLE_CONCEPT) {
+                            val valueCodeableConcept = value.value as CodeableConcept
+
+                            getConceptMapping(
+                                valueCodeableConcept,
+                                LocationContext("Observation.component", "valueCodeableConcept"),
+                                resource,
+                                tenant,
+                                componentContext,
+                                validation,
+                                forceCacheReloadTS,
+                            )?.let {
+                                newComponentExtensions.add(it.extension)
+                                DynamicValue(DynamicValueType.CODEABLE_CONCEPT, it.codeableConcept)
+                            }
+                        } else {
+                            null
+                        }
+                    } ?: component.value
+
+                if (newComponentExtensions.isEmpty()) {
+                    component
+                } else {
+                    component.copy(
+                        code = mappedComponentCode,
+                        value = mappedComponentValue,
+                        extension = component.extension + newComponentExtensions,
+                    )
+                }
             }
-        }
 
-        val mapped = resource.copy(
-            code = mappedCode,
-            value = mappedValue,
-            component = mappedComponents,
-            extension = resource.extension + newExtensions
-        )
+        val mapped =
+            resource.copy(
+                code = mappedCode,
+                value = mappedValue,
+                component = mappedComponents,
+                extension = resource.extension + newExtensions,
+            )
         return MapResponse(mapped, validation)
     }
 }

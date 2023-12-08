@@ -22,13 +22,17 @@ import kotlin.reflect.KClass
 class ConditionMapper(
     registryClient: NormalizationRegistryClient,
     @Value("\${ronin.fhir.conditions.tenantsNotConditionMapped:mdaoc,1xrekpx5}")
-    tenantsNotConditionMappedString: String
+    tenantsNotConditionMappedString: String,
 ) : ResourceMapper<Condition>, BaseMapper<Condition>(registryClient) {
     private val tenantsNotConditionMapped = tenantsNotConditionMappedString.split(",")
 
     override val supportedResource: KClass<Condition> = Condition::class
 
-    override fun map(resource: Condition, tenant: Tenant, forceCacheReloadTS: LocalDateTime?): MapResponse<Condition> {
+    override fun map(
+        resource: Condition,
+        tenant: Tenant,
+        forceCacheReloadTS: LocalDateTime?,
+    ): MapResponse<Condition> {
         val validation = Validation()
         val parentContext = LocationContext(Condition::class)
 
@@ -36,24 +40,26 @@ class ConditionMapper(
             val tenantSourceConditionCode =
                 resource.code.getExtensionOrEmptyList(RoninExtension.TENANT_SOURCE_CONDITION_CODE)
 
-            val mapped = resource.copy(
-                extension = resource.extension + tenantSourceConditionCode
-            )
+            val mapped =
+                resource.copy(
+                    extension = resource.extension + tenantSourceConditionCode,
+                )
             return MapResponse(mapped, validation)
         }
         // Condition.code is a single CodeableConcept
-        val mappedCode = resource.code?.let {
-            getConceptMapping(it, Condition::code, resource, tenant, parentContext, validation, forceCacheReloadTS)
-        }
+        val mappedCode =
+            resource.code?.let {
+                getConceptMapping(it, Condition::code, resource, tenant, parentContext, validation, forceCacheReloadTS)
+            }
 
         return MapResponse(
             mappedCode?.let {
                 resource.copy(
                     code = it.codeableConcept,
-                    extension = resource.extension + it.extension
+                    extension = resource.extension + it.extension,
                 )
             } ?: resource,
-            validation
+            validation,
         )
     }
 }

@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class RoninOrganizationValidatorTest {
-
     private val validator = RoninOrganizationValidator()
 
     @Test
@@ -37,29 +36,31 @@ class RoninOrganizationValidatorTest {
 
     @Test
     fun `validate is successful`() {
-        val organization = Organization(
-            id = Id("12345"),
-            meta = Meta(profile = listOf(Canonical(RoninProfile.ORGANIZATION.value)), source = Uri("source")),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            name = "Organization name".asFHIR(),
-            active = true.asFHIR()
-        )
+        val organization =
+            Organization(
+                id = Id("12345"),
+                meta = Meta(profile = listOf(Canonical(RoninProfile.ORGANIZATION.value)), source = Uri("source")),
+                identifier =
+                    listOf(
+                        Identifier(
+                            type = CodeableConcepts.RONIN_FHIR_ID,
+                            system = CodeSystem.RONIN_FHIR_ID.uri,
+                            value = "12345".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_TENANT,
+                            system = CodeSystem.RONIN_TENANT.uri,
+                            value = "test".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                            system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                            value = "EHR Data Authority".asFHIR(),
+                        ),
+                    ),
+                name = "Organization name".asFHIR(),
+                active = true.asFHIR(),
+            )
 
         val validation = validator.validate(organization, LocationContext(Organization::class))
         assertEquals(0, validation.issues().size)
@@ -67,69 +68,73 @@ class RoninOrganizationValidatorTest {
 
     @Test
     fun `validate fails with no organization name provided`() {
-        val organization = Organization(
-            meta = Meta(profile = listOf(Canonical(RoninProfile.ORGANIZATION.value)), source = Uri("source")),
-            id = Id("12345"),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            active = true.asFHIR()
-        )
+        val organization =
+            Organization(
+                meta = Meta(profile = listOf(Canonical(RoninProfile.ORGANIZATION.value)), source = Uri("source")),
+                id = Id("12345"),
+                identifier =
+                    listOf(
+                        Identifier(
+                            type = CodeableConcepts.RONIN_FHIR_ID,
+                            system = CodeSystem.RONIN_FHIR_ID.uri,
+                            value = "12345".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_TENANT,
+                            system = CodeSystem.RONIN_TENANT.uri,
+                            value = "test".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                            system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                            value = "EHR Data Authority".asFHIR(),
+                        ),
+                    ),
+                active = true.asFHIR(),
+            )
 
         val validation = validator.validate(organization, LocationContext(Organization::class))
         assertEquals(1, validation.issues().size)
 
         assertEquals(
             "ERROR REQ_FIELD: name is a required element @ Organization.name",
-            validation.issues().first().toString()
+            validation.issues().first().toString(),
         )
     }
 
     @Test
     fun `validate fails with no organization active provided`() {
-        val organization = Organization(
-            id = Id("12345"),
-            meta = Meta(profile = listOf(Canonical(RoninProfile.ORGANIZATION.value)), source = Uri("source")),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            name = "Organization name".asFHIR()
-        )
+        val organization =
+            Organization(
+                id = Id("12345"),
+                meta = Meta(profile = listOf(Canonical(RoninProfile.ORGANIZATION.value)), source = Uri("source")),
+                identifier =
+                    listOf(
+                        Identifier(
+                            type = CodeableConcepts.RONIN_FHIR_ID,
+                            system = CodeSystem.RONIN_FHIR_ID.uri,
+                            value = "12345".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_TENANT,
+                            system = CodeSystem.RONIN_TENANT.uri,
+                            value = "test".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                            system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                            value = "EHR Data Authority".asFHIR(),
+                        ),
+                    ),
+                name = "Organization name".asFHIR(),
+            )
 
         val validation = validator.validate(organization, LocationContext(Organization::class))
         assertEquals(1, validation.issues().size)
 
         assertEquals(
             "ERROR REQ_FIELD: active is a required element @ Organization.active",
-            validation.issues().first().toString()
+            validation.issues().first().toString(),
         )
     }
 }

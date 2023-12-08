@@ -18,9 +18,17 @@ abstract class BaseRoninDiagnosticReportProfileValidator : ProfileValidator<Diag
     private val requiredSubjectFieldError = RequiredFieldError(DiagnosticReport::subject)
     private val requiredCategoryFieldError = RequiredFieldError(DiagnosticReport::category)
 
-    abstract fun validateProfile(resource: DiagnosticReport, validation: Validation, context: LocationContext)
+    abstract fun validateProfile(
+        resource: DiagnosticReport,
+        validation: Validation,
+        context: LocationContext,
+    )
 
-    override fun validate(resource: DiagnosticReport, validation: Validation, context: LocationContext) {
+    override fun validate(
+        resource: DiagnosticReport,
+        validation: Validation,
+        context: LocationContext,
+    ) {
         validation.apply {
             checkTrue(resource.category.isNotEmpty(), requiredCategoryFieldError, context)
             checkNotNull(resource.subject, requiredSubjectFieldError, context)
@@ -29,7 +37,7 @@ abstract class BaseRoninDiagnosticReportProfileValidator : ProfileValidator<Diag
                 resource.subject,
                 listOf(ResourceType.Patient),
                 context.append(LocationContext(DiagnosticReport::subject)),
-                this
+                this,
             )
         }
 

@@ -25,14 +25,19 @@ class RoninMedicationRequestValidator : ProfileValidator<MedicationRequest>() {
     override val profileVersion: Int = 3
 
     private val requiredRequesterError = RequiredFieldError(MedicationRequest::requester)
-    private val requiredMedicationReferenceError = FHIRError(
-        code = "RONIN_MEDREQ_001",
-        description = "Medication must be a Reference",
-        severity = ValidationIssueSeverity.ERROR,
-        location = LocationContext(MedicationRequest::medication)
-    )
+    private val requiredMedicationReferenceError =
+        FHIRError(
+            code = "RONIN_MEDREQ_001",
+            description = "Medication must be a Reference",
+            severity = ValidationIssueSeverity.ERROR,
+            location = LocationContext(MedicationRequest::medication),
+        )
 
-    override fun validate(resource: MedicationRequest, validation: Validation, context: LocationContext) {
+    override fun validate(
+        resource: MedicationRequest,
+        validation: Validation,
+        context: LocationContext,
+    ) {
         validation.apply {
             checkNotNull(resource.requester, requiredRequesterError, context)
 
@@ -42,7 +47,7 @@ class RoninMedicationRequestValidator : ProfileValidator<MedicationRequest>() {
                 checkTrue(
                     medication.type == DynamicValueType.REFERENCE,
                     requiredMedicationReferenceError,
-                    context
+                    context,
                 )
             }
 
@@ -50,7 +55,7 @@ class RoninMedicationRequestValidator : ProfileValidator<MedicationRequest>() {
                 resource.subject,
                 listOf(ResourceType.Patient),
                 LocationContext(MedicationRequest::subject),
-                this
+                this,
             )
         }
     }

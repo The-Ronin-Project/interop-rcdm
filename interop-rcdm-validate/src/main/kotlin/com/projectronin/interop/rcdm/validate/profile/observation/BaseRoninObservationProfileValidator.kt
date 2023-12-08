@@ -34,7 +34,7 @@ abstract class BaseRoninObservationProfileValidator(protected val registryClient
     abstract fun validateSpecificObservation(
         resource: Observation,
         parentContext: LocationContext,
-        validation: Validation
+        validation: Validation,
     )
 
     /**
@@ -45,39 +45,46 @@ abstract class BaseRoninObservationProfileValidator(protected val registryClient
     /**
      * The List of supported codes by this profile.
      */
-    open fun getSupportedValueSet(): ValueSetList =
-        registryClient.getRequiredValueSet("Observation.code", profile.value)
+    open fun getSupportedValueSet(): ValueSetList = registryClient.getRequiredValueSet("Observation.code", profile.value)
 
     private val requiredSubjectError = RequiredFieldError(Observation::subject)
 
-    private val requiredExtensionCodeError = FHIRError(
-        code = "RONIN_OBS_004",
-        description = "Tenant source observation code extension is missing or invalid",
-        severity = ValidationIssueSeverity.ERROR,
-        location = LocationContext(Observation::extension)
-    )
+    private val requiredExtensionCodeError =
+        FHIRError(
+            code = "RONIN_OBS_004",
+            description = "Tenant source observation code extension is missing or invalid",
+            severity = ValidationIssueSeverity.ERROR,
+            location = LocationContext(Observation::extension),
+        )
 
-    private val requiredExtensionValueError = FHIRError(
-        code = "RONIN_OBS_005",
-        description = "Tenant source observation value extension is missing or invalid",
-        severity = ValidationIssueSeverity.ERROR,
-        location = LocationContext(Observation::extension)
-    )
-    private val requiredComponentExtensionCodeError = FHIRError(
-        code = "RONIN_OBS_006",
-        description = "Tenant source observation component code extension is missing or invalid",
-        severity = ValidationIssueSeverity.ERROR,
-        location = LocationContext(ObservationComponent::extension)
-    )
+    private val requiredExtensionValueError =
+        FHIRError(
+            code = "RONIN_OBS_005",
+            description = "Tenant source observation value extension is missing or invalid",
+            severity = ValidationIssueSeverity.ERROR,
+            location = LocationContext(Observation::extension),
+        )
+    private val requiredComponentExtensionCodeError =
+        FHIRError(
+            code = "RONIN_OBS_006",
+            description = "Tenant source observation component code extension is missing or invalid",
+            severity = ValidationIssueSeverity.ERROR,
+            location = LocationContext(ObservationComponent::extension),
+        )
 
-    private val requiredComponentExtensionValueError = FHIRError(
-        code = "RONIN_OBS_007",
-        description = "Tenant source observation component value extension is missing or invalid",
-        severity = ValidationIssueSeverity.ERROR,
-        location = LocationContext(ObservationComponent::extension)
-    )
+    private val requiredComponentExtensionValueError =
+        FHIRError(
+            code = "RONIN_OBS_007",
+            description = "Tenant source observation component value extension is missing or invalid",
+            severity = ValidationIssueSeverity.ERROR,
+            location = LocationContext(ObservationComponent::extension),
+        )
 
-    override fun validate(resource: Observation, validation: Validation, context: LocationContext) {
+    override fun validate(
+        resource: Observation,
+        validation: Validation,
+        context: LocationContext,
+    ) {
         validation.apply {
             validateRoninNormalizedCodeableConcept(resource.code, Observation::code, null, context, this)
 
@@ -90,10 +97,12 @@ abstract class BaseRoninObservationProfileValidator(protected val registryClient
                     FHIRError(
                         code = "RONIN_OBS_002",
                         severity = ValidationIssueSeverity.ERROR,
-                        description = "Must match this system|code: ${supportedCategories.joinToString(", ") { "${it.system?.value}|${it.code?.value}" }}",
-                        location = LocationContext(Observation::category)
+                        description = "Must match this system|code: ${supportedCategories.joinToString(
+                            ", ",
+                        ) { "${it.system?.value}|${it.code?.value}" }}",
+                        location = LocationContext(Observation::category),
                     ),
-                    context
+                    context,
                 )
             }
 
@@ -106,11 +115,13 @@ abstract class BaseRoninObservationProfileValidator(protected val registryClient
                         FHIRError(
                             code = "RONIN_OBS_003",
                             severity = ValidationIssueSeverity.ERROR,
-                            description = "Must match this system|code: ${supportedCodes.joinToString(", ") { "${it.system?.value}|${it.code?.value}" }}",
+                            description = "Must match this system|code: ${supportedCodes.joinToString(
+                                ", ",
+                            ) { "${it.system?.value}|${it.code?.value}" }}",
                             location = LocationContext(Observation::code),
-                            metadata = supportedValueSet.metadata?.let { listOf(it) } ?: emptyList()
+                            metadata = supportedValueSet.metadata?.let { listOf(it) } ?: emptyList(),
                         ),
-                        context
+                        context,
                     )
                 }
             }
@@ -121,7 +132,7 @@ abstract class BaseRoninObservationProfileValidator(protected val registryClient
                         it.value?.type == DynamicValueType.CODEABLE_CONCEPT
                 },
                 requiredExtensionCodeError,
-                context
+                context,
             )
             if (resource.value?.type == DynamicValueType.CODEABLE_CONCEPT) {
                 checkTrue(
@@ -130,7 +141,7 @@ abstract class BaseRoninObservationProfileValidator(protected val registryClient
                             it.value?.type == DynamicValueType.CODEABLE_CONCEPT
                     },
                     requiredExtensionValueError,
-                    context
+                    context,
                 )
             }
 
@@ -142,7 +153,7 @@ abstract class BaseRoninObservationProfileValidator(protected val registryClient
                             it.value?.type == DynamicValueType.CODEABLE_CONCEPT
                     },
                     requiredComponentExtensionCodeError,
-                    componentContext
+                    componentContext,
                 )
                 if (observationComponent.value?.type == DynamicValueType.CODEABLE_CONCEPT) {
                     checkTrue(
@@ -151,7 +162,7 @@ abstract class BaseRoninObservationProfileValidator(protected val registryClient
                                 it.value?.type == DynamicValueType.CODEABLE_CONCEPT
                         },
                         requiredComponentExtensionValueError,
-                        componentContext
+                        componentContext,
                     )
                 }
             }
@@ -160,7 +171,7 @@ abstract class BaseRoninObservationProfileValidator(protected val registryClient
                 resource.subject,
                 listOf(ResourceType.Patient),
                 LocationContext(Observation::subject),
-                this
+                this,
             )
 
             validateSpecificObservation(resource, context, this)

@@ -30,11 +30,12 @@ class RoninCarePlanValidatorTest {
 
     @Test
     fun `validate succeeds`() {
-        val carePlan = CarePlan(
-            id = Id("1234"),
-            meta = Meta(profile = listOf(RoninProfile.CARE_PLAN.canonical)),
-            identifier = requiredIdentifiers
-        )
+        val carePlan =
+            CarePlan(
+                id = Id("1234"),
+                meta = Meta(profile = listOf(RoninProfile.CARE_PLAN.canonical)),
+                identifier = requiredIdentifiers,
+            )
 
         val validation = validator.validate(carePlan, LocationContext(CarePlan::class))
         assertEquals(0, validation.issues().size)

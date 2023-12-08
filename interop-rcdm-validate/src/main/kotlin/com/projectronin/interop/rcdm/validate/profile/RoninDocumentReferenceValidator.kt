@@ -33,32 +33,40 @@ class RoninDocumentReferenceValidator : ProfileValidator<DocumentReference>() {
     private val requiredTypeError = RequiredFieldError(DocumentReference::type)
     private val requiredUrlError = RequiredFieldError(Attachment::url)
 
-    private val requiredDocumentReferenceTypeExtension = FHIRError(
-        code = "RONIN_DOCREF_001",
-        description = "Tenant source Document Reference extension is missing or invalid",
-        severity = ValidationIssueSeverity.ERROR,
-        location = LocationContext(DocumentReference::extension)
-    )
-    private val requiredCodingSize = FHIRError(
-        code = "RONIN_DOCREF_002",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "One, and only one, coding entry is allowed for type",
-        location = LocationContext(CodeableConcept::coding)
-    )
-    private val requiredDatalakeAttachmentExtension = FHIRError(
-        code = "RONIN_DOCREF_003",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "Datalake Attachment URL extension is missing or invalid",
-        location = LocationContext(Url::extension)
-    )
-    private val requiredEncounter = FHIRError(
-        code = "RONIN_DOCREF_004",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "No more than one encounter is allowed for this type",
-        location = LocationContext(DocumentReferenceContext::encounter)
-    )
+    private val requiredDocumentReferenceTypeExtension =
+        FHIRError(
+            code = "RONIN_DOCREF_001",
+            description = "Tenant source Document Reference extension is missing or invalid",
+            severity = ValidationIssueSeverity.ERROR,
+            location = LocationContext(DocumentReference::extension),
+        )
+    private val requiredCodingSize =
+        FHIRError(
+            code = "RONIN_DOCREF_002",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "One, and only one, coding entry is allowed for type",
+            location = LocationContext(CodeableConcept::coding),
+        )
+    private val requiredDatalakeAttachmentExtension =
+        FHIRError(
+            code = "RONIN_DOCREF_003",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "Datalake Attachment URL extension is missing or invalid",
+            location = LocationContext(Url::extension),
+        )
+    private val requiredEncounter =
+        FHIRError(
+            code = "RONIN_DOCREF_004",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "No more than one encounter is allowed for this type",
+            location = LocationContext(DocumentReferenceContext::encounter),
+        )
 
-    override fun validate(resource: DocumentReference, validation: Validation, context: LocationContext) {
+    override fun validate(
+        resource: DocumentReference,
+        validation: Validation,
+        context: LocationContext,
+    ) {
         validation.apply {
             checkTrue(
                 resource.extension.any {
@@ -66,15 +74,15 @@ class RoninDocumentReferenceValidator : ProfileValidator<DocumentReference>() {
                         it.value?.type == DynamicValueType.CODEABLE_CONCEPT
                 },
                 requiredDocumentReferenceTypeExtension,
-                context
+                context,
             )
 
             checkNotNull(resource.type, requiredTypeError, context)
             ifNotNull(resource.type) {
                 checkTrue(
-                    resource.type!!.coding.size == 1, // coding is required
+                    resource.type!!.coding.size == 1,
                     requiredCodingSize,
-                    context.append(LocationContext(DocumentReference::type))
+                    context.append(LocationContext(DocumentReference::type)),
                 )
             }
 
@@ -91,7 +99,7 @@ class RoninDocumentReferenceValidator : ProfileValidator<DocumentReference>() {
                                     it.value?.type == DynamicValueType.URL
                             },
                             requiredDatalakeAttachmentExtension,
-                            urlContext
+                            urlContext,
                         )
                     }
                 }
@@ -102,7 +110,7 @@ class RoninDocumentReferenceValidator : ProfileValidator<DocumentReference>() {
                 resource.subject,
                 listOf(ResourceType.Patient),
                 LocationContext(DocumentReference::subject),
-                validation
+                validation,
             )
 
             resource.context?.let { docRefContext ->
@@ -114,7 +122,7 @@ class RoninDocumentReferenceValidator : ProfileValidator<DocumentReference>() {
                     docRefContext.encounter.firstOrNull(),
                     listOf(ResourceType.Encounter),
                     contextLocationContext.append(LocationContext("", "encounter[0]")),
-                    validation
+                    validation,
                 )
             }
 

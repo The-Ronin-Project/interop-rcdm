@@ -23,17 +23,20 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDateTime
 
+@Suppress("ktlint:standard:max-line-length")
 class ConditionMapperTest {
     private val registryClient = mockk<NormalizationRegistryClient>()
     private val mapper = ConditionMapper(registryClient, "unmapped1,unmapped2")
 
-    private val mappedTenant = mockk<Tenant> {
-        every { mnemonic } returns "tenant"
-    }
+    private val mappedTenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "tenant"
+        }
 
-    private val unmappedTenant = mockk<Tenant> {
-        every { mnemonic } returns "unmapped2"
-    }
+    private val unmappedTenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "unmapped2"
+        }
 
     @Test
     fun `supported resource is Condition`() {
@@ -42,9 +45,10 @@ class ConditionMapperTest {
 
     @Test
     fun `tenant in not mapped list with null code`() {
-        val condition = Condition(
-            subject = Reference(display = "Subject".asFHIR())
-        )
+        val condition =
+            Condition(
+                subject = Reference(display = "Subject".asFHIR()),
+            )
 
         val (mappedResource, validation) = mapper.map(condition, unmappedTenant, null)
         mappedResource!!
@@ -55,15 +59,18 @@ class ConditionMapperTest {
 
     @Test
     fun `tenant in not mapped list with code`() {
-        val code = CodeableConcept(
-            coding = listOf(
-                Coding(system = Uri("http://snomed.info/sct"), code = Code("12345"))
+        val code =
+            CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(system = Uri("http://snomed.info/sct"), code = Code("12345")),
+                    ),
             )
-        )
-        val condition = Condition(
-            subject = Reference(display = "Subject".asFHIR()),
-            code = code
-        )
+        val condition =
+            Condition(
+                subject = Reference(display = "Subject".asFHIR()),
+                code = code,
+            )
 
         val (mappedResource, validation) = mapper.map(condition, unmappedTenant, null)
         mappedResource!!
@@ -71,10 +78,10 @@ class ConditionMapperTest {
             listOf(
                 Extension(
                     url = RoninExtension.TENANT_SOURCE_CONDITION_CODE.uri,
-                    value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, code)
-                )
+                    value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, code),
+                ),
             ),
-            mappedResource.extension
+            mappedResource.extension,
         )
 
         assertFalse(validation.hasIssues())
@@ -82,23 +89,28 @@ class ConditionMapperTest {
 
     @Test
     fun `tenant in not mapped list with code and extensions`() {
-        val code = CodeableConcept(
-            coding = listOf(
-                Coding(system = Uri("http://snomed.info/sct"), code = Code("12345"))
+        val code =
+            CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(system = Uri("http://snomed.info/sct"), code = Code("12345")),
+                    ),
             )
-        )
-        val dataAuthorityExtension = Extension(
-            url = Uri("http://projectronin.io/fhir/StructureDefinition/Extension/ronin-dataAuthorityIdentifier"),
-            value = DynamicValue(
-                type = DynamicValueType.IDENTIFIER,
-                dataAuthorityIdentifier
+        val dataAuthorityExtension =
+            Extension(
+                url = Uri("http://projectronin.io/fhir/StructureDefinition/Extension/ronin-dataAuthorityIdentifier"),
+                value =
+                    DynamicValue(
+                        type = DynamicValueType.IDENTIFIER,
+                        dataAuthorityIdentifier,
+                    ),
             )
-        )
-        val condition = Condition(
-            subject = Reference(display = "Subject".asFHIR()),
-            code = code,
-            extension = listOf(dataAuthorityExtension)
-        )
+        val condition =
+            Condition(
+                subject = Reference(display = "Subject".asFHIR()),
+                code = code,
+                extension = listOf(dataAuthorityExtension),
+            )
 
         val (mappedResource, validation) = mapper.map(condition, unmappedTenant, null)
         mappedResource!!
@@ -107,10 +119,10 @@ class ConditionMapperTest {
                 dataAuthorityExtension,
                 Extension(
                     url = RoninExtension.TENANT_SOURCE_CONDITION_CODE.uri,
-                    value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, code)
-                )
+                    value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, code),
+                ),
             ),
-            mappedResource.extension
+            mappedResource.extension,
         )
 
         assertFalse(validation.hasIssues())
@@ -118,9 +130,10 @@ class ConditionMapperTest {
 
     @Test
     fun `null code on Condition`() {
-        val condition = Condition(
-            subject = Reference(display = "Subject".asFHIR())
-        )
+        val condition =
+            Condition(
+                subject = Reference(display = "Subject".asFHIR()),
+            )
 
         val (mappedResource, validation) = mapper.map(condition, mappedTenant, null)
         assertEquals(condition, mappedResource)
@@ -129,15 +142,18 @@ class ConditionMapperTest {
 
     @Test
     fun `concept mapping finds no code`() {
-        val code = CodeableConcept(
-            coding = listOf(
-                Coding(system = Uri("http://snomed.info/sct"), code = Code("12345"))
+        val code =
+            CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(system = Uri("http://snomed.info/sct"), code = Code("12345")),
+                    ),
             )
-        )
-        val condition = Condition(
-            subject = Reference(display = "Subject".asFHIR()),
-            code = code
-        )
+        val condition =
+            Condition(
+                subject = Reference(display = "Subject".asFHIR()),
+                code = code,
+            )
 
         every { registryClient.getConceptMapping("tenant", "Condition.code", code, condition, null) } returns null
 
@@ -148,38 +164,44 @@ class ConditionMapperTest {
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR NOV_CONMAP_LOOKUP: Tenant source value '12345' has no target defined in any Condition.code concept map for tenant 'tenant' @ Condition.code",
-            exception.message
+            exception.message,
         )
     }
 
     @Test
     fun `concept mapping finds code`() {
-        val code = CodeableConcept(
-            coding = listOf(
-                Coding(system = Uri("http://snomed.info/sct"), code = Code("12345"))
+        val code =
+            CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(system = Uri("http://snomed.info/sct"), code = Code("12345")),
+                    ),
             )
-        )
-        val condition = Condition(
-            subject = Reference(display = "Subject".asFHIR()),
-            code = code
-        )
+        val condition =
+            Condition(
+                subject = Reference(display = "Subject".asFHIR()),
+                code = code,
+            )
 
-        val mappedCode = CodeableConcept(
-            coding = listOf(
-                Coding(system = Uri("http://snomed.info/sct"), code = Code("67890"))
+        val mappedCode =
+            CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(system = Uri("http://snomed.info/sct"), code = Code("67890")),
+                    ),
             )
-        )
-        val mappedExtension = Extension(
-            url = RoninExtension.TENANT_SOURCE_CONDITION_CODE.uri,
-            value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, code)
-        )
+        val mappedExtension =
+            Extension(
+                url = RoninExtension.TENANT_SOURCE_CONDITION_CODE.uri,
+                value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, code),
+            )
         every {
             registryClient.getConceptMapping(
                 "tenant",
                 "Condition.code",
                 code,
                 condition,
-                null
+                null,
             )
         } returns ConceptMapCodeableConcept(mappedCode, mappedExtension, listOf())
 
@@ -193,40 +215,48 @@ class ConditionMapperTest {
 
     @Test
     fun `concept mapping finds code for condition with extensions`() {
-        val code = CodeableConcept(
-            coding = listOf(
-                Coding(system = Uri("http://snomed.info/sct"), code = Code("12345"))
+        val code =
+            CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(system = Uri("http://snomed.info/sct"), code = Code("12345")),
+                    ),
             )
-        )
-        val dataAuthorityExtension = Extension(
-            url = Uri("http://projectronin.io/fhir/StructureDefinition/Extension/ronin-dataAuthorityIdentifier"),
-            value = DynamicValue(
-                type = DynamicValueType.IDENTIFIER,
-                dataAuthorityIdentifier
+        val dataAuthorityExtension =
+            Extension(
+                url = Uri("http://projectronin.io/fhir/StructureDefinition/Extension/ronin-dataAuthorityIdentifier"),
+                value =
+                    DynamicValue(
+                        type = DynamicValueType.IDENTIFIER,
+                        dataAuthorityIdentifier,
+                    ),
             )
-        )
-        val condition = Condition(
-            subject = Reference(display = "Subject".asFHIR()),
-            code = code,
-            extension = listOf(dataAuthorityExtension)
-        )
+        val condition =
+            Condition(
+                subject = Reference(display = "Subject".asFHIR()),
+                code = code,
+                extension = listOf(dataAuthorityExtension),
+            )
 
-        val mappedCode = CodeableConcept(
-            coding = listOf(
-                Coding(system = Uri("http://snomed.info/sct"), code = Code("67890"))
+        val mappedCode =
+            CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(system = Uri("http://snomed.info/sct"), code = Code("67890")),
+                    ),
             )
-        )
-        val mappedExtension = Extension(
-            url = RoninExtension.TENANT_SOURCE_CONDITION_CODE.uri,
-            value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, code)
-        )
+        val mappedExtension =
+            Extension(
+                url = RoninExtension.TENANT_SOURCE_CONDITION_CODE.uri,
+                value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, code),
+            )
         every {
             registryClient.getConceptMapping(
                 "tenant",
                 "Condition.code",
                 code,
                 condition,
-                null
+                null,
             )
         } returns ConceptMapCodeableConcept(mappedCode, mappedExtension, listOf())
 
@@ -240,34 +270,40 @@ class ConditionMapperTest {
 
     @Test
     fun `honors force cache reload when mapping`() {
-        val code = CodeableConcept(
-            coding = listOf(
-                Coding(system = Uri("http://snomed.info/sct"), code = Code("12345"))
+        val code =
+            CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(system = Uri("http://snomed.info/sct"), code = Code("12345")),
+                    ),
             )
-        )
-        val condition = Condition(
-            subject = Reference(display = "Subject".asFHIR()),
-            code = code
-        )
+        val condition =
+            Condition(
+                subject = Reference(display = "Subject".asFHIR()),
+                code = code,
+            )
 
         val cacheReload = LocalDateTime.now()
 
-        val mappedCode = CodeableConcept(
-            coding = listOf(
-                Coding(system = Uri("http://snomed.info/sct"), code = Code("67890"))
+        val mappedCode =
+            CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(system = Uri("http://snomed.info/sct"), code = Code("67890")),
+                    ),
             )
-        )
-        val mappedExtension = Extension(
-            url = RoninExtension.TENANT_SOURCE_CONDITION_CODE.uri,
-            value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, code)
-        )
+        val mappedExtension =
+            Extension(
+                url = RoninExtension.TENANT_SOURCE_CONDITION_CODE.uri,
+                value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, code),
+            )
         every {
             registryClient.getConceptMapping(
                 "tenant",
                 "Condition.code",
                 code,
                 condition,
-                cacheReload
+                cacheReload,
             )
         } returns ConceptMapCodeableConcept(mappedCode, mappedExtension, listOf())
 

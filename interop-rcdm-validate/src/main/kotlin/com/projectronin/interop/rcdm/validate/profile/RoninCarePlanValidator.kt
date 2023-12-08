@@ -18,7 +18,11 @@ class RoninCarePlanValidator : ProfileValidator<CarePlan>() {
     override val rcdmVersion: RCDMVersion = RCDMVersion.V3_27_0
     override val profileVersion: Int = 7
 
-    override fun validate(resource: CarePlan, validation: Validation, context: LocationContext) {
+    override fun validate(
+        resource: CarePlan,
+        validation: Validation,
+        context: LocationContext,
+    ) {
         // Nothing explicit to validate
     }
 }

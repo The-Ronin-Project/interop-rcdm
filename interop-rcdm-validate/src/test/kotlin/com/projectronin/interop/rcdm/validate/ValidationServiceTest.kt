@@ -35,28 +35,32 @@ import java.util.UUID
 import com.projectronin.interop.fhir.validate.ProfileValidator as R4ProfileValidator
 
 class ValidationServiceTest {
-    private val r4ProfileTransformer = mockk<R4ProfileValidator<Patient>> {
-        every { validate(any(), LocationContext(Patient::class)) } returns Validation()
-    }
+    private val r4ProfileTransformer =
+        mockk<R4ProfileValidator<Patient>> {
+            every { validate(any(), LocationContext(Patient::class)) } returns Validation()
+        }
 
-    private val profileValidator = mockk<ProfileValidator<Patient>> {
-        every { supportedResource } returns Patient::class
-        every { r4Validator } returns r4ProfileTransformer
-        every { profile } returns RoninProfile.PATIENT
-        every { qualifies(any()) } returns true
-    }
+    private val profileValidator =
+        mockk<ProfileValidator<Patient>> {
+            every { supportedResource } returns Patient::class
+            every { r4Validator } returns r4ProfileTransformer
+            every { profile } returns RoninProfile.PATIENT
+            every { qualifies(any()) } returns true
+        }
 
     private val validationError =
         FHIRError(severity = ValidationIssueSeverity.ERROR, code = "Error", description = "Error!", location = null)
     private val failedValidation = Validation().apply { checkTrue(false, validationError, null) }
 
-    private val validationClient = mockk<ValidationClient> {
-        every { reportIssues(any(), any<Patient>(), any()) } answers { UUID.randomUUID() }
-    }
+    private val validationClient =
+        mockk<ValidationClient> {
+            every { reportIssues(any(), any<Patient>(), any()) } answers { UUID.randomUUID() }
+        }
 
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "test"
-    }
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "test"
+        }
 
     @Test
     fun `no validators defined for resource`() {
@@ -69,18 +73,21 @@ class ValidationServiceTest {
 
     @Test
     fun `no qualifying validators`() {
-        val meta = Meta(
-            profile = listOf(Canonical("http://example.org/profile"))
-        )
-        val patient = Patient(
-            id = Id("1234"),
-            meta = meta
-        )
+        val meta =
+            Meta(
+                profile = listOf(Canonical("http://example.org/profile")),
+            )
+        val patient =
+            Patient(
+                id = Id("1234"),
+                meta = meta,
+            )
 
-        val profileValidator = mockk<ProfileValidator<Patient>> {
-            every { supportedResource } returns Patient::class
-            every { qualifies(patient) } returns false
-        }
+        val profileValidator =
+            mockk<ProfileValidator<Patient>> {
+                every { supportedResource } returns Patient::class
+                every { qualifies(patient) } returns false
+            }
 
         val service = ValidationService(validationClient, listOf(profileValidator), listOf())
         val exception = assertThrows<IllegalStateException> { service.validate(patient, tenant) }
@@ -191,17 +198,19 @@ class ValidationServiceTest {
 
         every { profileValidator.validate(patient, LocationContext(Patient::class)) } returns Validation()
 
-        val r4ProfileTransformer2 = mockk<R4ProfileValidator<Patient>> {
-            every { validate(any(), LocationContext(Patient::class)) } returns Validation()
-        }
+        val r4ProfileTransformer2 =
+            mockk<R4ProfileValidator<Patient>> {
+                every { validate(any(), LocationContext(Patient::class)) } returns Validation()
+            }
 
-        val profileValidator2 = mockk<ProfileValidator<Patient>> {
-            every { supportedResource } returns Patient::class
-            every { r4Validator } returns r4ProfileTransformer2
-            every { profile } returns RoninProfile.PATIENT
-            every { qualifies(any()) } returns true
-            every { validate(patient, LocationContext(Patient::class)) } returns Validation()
-        }
+        val profileValidator2 =
+            mockk<ProfileValidator<Patient>> {
+                every { supportedResource } returns Patient::class
+                every { r4Validator } returns r4ProfileTransformer2
+                every { profile } returns RoninProfile.PATIENT
+                every { qualifies(any()) } returns true
+                every { validate(patient, LocationContext(Patient::class)) } returns Validation()
+            }
 
         val service = ValidationService(validationClient, listOf(profileValidator, profileValidator2), listOf())
         val response = service.validate(patient, tenant)
@@ -220,22 +229,24 @@ class ValidationServiceTest {
     @Test
     fun `validates against contained element with validator`() {
         val reference = Reference(reference = FHIRString("Organization/1234"))
-        val patient = Patient(
-            managingOrganization = reference
-        )
+        val patient =
+            Patient(
+                managingOrganization = reference,
+            )
 
         every { profileValidator.validate(patient, LocationContext(Patient::class)) } returns Validation()
 
-        val referenceValidator = mockk<ElementValidator<Reference>> {
-            every { supportedElement } returns Reference::class
-            every {
-                validate(
-                    reference,
-                    listOf(RoninProfile.PATIENT),
-                    LocationContext(Patient::managingOrganization)
-                )
-            } returns failedValidation
-        }
+        val referenceValidator =
+            mockk<ElementValidator<Reference>> {
+                every { supportedElement } returns Reference::class
+                every {
+                    validate(
+                        reference,
+                        listOf(RoninProfile.PATIENT),
+                        LocationContext(Patient::managingOrganization),
+                    )
+                } returns failedValidation
+            }
 
         val service = ValidationService(validationClient, listOf(profileValidator), listOf(referenceValidator))
         val response = service.validate(patient, tenant)
@@ -249,7 +260,7 @@ class ValidationServiceTest {
             referenceValidator.validate(
                 reference,
                 listOf(RoninProfile.PATIENT),
-                LocationContext(Patient::managingOrganization)
+                LocationContext(Patient::managingOrganization),
             )
         }
     }
@@ -257,9 +268,10 @@ class ValidationServiceTest {
     @Test
     fun `validates against contained element with no validator`() {
         val reference = Reference(reference = FHIRString("Organization/1234"))
-        val patient = Patient(
-            managingOrganization = reference
-        )
+        val patient =
+            Patient(
+                managingOrganization = reference,
+            )
 
         every { profileValidator.validate(patient, LocationContext(Patient::class)) } returns Validation()
 
@@ -273,22 +285,24 @@ class ValidationServiceTest {
     @Test
     fun `validates against nested element with validator`() {
         val identifier = Identifier(system = Uri("system"))
-        val patient = Patient(
-            managingOrganization = Reference(identifier = identifier)
-        )
+        val patient =
+            Patient(
+                managingOrganization = Reference(identifier = identifier),
+            )
 
         every { profileValidator.validate(patient, LocationContext(Patient::class)) } returns Validation()
 
-        val identifierValidator = mockk<ElementValidator<Identifier>> {
-            every { supportedElement } returns Identifier::class
-            every {
-                validate(
-                    identifier,
-                    listOf(RoninProfile.PATIENT),
-                    LocationContext("Patient", "managingOrganization.identifier")
-                )
-            } returns failedValidation
-        }
+        val identifierValidator =
+            mockk<ElementValidator<Identifier>> {
+                every { supportedElement } returns Identifier::class
+                every {
+                    validate(
+                        identifier,
+                        listOf(RoninProfile.PATIENT),
+                        LocationContext("Patient", "managingOrganization.identifier"),
+                    )
+                } returns failedValidation
+            }
 
         val service = ValidationService(validationClient, listOf(profileValidator), listOf(identifierValidator))
         val response = service.validate(patient, tenant)
@@ -302,7 +316,7 @@ class ValidationServiceTest {
             identifierValidator.validate(
                 identifier,
                 listOf(RoninProfile.PATIENT),
-                LocationContext("Patient", "managingOrganization.identifier")
+                LocationContext("Patient", "managingOrganization.identifier"),
             )
         }
     }
@@ -310,26 +324,29 @@ class ValidationServiceTest {
     @Test
     fun `validates against dynamic value with element with validator`() {
         val identifier = Identifier(system = Uri("system"))
-        val patient = Patient(
-            // This is not a valid type, but proves out this test.
-            deceased = DynamicValue(
-                DynamicValueType.IDENTIFIER,
-                identifier
+        val patient =
+            Patient(
+                // This is not a valid type, but proves out this test.
+                deceased =
+                    DynamicValue(
+                        DynamicValueType.IDENTIFIER,
+                        identifier,
+                    ),
             )
-        )
 
         every { profileValidator.validate(patient, LocationContext(Patient::class)) } returns Validation()
 
-        val identifierValidator = mockk<ElementValidator<Identifier>> {
-            every { supportedElement } returns Identifier::class
-            every {
-                validate(
-                    identifier,
-                    listOf(RoninProfile.PATIENT),
-                    LocationContext(Patient::deceased)
-                )
-            } returns failedValidation
-        }
+        val identifierValidator =
+            mockk<ElementValidator<Identifier>> {
+                every { supportedElement } returns Identifier::class
+                every {
+                    validate(
+                        identifier,
+                        listOf(RoninProfile.PATIENT),
+                        LocationContext(Patient::deceased),
+                    )
+                } returns failedValidation
+            }
 
         val service = ValidationService(validationClient, listOf(profileValidator), listOf(identifierValidator))
         val response = service.validate(patient, tenant)
@@ -343,7 +360,7 @@ class ValidationServiceTest {
             identifierValidator.validate(
                 identifier,
                 listOf(RoninProfile.PATIENT),
-                LocationContext(Patient::deceased)
+                LocationContext(Patient::deceased),
             )
         }
     }
@@ -351,13 +368,15 @@ class ValidationServiceTest {
     @Test
     fun `validates against dynamic value with element with no validator`() {
         val identifier = Identifier(system = Uri("system"))
-        val patient = Patient(
-            // This is not a valid type, but proves out this test.
-            deceased = DynamicValue(
-                DynamicValueType.IDENTIFIER,
-                identifier
+        val patient =
+            Patient(
+                // This is not a valid type, but proves out this test.
+                deceased =
+                    DynamicValue(
+                        DynamicValueType.IDENTIFIER,
+                        identifier,
+                    ),
             )
-        )
 
         every { profileValidator.validate(patient, LocationContext(Patient::class)) } returns Validation()
 
@@ -373,36 +392,38 @@ class ValidationServiceTest {
         val identifier1 = Identifier(system = Uri("system"))
         val identifier2 = Identifier(value = FHIRString("value"))
         val identifier3 = Identifier(system = Uri("system"), value = FHIRString("value"))
-        val patient = Patient(
-            identifier = listOf(identifier1, identifier2, identifier3)
-        )
+        val patient =
+            Patient(
+                identifier = listOf(identifier1, identifier2, identifier3),
+            )
 
         every { profileValidator.validate(patient, LocationContext(Patient::class)) } returns Validation()
 
-        val identifierValidator = mockk<ElementValidator<Identifier>> {
-            every { supportedElement } returns Identifier::class
-            every {
-                validate(
-                    identifier1,
-                    listOf(RoninProfile.PATIENT),
-                    LocationContext("Patient", "identifier[0]")
-                )
-            } returns failedValidation
-            every {
-                validate(
-                    identifier2,
-                    listOf(RoninProfile.PATIENT),
-                    LocationContext("Patient", "identifier[1]")
-                )
-            } returns failedValidation
-            every {
-                validate(
-                    identifier3,
-                    listOf(RoninProfile.PATIENT),
-                    LocationContext("Patient", "identifier[2]")
-                )
-            } returns Validation()
-        }
+        val identifierValidator =
+            mockk<ElementValidator<Identifier>> {
+                every { supportedElement } returns Identifier::class
+                every {
+                    validate(
+                        identifier1,
+                        listOf(RoninProfile.PATIENT),
+                        LocationContext("Patient", "identifier[0]"),
+                    )
+                } returns failedValidation
+                every {
+                    validate(
+                        identifier2,
+                        listOf(RoninProfile.PATIENT),
+                        LocationContext("Patient", "identifier[1]"),
+                    )
+                } returns failedValidation
+                every {
+                    validate(
+                        identifier3,
+                        listOf(RoninProfile.PATIENT),
+                        LocationContext("Patient", "identifier[2]"),
+                    )
+                } returns Validation()
+            }
 
         val service = ValidationService(validationClient, listOf(profileValidator), listOf(identifierValidator))
         val response = service.validate(patient, tenant)
@@ -420,9 +441,10 @@ class ValidationServiceTest {
         val identifier1 = Identifier(system = Uri("system"))
         val identifier2 = Identifier(value = FHIRString("value"))
         val identifier3 = Identifier(system = Uri("system"), value = FHIRString("value"))
-        val patient = Patient(
-            identifier = listOf(identifier1, identifier2, identifier3)
-        )
+        val patient =
+            Patient(
+                identifier = listOf(identifier1, identifier2, identifier3),
+            )
 
         every { profileValidator.validate(patient, LocationContext(Patient::class)) } returns Validation()
 
@@ -436,56 +458,61 @@ class ValidationServiceTest {
     @Test
     fun `validates against collection of dynamic values with element with validator`() {
         data class TestResource(
-            val values: List<DynamicValue<Any>>
+            val values: List<DynamicValue<Any>>,
         ) : DefaultResource<TestResource>()
 
         val identifier1 = Identifier(system = Uri("system"))
         val identifier2 = Identifier(value = FHIRString("value"))
         val identifier3 = Identifier(system = Uri("system"), value = FHIRString("value"))
-        val resource = TestResource(
-            values = listOf(
-                DynamicValue(DynamicValueType.IDENTIFIER, identifier1),
-                DynamicValue(DynamicValueType.IDENTIFIER, identifier2),
-                DynamicValue(DynamicValueType.IDENTIFIER, identifier3)
+        val resource =
+            TestResource(
+                values =
+                    listOf(
+                        DynamicValue(DynamicValueType.IDENTIFIER, identifier1),
+                        DynamicValue(DynamicValueType.IDENTIFIER, identifier2),
+                        DynamicValue(DynamicValueType.IDENTIFIER, identifier3),
+                    ),
             )
-        )
 
-        val r4ProfileTransformer = mockk<R4ProfileValidator<TestResource>> {
-            every { validate(any(), LocationContext(TestResource::class)) } returns Validation()
-        }
+        val r4ProfileTransformer =
+            mockk<R4ProfileValidator<TestResource>> {
+                every { validate(any(), LocationContext(TestResource::class)) } returns Validation()
+            }
 
-        val profileValidator = mockk<ProfileValidator<TestResource>> {
-            every { supportedResource } returns TestResource::class
-            every { r4Validator } returns r4ProfileTransformer
-            every { profile } returns RoninProfile.APPOINTMENT
-            every { qualifies(any()) } returns true
-            every { validate(resource, LocationContext(TestResource::class)) } returns Validation()
-        }
+        val profileValidator =
+            mockk<ProfileValidator<TestResource>> {
+                every { supportedResource } returns TestResource::class
+                every { r4Validator } returns r4ProfileTransformer
+                every { profile } returns RoninProfile.APPOINTMENT
+                every { qualifies(any()) } returns true
+                every { validate(resource, LocationContext(TestResource::class)) } returns Validation()
+            }
 
-        val identifierValidator = mockk<ElementValidator<Identifier>> {
-            every { supportedElement } returns Identifier::class
-            every {
-                validate(
-                    identifier1,
-                    listOf(RoninProfile.APPOINTMENT),
-                    LocationContext("TestResource", "values[0]")
-                )
-            } returns failedValidation
-            every {
-                validate(
-                    identifier2,
-                    listOf(RoninProfile.APPOINTMENT),
-                    LocationContext("TestResource", "values[1]")
-                )
-            } returns failedValidation
-            every {
-                validate(
-                    identifier3,
-                    listOf(RoninProfile.APPOINTMENT),
-                    LocationContext("TestResource", "values[2]")
-                )
-            } returns Validation()
-        }
+        val identifierValidator =
+            mockk<ElementValidator<Identifier>> {
+                every { supportedElement } returns Identifier::class
+                every {
+                    validate(
+                        identifier1,
+                        listOf(RoninProfile.APPOINTMENT),
+                        LocationContext("TestResource", "values[0]"),
+                    )
+                } returns failedValidation
+                every {
+                    validate(
+                        identifier2,
+                        listOf(RoninProfile.APPOINTMENT),
+                        LocationContext("TestResource", "values[1]"),
+                    )
+                } returns failedValidation
+                every {
+                    validate(
+                        identifier3,
+                        listOf(RoninProfile.APPOINTMENT),
+                        LocationContext("TestResource", "values[2]"),
+                    )
+                } returns Validation()
+            }
 
         every { validationClient.reportIssues(any(), any<TestResource>(), any()) } returns UUID.randomUUID()
 
@@ -503,31 +530,35 @@ class ValidationServiceTest {
     @Test
     fun `validates against collection of dynamic values with element with no validator`() {
         data class TestResource(
-            val values: List<DynamicValue<Any>>
+            val values: List<DynamicValue<Any>>,
         ) : DefaultResource<TestResource>()
 
         val identifier1 = Identifier(system = Uri("system"))
         val identifier2 = Identifier(value = FHIRString("value"))
         val identifier3 = Identifier(system = Uri("system"), value = FHIRString("value"))
-        val resource = TestResource(
-            values = listOf(
-                DynamicValue(DynamicValueType.IDENTIFIER, identifier1),
-                DynamicValue(DynamicValueType.IDENTIFIER, identifier2),
-                DynamicValue(DynamicValueType.IDENTIFIER, identifier3)
+        val resource =
+            TestResource(
+                values =
+                    listOf(
+                        DynamicValue(DynamicValueType.IDENTIFIER, identifier1),
+                        DynamicValue(DynamicValueType.IDENTIFIER, identifier2),
+                        DynamicValue(DynamicValueType.IDENTIFIER, identifier3),
+                    ),
             )
-        )
 
-        val r4ProfileTransformer = mockk<R4ProfileValidator<TestResource>> {
-            every { validate(any(), LocationContext(TestResource::class)) } returns Validation()
-        }
+        val r4ProfileTransformer =
+            mockk<R4ProfileValidator<TestResource>> {
+                every { validate(any(), LocationContext(TestResource::class)) } returns Validation()
+            }
 
-        val profileValidator = mockk<ProfileValidator<TestResource>> {
-            every { supportedResource } returns TestResource::class
-            every { r4Validator } returns r4ProfileTransformer
-            every { profile } returns RoninProfile.APPOINTMENT
-            every { qualifies(any()) } returns true
-            every { validate(resource, LocationContext(TestResource::class)) } returns Validation()
-        }
+        val profileValidator =
+            mockk<ProfileValidator<TestResource>> {
+                every { supportedResource } returns TestResource::class
+                every { r4Validator } returns r4ProfileTransformer
+                every { profile } returns RoninProfile.APPOINTMENT
+                every { qualifies(any()) } returns true
+                every { validate(resource, LocationContext(TestResource::class)) } returns Validation()
+            }
 
         val service = ValidationService(validationClient, listOf(profileValidator), listOf())
         val response = service.validate(resource, tenant)

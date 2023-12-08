@@ -47,9 +47,10 @@ import org.junit.jupiter.api.Test
 class RoninLocationTransformerTest {
     private val transformer = RoninLocationTransformer()
 
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "test"
-    }
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "test"
+        }
 
     @Test
     fun `returns supported resource`() {
@@ -63,101 +64,112 @@ class RoninLocationTransformerTest {
 
     @Test
     fun `transforms location with all attributes`() {
-        val telecom = listOf(
-            ContactPoint(
-                id = "12345".asFHIR(),
-                extension = listOf(
-                    Extension(
-                        url = Uri("http://localhost/extension"),
-                        value = DynamicValue(DynamicValueType.STRING, "Value".asFHIR())
-                    )
+        val telecom =
+            listOf(
+                ContactPoint(
+                    id = "12345".asFHIR(),
+                    extension =
+                        listOf(
+                            Extension(
+                                url = Uri("http://localhost/extension"),
+                                value = DynamicValue(DynamicValueType.STRING, "Value".asFHIR()),
+                            ),
+                        ),
+                    system = ContactPointSystem.PHONE.asCode(),
+                    use = ContactPointUse.MOBILE.asCode(),
+                    value = "8675309".asFHIR(),
+                    rank = PositiveInt(1),
+                    period =
+                        Period(
+                            start = DateTime("2021-11-18"),
+                            end = DateTime("2022-11-17"),
+                        ),
                 ),
-                system = ContactPointSystem.PHONE.asCode(),
-                use = ContactPointUse.MOBILE.asCode(),
-                value = "8675309".asFHIR(),
-                rank = PositiveInt(1),
-                period = Period(
-                    start = DateTime("2021-11-18"),
-                    end = DateTime("2022-11-17")
-                )
-            ),
-            ContactPoint(
-                system = Code("telephone"),
-                value = "1112223333".asFHIR()
+                ContactPoint(
+                    system = Code("telephone"),
+                    value = "1112223333".asFHIR(),
+                ),
             )
-        )
 
         val operationalStatus =
             Coding(code = Code("O"), system = Uri(value = "http://terminology.hl7.org/CodeSystem/v2-0116"))
-        val type = listOf(
+        val type =
+            listOf(
+                CodeableConcept(
+                    text = "Diagnostic".asFHIR(),
+                    coding =
+                        listOf(
+                            Coding(
+                                code = Code("DX"),
+                                system = Uri(value = "http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType"),
+                            ),
+                        ),
+                ),
+            )
+        val physicalType =
             CodeableConcept(
-                text = "Diagnostic".asFHIR(),
-                coding = listOf(
-                    Coding(
-                        code = Code("DX"),
-                        system = Uri(value = "http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType")
-                    )
-                )
+                text = "Room".asFHIR(),
+                coding =
+                    listOf(
+                        Coding(
+                            code = Code("ro"),
+                            system = Uri(value = "http://terminology.hl7.org/CodeSystem/location-physical-type"),
+                        ),
+                    ),
             )
-        )
-        val physicalType = CodeableConcept(
-            text = "Room".asFHIR(),
-            coding = listOf(
-                Coding(
-                    code = Code("ro"),
-                    system = Uri(value = "http://terminology.hl7.org/CodeSystem/location-physical-type")
-                )
-            )
-        )
         val hoursOfOperation =
             listOf(
                 LocationHoursOfOperation(
                     daysOfWeek = listOf(DayOfWeek.SATURDAY.asCode(), DayOfWeek.SUNDAY.asCode()),
-                    allDay = FHIRBoolean.TRUE
-                )
+                    allDay = FHIRBoolean.TRUE,
+                ),
             )
         val position = LocationPosition(longitude = Decimal(13.81531), latitude = Decimal(66.077132))
         val endpoint = listOf(Reference(reference = "Endpoint/4321".asFHIR()))
-        val location = Location(
-            id = Id("12345"),
-            meta = Meta(
-                profile = listOf(Canonical("https://www.hl7.org/fhir/location")),
-                source = Uri("source")
-            ),
-            implicitRules = Uri("implicit-rules"),
-            language = Code("en-US"),
-            text = Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()),
-            contained = listOf(Location(id = Id("67890"))),
-            extension = listOf(
-                Extension(
-                    url = Uri("http://localhost/extension"),
-                    value = DynamicValue(DynamicValueType.STRING, "Value")
-                )
-            ),
-            modifierExtension = listOf(
-                Extension(
-                    url = Uri("http://localhost/modifier-extension"),
-                    value = DynamicValue(DynamicValueType.STRING, "Value")
-                )
-            ),
-            identifier = listOf(Identifier(value = "id".asFHIR())),
-            status = LocationStatus.ACTIVE.asCode(),
-            operationalStatus = operationalStatus,
-            name = "My Office".asFHIR(),
-            alias = listOf("Guest Room").asFHIR(),
-            description = "Sun Room".asFHIR(),
-            mode = LocationMode.INSTANCE.asCode(),
-            type = type,
-            telecom = telecom,
-            address = Address(country = "USA".asFHIR()),
-            physicalType = physicalType,
-            position = position,
-            managingOrganization = Reference(reference = "Organization/1234".asFHIR()),
-            partOf = Reference(reference = "Location/1234".asFHIR()),
-            hoursOfOperation = hoursOfOperation,
-            availabilityExceptions = "Call for details".asFHIR(),
-            endpoint = endpoint
-        )
+        val location =
+            Location(
+                id = Id("12345"),
+                meta =
+                    Meta(
+                        profile = listOf(Canonical("https://www.hl7.org/fhir/location")),
+                        source = Uri("source"),
+                    ),
+                implicitRules = Uri("implicit-rules"),
+                language = Code("en-US"),
+                text = Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()),
+                contained = listOf(Location(id = Id("67890"))),
+                extension =
+                    listOf(
+                        Extension(
+                            url = Uri("http://localhost/extension"),
+                            value = DynamicValue(DynamicValueType.STRING, "Value"),
+                        ),
+                    ),
+                modifierExtension =
+                    listOf(
+                        Extension(
+                            url = Uri("http://localhost/modifier-extension"),
+                            value = DynamicValue(DynamicValueType.STRING, "Value"),
+                        ),
+                    ),
+                identifier = listOf(Identifier(value = "id".asFHIR())),
+                status = LocationStatus.ACTIVE.asCode(),
+                operationalStatus = operationalStatus,
+                name = "My Office".asFHIR(),
+                alias = listOf("Guest Room").asFHIR(),
+                description = "Sun Room".asFHIR(),
+                mode = LocationMode.INSTANCE.asCode(),
+                type = type,
+                telecom = telecom,
+                address = Address(country = "USA".asFHIR()),
+                physicalType = physicalType,
+                position = position,
+                managingOrganization = Reference(reference = "Organization/1234".asFHIR()),
+                partOf = Reference(reference = "Location/1234".asFHIR()),
+                hoursOfOperation = hoursOfOperation,
+                availabilityExceptions = "Call for details".asFHIR(),
+                endpoint = endpoint,
+            )
 
         val transformResponse = transformer.transform(location, tenant)
 
@@ -169,32 +181,32 @@ class RoninLocationTransformerTest {
         assertEquals(Id("12345"), transformed.id)
         assertEquals(
             Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source")),
-            transformed.meta
+            transformed.meta,
         )
         assertEquals(Uri("implicit-rules"), transformed.implicitRules)
         assertEquals(Code("en-US"), transformed.language)
         assertEquals(Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()), transformed.text)
         assertEquals(
             listOf(Location(id = Id("67890"))),
-            transformed.contained
+            transformed.contained,
         )
         assertEquals(
             listOf(
                 Extension(
                     url = Uri("http://localhost/extension"),
-                    value = DynamicValue(DynamicValueType.STRING, "Value")
-                )
+                    value = DynamicValue(DynamicValueType.STRING, "Value"),
+                ),
             ),
-            transformed.extension
+            transformed.extension,
         )
         assertEquals(
             listOf(
                 Extension(
                     url = Uri("http://localhost/modifier-extension"),
-                    value = DynamicValue(DynamicValueType.STRING, "Value")
-                )
+                    value = DynamicValue(DynamicValueType.STRING, "Value"),
+                ),
             ),
-            transformed.modifierExtension
+            transformed.modifierExtension,
         )
         assertEquals(
             listOf(
@@ -202,20 +214,20 @@ class RoninLocationTransformerTest {
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
                     system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
+                    value = "12345".asFHIR(),
                 ),
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
+                    value = "test".asFHIR(),
                 ),
                 Identifier(
                     type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
                     system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
+                    value = "EHR Data Authority".asFHIR(),
+                ),
             ),
-            transformed.identifier
+            transformed.identifier,
         )
         assertEquals(LocationStatus.ACTIVE.asCode(), transformed.status)
         assertEquals(operationalStatus, transformed.operationalStatus)
@@ -237,11 +249,12 @@ class RoninLocationTransformerTest {
 
     @Test
     fun `transforms location with only required attributes`() {
-        val location = Location(
-            id = Id("12345"),
-            meta = Meta(source = Uri("source")),
-            name = "Name".asFHIR()
-        )
+        val location =
+            Location(
+                id = Id("12345"),
+                meta = Meta(source = Uri("source")),
+                name = "Name".asFHIR(),
+            )
 
         val transformResponse = transformer.transform(location, tenant)
 
@@ -253,7 +266,7 @@ class RoninLocationTransformerTest {
         assertEquals(Id("12345"), transformed.id)
         assertEquals(
             Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source")),
-            transformed.meta
+            transformed.meta,
         )
         assertNull(transformed.implicitRules)
         assertNull(transformed.language)
@@ -266,20 +279,20 @@ class RoninLocationTransformerTest {
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
                     system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
+                    value = "12345".asFHIR(),
                 ),
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
+                    value = "test".asFHIR(),
                 ),
                 Identifier(
                     type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
                     system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
+                    value = "EHR Data Authority".asFHIR(),
+                ),
             ),
-            transformed.identifier
+            transformed.identifier,
         )
         assertNull(transformed.status)
         assertNull(transformed.operationalStatus)
@@ -301,27 +314,29 @@ class RoninLocationTransformerTest {
 
     @Test
     fun `transforms location when no name is provided`() {
-        val location = Location(
-            id = Id("12345"),
-            meta = Meta(source = Uri("source")),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
+        val location =
+            Location(
+                id = Id("12345"),
+                meta = Meta(source = Uri("source")),
+                identifier =
+                    listOf(
+                        Identifier(
+                            type = CodeableConcepts.RONIN_FHIR_ID,
+                            system = CodeSystem.RONIN_FHIR_ID.uri,
+                            value = "12345".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_TENANT,
+                            system = CodeSystem.RONIN_TENANT.uri,
+                            value = "test".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                            system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                            value = "EHR Data Authority".asFHIR(),
+                        ),
+                    ),
             )
-        )
 
         val locationTransformer = transformer.transformInternal(location, tenant)
 
@@ -333,28 +348,30 @@ class RoninLocationTransformerTest {
 
     @Test
     fun `transforms location when empty name is provided`() {
-        val location = Location(
-            id = Id("12345"),
-            meta = Meta(source = Uri("source")),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            name = "".asFHIR()
-        )
+        val location =
+            Location(
+                id = Id("12345"),
+                meta = Meta(source = Uri("source")),
+                identifier =
+                    listOf(
+                        Identifier(
+                            type = CodeableConcepts.RONIN_FHIR_ID,
+                            system = CodeSystem.RONIN_FHIR_ID.uri,
+                            value = "12345".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_TENANT,
+                            system = CodeSystem.RONIN_TENANT.uri,
+                            value = "test".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                            system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                            value = "EHR Data Authority".asFHIR(),
+                        ),
+                    ),
+                name = "".asFHIR(),
+            )
 
         val locationTransformer = transformer.transformInternal(location, tenant)
 
@@ -366,21 +383,24 @@ class RoninLocationTransformerTest {
 
     @Test
     fun `transforms location with name containing id and extensions`() {
-        val name = FHIRString(
-            value = "Name",
-            id = FHIRString("id"),
-            extension = listOf(
-                Extension(
-                    url = Uri("http://localhost/extension"),
-                    value = DynamicValue(DynamicValueType.STRING, "Value")
-                )
+        val name =
+            FHIRString(
+                value = "Name",
+                id = FHIRString("id"),
+                extension =
+                    listOf(
+                        Extension(
+                            url = Uri("http://localhost/extension"),
+                            value = DynamicValue(DynamicValueType.STRING, "Value"),
+                        ),
+                    ),
             )
-        )
-        val location = Location(
-            id = Id("12345"),
-            meta = Meta(source = Uri("source")),
-            name = name
-        )
+        val location =
+            Location(
+                id = Id("12345"),
+                meta = Meta(source = Uri("source")),
+                name = name,
+            )
 
         val transformResponse = transformer.transform(location, tenant)
 
@@ -392,7 +412,7 @@ class RoninLocationTransformerTest {
         assertEquals(Id("12345"), transformed.id)
         assertEquals(
             Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source")),
-            transformed.meta
+            transformed.meta,
         )
         assertNull(transformed.implicitRules)
         assertNull(transformed.language)
@@ -405,20 +425,20 @@ class RoninLocationTransformerTest {
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
                     system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
+                    value = "12345".asFHIR(),
                 ),
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
+                    value = "test".asFHIR(),
                 ),
                 Identifier(
                     type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
                     system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
+                    value = "EHR Data Authority".asFHIR(),
+                ),
             ),
-            transformed.identifier
+            transformed.identifier,
         )
         assertNull(transformed.status)
         assertNull(transformed.operationalStatus)

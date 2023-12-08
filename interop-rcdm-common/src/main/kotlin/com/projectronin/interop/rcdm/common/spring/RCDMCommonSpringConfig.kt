@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration
 @ComponentScan(
     *[
         "com.projectronin.interop.rcdm.common",
-        "com.projectronin.interop.validation.client" // INT-2128 modularize validation
-    ]
+        "com.projectronin.interop.validation.client", // INT-2128 modularize validation
+    ],
 )
 class RCDMCommonSpringConfig

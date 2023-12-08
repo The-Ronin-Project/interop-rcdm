@@ -18,36 +18,38 @@ import kotlin.reflect.KClass
 class AppointmentMapper(registryClient: NormalizationRegistryClient) :
     ResourceMapper<Appointment>, BaseMapper<Appointment>(registryClient) {
     override val supportedResource: KClass<Appointment> = Appointment::class
+
     override fun map(
         resource: Appointment,
         tenant: Tenant,
-        forceCacheReloadTS: LocalDateTime?
+        forceCacheReloadTS: LocalDateTime?,
     ): MapResponse<Appointment> {
         val validation = Validation()
         val parentContext = LocationContext(Appointment::class)
 
-        val mappedStatus = resource.status?.value?.let {
-            getConceptMappingForEnum<AppointmentStatus, Appointment>(
-                it,
-                Appointment::status,
-                "${parentContext.element}.status",
-                resource,
-                RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS,
-                tenant,
-                parentContext,
-                validation,
-                forceCacheReloadTS
-            )
-        }
+        val mappedStatus =
+            resource.status?.value?.let {
+                getConceptMappingForEnum<AppointmentStatus, Appointment>(
+                    it,
+                    Appointment::status,
+                    "${parentContext.element}.status",
+                    resource,
+                    RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS,
+                    tenant,
+                    parentContext,
+                    validation,
+                    forceCacheReloadTS,
+                )
+            }
 
         return MapResponse(
             mappedStatus?.let {
                 resource.copy(
                     status = it.coding.code,
-                    extension = resource.extension + it.extension
+                    extension = resource.extension + it.extension,
                 )
             } ?: resource,
-            validation
+            validation,
         )
     }
 }

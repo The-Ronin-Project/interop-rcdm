@@ -20,7 +20,11 @@ class RoninRequestGroupValidator : ProfileValidator<RequestGroup>() {
     override val profileVersion = 1
     val requiredSubject = RequiredFieldError(RequestGroup::subject)
 
-    override fun validate(resource: RequestGroup, validation: Validation, context: LocationContext) {
+    override fun validate(
+        resource: RequestGroup,
+        validation: Validation,
+        context: LocationContext,
+    ) {
         validation.apply {
             checkNotNull(resource.subject, requiredSubject, context)
         }

@@ -21,16 +21,21 @@ abstract class BaseRoninConditionProfileValidator : ProfileValidator<Condition>(
 
     private val requiredCodeError = RequiredFieldError(Condition::code)
 
-    private val requiredConditionCodeExtension = FHIRError(
-        code = "RONIN_CND_001",
-        description = "Tenant source condition code extension is missing or invalid",
-        severity = ValidationIssueSeverity.ERROR,
-        location = LocationContext(Condition::extension)
-    )
+    private val requiredConditionCodeExtension =
+        FHIRError(
+            code = "RONIN_CND_001",
+            description = "Tenant source condition code extension is missing or invalid",
+            severity = ValidationIssueSeverity.ERROR,
+            location = LocationContext(Condition::extension),
+        )
 
     abstract fun getQualifyingCategories(): List<Coding>
 
-    override fun validate(resource: Condition, validation: Validation, context: LocationContext) {
+    override fun validate(
+        resource: Condition,
+        validation: Validation,
+        context: LocationContext,
+    ) {
         validation.apply {
             val qualifyingCategories = getQualifyingCategories()
             checkTrue(
@@ -39,11 +44,11 @@ abstract class BaseRoninConditionProfileValidator : ProfileValidator<Condition>(
                     code = "RONIN_CND_001",
                     severity = ValidationIssueSeverity.ERROR,
                     description = "Must match this system|code: ${
-                    qualifyingCategories.joinToString(", ") { "${it.system?.value}|${it.code?.value}" }
+                        qualifyingCategories.joinToString(", ") { "${it.system?.value}|${it.code?.value}" }
                     }",
-                    location = LocationContext(Condition::category)
+                    location = LocationContext(Condition::category),
                 ),
-                context
+                context,
             )
 
             checkNotNull(resource.code, requiredCodeError, context)
@@ -54,7 +59,7 @@ abstract class BaseRoninConditionProfileValidator : ProfileValidator<Condition>(
                     it.url == RoninExtension.TENANT_SOURCE_CONDITION_CODE.uri && it.value?.type == DynamicValueType.CODEABLE_CONCEPT
                 },
                 requiredConditionCodeExtension,
-                context
+                context,
             )
         }
     }

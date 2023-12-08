@@ -36,9 +36,10 @@ import org.junit.jupiter.api.Test
 class RoninOrganizationTransformerTest {
     private val transformer = RoninOrganizationTransformer()
 
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "test"
-    }
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "test"
+        }
 
     @Test
     fun `returns supported resource`() {
@@ -52,91 +53,112 @@ class RoninOrganizationTransformerTest {
 
     @Test
     fun `transform organization with all attributes`() {
-        val organization = Organization(
-            id = Id("12345"),
-            meta = Meta(
-                profile = listOf(Canonical("http://hl7.org/fhir/R4/organization.html")),
-                source = Uri("source")
-            ),
-            implicitRules = Uri("implicit-rules"),
-            language = Code("en-US"),
-            text = Narrative(status = com.projectronin.interop.fhir.r4.valueset.NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()),
-            contained = listOf(Location(id = Id("67890"))),
-            extension = listOf(
-                Extension(
-                    url = Uri("http://hl7.org/extension-1"),
-                    value = DynamicValue(DynamicValueType.STRING, "value")
-                )
-            ),
-            modifierExtension = listOf(
-                Extension(
-                    url = Uri("http://localhost/modifier-extension"),
-                    value = DynamicValue(DynamicValueType.STRING, "Value")
-                )
-            ),
-            identifier = listOf(Identifier(value = "id".asFHIR())),
-            active = true.asFHIR(),
-            type = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = Uri("http://terminology.hl7.org/CodeSystem/organization-type"),
-                            code = Code("prov"),
-                            display = "Healthcare Provider".asFHIR()
-                        )
-                    )
-                )
-            ),
-            name = "Organization Name".asFHIR(),
-            alias = listOf(
-                "Other Organization Name".asFHIR(),
-                "Organization also known as...".asFHIR()
-            ),
-            telecom = listOf(
-                ContactPoint(
-                    id = "FAKEID".asFHIR(),
-                    system = Code("phone"),
-                    value = "555-555-5555".asFHIR(),
-                    use = Code("work")
-                )
-            ),
-            address = listOf(
-                Address(
-                    country = "USA".asFHIR()
-                )
-            ),
-            partOf = Reference(reference = "Organization/super".asFHIR()),
-            contact = listOf(
-                OrganizationContact(
-                    purpose = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                code = Code("fake")
-                            )
-                        )
+        val organization =
+            Organization(
+                id = Id("12345"),
+                meta =
+                    Meta(
+                        profile = listOf(Canonical("http://hl7.org/fhir/R4/organization.html")),
+                        source = Uri("source"),
                     ),
-                    name = HumanName(
-                        given = listOf(
-                            "FakeName".asFHIR()
-                        )
+                implicitRules = Uri("implicit-rules"),
+                language = Code("en-US"),
+                text =
+                    Narrative(
+                        status = com.projectronin.interop.fhir.r4.valueset.NarrativeStatus.GENERATED.asCode(),
+                        div = "div".asFHIR(),
                     ),
-                    telecom = listOf(
+                contained = listOf(Location(id = Id("67890"))),
+                extension =
+                    listOf(
+                        Extension(
+                            url = Uri("http://hl7.org/extension-1"),
+                            value = DynamicValue(DynamicValueType.STRING, "value"),
+                        ),
+                    ),
+                modifierExtension =
+                    listOf(
+                        Extension(
+                            url = Uri("http://localhost/modifier-extension"),
+                            value = DynamicValue(DynamicValueType.STRING, "Value"),
+                        ),
+                    ),
+                identifier = listOf(Identifier(value = "id".asFHIR())),
+                active = true.asFHIR(),
+                type =
+                    listOf(
+                        CodeableConcept(
+                            coding =
+                                listOf(
+                                    Coding(
+                                        system = Uri("http://terminology.hl7.org/CodeSystem/organization-type"),
+                                        code = Code("prov"),
+                                        display = "Healthcare Provider".asFHIR(),
+                                    ),
+                                ),
+                        ),
+                    ),
+                name = "Organization Name".asFHIR(),
+                alias =
+                    listOf(
+                        "Other Organization Name".asFHIR(),
+                        "Organization also known as...".asFHIR(),
+                    ),
+                telecom =
+                    listOf(
                         ContactPoint(
+                            id = "FAKEID".asFHIR(),
                             system = Code("phone"),
-                            value = "555-555-5555".asFHIR()
-                        )
+                            value = "555-555-5555".asFHIR(),
+                            use = Code("work"),
+                        ),
                     ),
-                    address = Address(
-                        country = "USA".asFHIR()
-                    )
-                )
-            ),
-            endpoint = listOf(
-                Reference(
-                    reference = "Endpoint/1357".asFHIR()
-                )
+                address =
+                    listOf(
+                        Address(
+                            country = "USA".asFHIR(),
+                        ),
+                    ),
+                partOf = Reference(reference = "Organization/super".asFHIR()),
+                contact =
+                    listOf(
+                        OrganizationContact(
+                            purpose =
+                                CodeableConcept(
+                                    coding =
+                                        listOf(
+                                            Coding(
+                                                code = Code("fake"),
+                                            ),
+                                        ),
+                                ),
+                            name =
+                                HumanName(
+                                    given =
+                                        listOf(
+                                            "FakeName".asFHIR(),
+                                        ),
+                                ),
+                            telecom =
+                                listOf(
+                                    ContactPoint(
+                                        system = Code("phone"),
+                                        value = "555-555-5555".asFHIR(),
+                                    ),
+                                ),
+                            address =
+                                Address(
+                                    country = "USA".asFHIR(),
+                                ),
+                        ),
+                    ),
+                endpoint =
+                    listOf(
+                        Reference(
+                            reference = "Endpoint/1357".asFHIR(),
+                        ),
+                    ),
             )
-        )
 
         val transformResponse = transformer.transform(organization, tenant)
 
@@ -149,32 +171,35 @@ class RoninOrganizationTransformerTest {
         assertEquals(Id(value = "12345"), transformed.id)
         assertEquals(
             Meta(profile = listOf(Canonical(RoninProfile.ORGANIZATION.value)), source = Uri("source")),
-            transformed.meta
+            transformed.meta,
         )
         assertEquals(Uri("implicit-rules"), transformed.implicitRules)
         assertEquals(Code("en-US"), transformed.language)
-        assertEquals(Narrative(status = com.projectronin.interop.fhir.r4.valueset.NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()), transformed.text)
+        assertEquals(
+            Narrative(status = com.projectronin.interop.fhir.r4.valueset.NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()),
+            transformed.text,
+        )
         assertEquals(
             listOf(Location(id = Id("67890"))),
-            transformed.contained
+            transformed.contained,
         )
         assertEquals(
             listOf(
                 Extension(
                     url = Uri("http://hl7.org/extension-1"),
-                    value = DynamicValue(DynamicValueType.STRING, "value")
-                )
+                    value = DynamicValue(DynamicValueType.STRING, "value"),
+                ),
             ),
-            transformed.extension
+            transformed.extension,
         )
         assertEquals(
             listOf(
                 Extension(
                     url = Uri("http://localhost/modifier-extension"),
-                    value = DynamicValue(DynamicValueType.STRING, "Value")
-                )
+                    value = DynamicValue(DynamicValueType.STRING, "Value"),
+                ),
             ),
-            transformed.modifierExtension
+            transformed.modifierExtension,
         )
         assertEquals(
             listOf(
@@ -182,43 +207,44 @@ class RoninOrganizationTransformerTest {
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
                     system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
+                    value = "12345".asFHIR(),
                 ),
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
+                    value = "test".asFHIR(),
                 ),
                 Identifier(
                     type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
                     system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
+                    value = "EHR Data Authority".asFHIR(),
+                ),
             ),
-            transformed.identifier
+            transformed.identifier,
         )
         Assertions.assertNotNull(transformed.active)
         assertEquals(
             listOf(
                 CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = Uri("http://terminology.hl7.org/CodeSystem/organization-type"),
-                            code = Code("prov"),
-                            display = "Healthcare Provider".asFHIR()
-                        )
-                    )
-                )
+                    coding =
+                        listOf(
+                            Coding(
+                                system = Uri("http://terminology.hl7.org/CodeSystem/organization-type"),
+                                code = Code("prov"),
+                                display = "Healthcare Provider".asFHIR(),
+                            ),
+                        ),
+                ),
             ),
-            transformed.type
+            transformed.type,
         )
         Assertions.assertNotNull(transformed.name)
         assertEquals(
             listOf(
                 "Other Organization Name".asFHIR(),
-                "Organization also known as...".asFHIR()
+                "Organization also known as...".asFHIR(),
             ),
-            transformed.alias
+            transformed.alias,
         )
         assertEquals(
             listOf(
@@ -226,66 +252,73 @@ class RoninOrganizationTransformerTest {
                     id = "FAKEID".asFHIR(),
                     system = Code("phone"),
                     value = "555-555-5555".asFHIR(),
-                    use = Code("work")
-                )
+                    use = Code("work"),
+                ),
             ),
-            transformed.telecom
+            transformed.telecom,
         )
         assertEquals(
             listOf(
                 Address(
-                    country = "USA".asFHIR()
-                )
+                    country = "USA".asFHIR(),
+                ),
             ),
-            transformed.address
+            transformed.address,
         )
         assertEquals(Reference(reference = "Organization/super".asFHIR()), transformed.partOf)
         assertEquals(
             listOf(
                 OrganizationContact(
-                    purpose = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                code = Code("fake")
-                            )
-                        )
-                    ),
-                    name = HumanName(
-                        given = listOf(
-                            "FakeName".asFHIR()
-                        )
-                    ),
-                    telecom = listOf(
-                        ContactPoint(
-                            system = Code("phone"),
-                            value = "555-555-5555".asFHIR()
-                        )
-                    ),
-                    address = Address(
-                        country = "USA".asFHIR()
-                    )
-                )
+                    purpose =
+                        CodeableConcept(
+                            coding =
+                                listOf(
+                                    Coding(
+                                        code = Code("fake"),
+                                    ),
+                                ),
+                        ),
+                    name =
+                        HumanName(
+                            given =
+                                listOf(
+                                    "FakeName".asFHIR(),
+                                ),
+                        ),
+                    telecom =
+                        listOf(
+                            ContactPoint(
+                                system = Code("phone"),
+                                value = "555-555-5555".asFHIR(),
+                            ),
+                        ),
+                    address =
+                        Address(
+                            country = "USA".asFHIR(),
+                        ),
+                ),
             ),
-            transformed.contact
+            transformed.contact,
         )
         assertEquals(
             listOf(
                 Reference(
-                    reference = "Endpoint/1357".asFHIR()
-                )
+                    reference = "Endpoint/1357".asFHIR(),
+                ),
             ),
-            transformed.endpoint
+            transformed.endpoint,
         )
     }
 
     @Test
     fun `transform organization with only required attributes`() {
-        val organization = Organization(
-            id = Id("12345"),
-            meta = Meta(source = Uri("source")),
-            name = "Organization name".asFHIR(),
-            active = true.asFHIR()
-        )
+        val organization =
+            Organization(
+                id = Id("12345"),
+                meta = Meta(source = Uri("source")),
+                name = "Organization name".asFHIR(),
+                active = true.asFHIR(),
+            )
 
         val transformResponse = transformer.transform(organization, tenant)
 
@@ -298,7 +331,7 @@ class RoninOrganizationTransformerTest {
         assertEquals(Id(value = "12345"), transformed.id)
         assertEquals(
             Meta(profile = listOf(Canonical(RoninProfile.ORGANIZATION.value)), source = Uri("source")),
-            transformed.meta
+            transformed.meta,
         )
         Assertions.assertNull(transformed.implicitRules)
         Assertions.assertNull(transformed.language)
@@ -310,20 +343,20 @@ class RoninOrganizationTransformerTest {
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
                     system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
+                    value = "12345".asFHIR(),
                 ),
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
+                    value = "test".asFHIR(),
                 ),
                 Identifier(
                     type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
                     system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
+                    value = "EHR Data Authority".asFHIR(),
+                ),
             ),
-            transformed.identifier
+            transformed.identifier,
         )
         Assertions.assertNotNull(transformed.active)
         assertEquals(listOf<CodeableConcept>(), transformed.type)

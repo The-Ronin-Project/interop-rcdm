@@ -18,45 +18,48 @@ class ContactPointValidator : ElementValidator<ContactPoint> {
     private val requiredTelecomSystemError = RequiredFieldError(ContactPoint::system)
     private val requiredTelecomValueError = RequiredFieldError(ContactPoint::value)
 
-    private val requiredTelecomSystemExtensionError = FHIRError(
-        code = "RONIN_CNTCTPT_001",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "A single tenant source element system extension is required",
-        location = LocationContext(ContactPoint::system)
-    )
-    private val requiredTelecomUseExtensionError = FHIRError(
-        code = "RONIN_CNTCTPT_003",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "A single tenant source element use extension is required",
-        location = LocationContext(ContactPoint::use)
-    )
+    private val requiredTelecomSystemExtensionError =
+        FHIRError(
+            code = "RONIN_CNTCTPT_001",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "A single tenant source element system extension is required",
+            location = LocationContext(ContactPoint::system),
+        )
+    private val requiredTelecomUseExtensionError =
+        FHIRError(
+            code = "RONIN_CNTCTPT_003",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "A single tenant source element use extension is required",
+            location = LocationContext(ContactPoint::use),
+        )
 
     override fun validate(
         element: ContactPoint,
         profiles: List<RoninProfile>,
-        parentContext: LocationContext
-    ): Validation = Validation().apply {
-        checkNotNull(element.system, requiredTelecomSystemError, parentContext)
-        element.system?.let { system ->
-            val extension =
-                system.extension.singleOrNull { it.url?.value == RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value }
-            checkNotNull(
-                extension,
-                requiredTelecomSystemExtensionError,
-                parentContext
-            )
-        }
+        parentContext: LocationContext,
+    ): Validation =
+        Validation().apply {
+            checkNotNull(element.system, requiredTelecomSystemError, parentContext)
+            element.system?.let { system ->
+                val extension =
+                    system.extension.singleOrNull { it.url?.value == RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value }
+                checkNotNull(
+                    extension,
+                    requiredTelecomSystemExtensionError,
+                    parentContext,
+                )
+            }
 
-        checkNotNull(element.value, requiredTelecomValueError, parentContext)
+            checkNotNull(element.value, requiredTelecomValueError, parentContext)
 
-        element.use?.let { use ->
-            val extension =
-                use.extension.singleOrNull { it.url?.value == RoninExtension.TENANT_SOURCE_TELECOM_USE.value }
-            checkNotNull(
-                extension,
-                requiredTelecomUseExtensionError,
-                parentContext
-            )
+            element.use?.let { use ->
+                val extension =
+                    use.extension.singleOrNull { it.url?.value == RoninExtension.TENANT_SOURCE_TELECOM_USE.value }
+                checkNotNull(
+                    extension,
+                    requiredTelecomUseExtensionError,
+                    parentContext,
+                )
+            }
         }
-    }
 }

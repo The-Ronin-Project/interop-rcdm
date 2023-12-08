@@ -8,7 +8,8 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
  * Access to common Ronin-specific code systems
  */
 enum class RoninConceptMap(uriString: String) {
-    CODE_SYSTEMS("http://projectronin.io/fhir/CodeSystem");
+    CODE_SYSTEMS("http://projectronin.io/fhir/CodeSystem"),
+    ;
 
     val uri = Uri(uriString)
 
@@ -17,22 +18,29 @@ enum class RoninConceptMap(uriString: String) {
      * when the incoming data provides only a Code, with a string value, and no Coding.
      * The method derives the correct Coding.system and assigns the Code to Coding.code.
      */
-    fun toCoding(tenantMnemonic: String, fhirPath: String, value: String) =
-        Coding(system = this.toUri(tenantMnemonic, fhirPath), code = Code(value = value))
+    fun toCoding(
+        tenantMnemonic: String,
+        fhirPath: String,
+        value: String,
+    ) = Coding(system = this.toUri(tenantMnemonic, fhirPath), code = Code(value = value))
 
     /**
      * Create a [Uri] for the Coding.system input to a Concept Map Registry request,
      * when the incoming data provides only a Code value with no system value.
      */
-    fun toUri(tenantMnemonic: String, fhirPath: String) =
-        Uri(this.toUriString(tenantMnemonic, fhirPath))
+    fun toUri(
+        tenantMnemonic: String,
+        fhirPath: String,
+    ) = Uri(this.toUriString(tenantMnemonic, fhirPath))
 
     /**
      * Compose the string value for the Coding.system input to a Concept Map Registry request,
      * when the incoming data provides only a Code value with no system.
      */
-    fun toUriString(tenantMnemonic: String, fhirPath: String) =
-        "${this.uri.value}/$tenantMnemonic/${fhirPath.toUriName()}"
+    fun toUriString(
+        tenantMnemonic: String,
+        fhirPath: String,
+    ) = "${this.uri.value}/$tenantMnemonic/${fhirPath.toUriName()}"
 
     private val uriRegex = Regex("${Regex.escape(uri.value!!)}/(\\w+)/([A-Za-z]+)")
 

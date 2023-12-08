@@ -16,10 +16,14 @@ class RoninPractitionerRoleTransformer : ProfileTransformer<PractitionerRole>() 
     override val rcdmVersion: RCDMVersion = RCDMVersion.V3_19_0
     override val profileVersion: Int = 2
 
-    override fun transformInternal(original: PractitionerRole, tenant: Tenant): TransformResponse<PractitionerRole>? {
-        val transformed = original.copy(
-            identifier = original.getRoninIdentifiers(tenant)
-        )
+    override fun transformInternal(
+        original: PractitionerRole,
+        tenant: Tenant,
+    ): TransformResponse<PractitionerRole>? {
+        val transformed =
+            original.copy(
+                identifier = original.getRoninIdentifiers(tenant),
+            )
         return TransformResponse(transformed)
     }
 }

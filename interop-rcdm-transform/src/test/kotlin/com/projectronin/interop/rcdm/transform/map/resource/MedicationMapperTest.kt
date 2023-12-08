@@ -18,9 +18,10 @@ import org.junit.jupiter.api.Test
 class MedicationMapperTest {
     private val mapper = MedicationMapper(mockk())
 
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "tenant"
-    }
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "tenant"
+        }
 
     @Test
     fun `supported resource is Medication`() {
@@ -31,16 +32,19 @@ class MedicationMapperTest {
     fun `copies extension if status is present`() {
         val mappedCode = CodeableConcept(text = "Cool Code".asFHIR())
 
-        val mappedExtension = Extension(
-            url = RoninExtension.TENANT_SOURCE_MEDICATION_CODE.uri,
-            value = DynamicValue(
-                type = DynamicValueType.CODEABLE_CONCEPT,
-                value = mappedCode
+        val mappedExtension =
+            Extension(
+                url = RoninExtension.TENANT_SOURCE_MEDICATION_CODE.uri,
+                value =
+                    DynamicValue(
+                        type = DynamicValueType.CODEABLE_CONCEPT,
+                        value = mappedCode,
+                    ),
             )
-        )
-        val medication = Medication(
-            code = mappedCode
-        )
+        val medication =
+            Medication(
+                code = mappedCode,
+            )
         val (mappedResource, validation) = mapper.map(medication, tenant, null)
         mappedResource!!
         assertEquals(mappedCode, mappedResource.code)

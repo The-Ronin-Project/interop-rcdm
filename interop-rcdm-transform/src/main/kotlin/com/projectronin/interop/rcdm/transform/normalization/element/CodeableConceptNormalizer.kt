@@ -11,7 +11,10 @@ import kotlin.reflect.KClass
 class CodeableConceptNormalizer : ElementNormalizer<CodeableConcept> {
     override val elementType: KClass<CodeableConcept> = CodeableConcept::class
 
-    override fun normalize(element: CodeableConcept, tenant: Tenant): TransformResult<CodeableConcept> {
+    override fun normalize(
+        element: CodeableConcept,
+        tenant: Tenant,
+    ): TransformResult<CodeableConcept> {
         // If text is populated on the codeable concept already, return as is.
         if (element.text?.value?.isNotEmpty() == true) {
             return TransformResult(element)
@@ -21,11 +24,12 @@ class CodeableConceptNormalizer : ElementNormalizer<CodeableConcept> {
         val selectedCoding =
             element.coding.singleOrNull { it.userSelected?.value == true }
                 ?: element.coding.singleOrNull()
-        val normalizedCodeableConcept = if (selectedCoding != null && selectedCoding.display?.value?.isNotEmpty() == true) {
-            element.copy(text = selectedCoding.display)
-        } else {
-            element
-        }
+        val normalizedCodeableConcept =
+            if (selectedCoding != null && selectedCoding.display?.value?.isNotEmpty() == true) {
+                element.copy(text = selectedCoding.display)
+            } else {
+                element
+            }
         return TransformResult(normalizedCodeableConcept)
     }
 }

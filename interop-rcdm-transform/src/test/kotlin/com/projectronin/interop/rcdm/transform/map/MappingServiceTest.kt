@@ -30,19 +30,21 @@ class MappingServiceTest {
         val patient = Patient()
 
         val service = MappingService(listOf(), listOf())
-        val exception = assertThrows<IllegalStateException> {
-            service.map(patient, tenant, null)
-        }
+        val exception =
+            assertThrows<IllegalStateException> {
+                service.map(patient, tenant, null)
+            }
         assertEquals("No ResourceMapper defined for Patient", exception.message)
     }
 
     @Test
     fun `resource mapper returns null mapped resource`() {
         val patient = Patient()
-        val mapper = mockk<ResourceMapper<Patient>> {
-            every { supportedResource } returns Patient::class
-            every { map(patient, tenant, null) } returns MapResponse(null, validation)
-        }
+        val mapper =
+            mockk<ResourceMapper<Patient>> {
+                every { supportedResource } returns Patient::class
+                every { map(patient, tenant, null) } returns MapResponse(null, validation)
+            }
 
         val service = MappingService(listOf(mapper), listOf())
         val response = service.map(patient, tenant, null)
@@ -54,14 +56,16 @@ class MappingServiceTest {
     fun `primitive elements are not changed`() {
         val resource = StringValueResource(FHIRString("example"))
 
-        val resourceMapper = mockk<ResourceMapper<StringValueResource>> {
-            every { supportedResource } returns StringValueResource::class
-            every { map(resource, tenant, null) } returns MapResponse(resource, validation)
-        }
+        val resourceMapper =
+            mockk<ResourceMapper<StringValueResource>> {
+                every { supportedResource } returns StringValueResource::class
+                every { map(resource, tenant, null) } returns MapResponse(resource, validation)
+            }
 
-        val fhirStringMapper = mockk<ElementMapper<FHIRString>> {
-            every { supportedElement } returns FHIRString::class
-        }
+        val fhirStringMapper =
+            mockk<ElementMapper<FHIRString>> {
+                every { supportedElement } returns FHIRString::class
+            }
 
         val service = MappingService(listOf(resourceMapper), listOf(fhirStringMapper))
         val response = service.map(resource, tenant, null)
@@ -75,25 +79,29 @@ class MappingServiceTest {
         val element2 = NestingElement1(element1)
         val resource = NestedElementResource(element2)
 
-        val resourceMapper = mockk<ResourceMapper<NestedElementResource>> {
-            every { supportedResource } returns NestedElementResource::class
-            every { map(resource, tenant, null) } returns MapResponse(resource, validation)
-        }
+        val resourceMapper =
+            mockk<ResourceMapper<NestedElementResource>> {
+                every { supportedResource } returns NestedElementResource::class
+                every { map(resource, tenant, null) } returns MapResponse(resource, validation)
+            }
 
         val newElement1 = NestedElement(FHIRString("new value"))
-        val element1Mapper = mockk<ElementMapper<NestedElement>> {
-            every { supportedElement } returns NestedElement::class
-            every { map(element1, resource, tenant, any(), validation, null) } returns newElement1
-        }
+        val element1Mapper =
+            mockk<ElementMapper<NestedElement>> {
+                every { supportedElement } returns NestedElement::class
+                every { map(element1, resource, tenant, any(), validation, null) } returns newElement1
+            }
 
         val service = MappingService(listOf(resourceMapper), listOf(element1Mapper))
         val response = service.map(resource, tenant, null)
 
-        val expectedResource = NestedElementResource(
-            element = NestingElement1(
-                element = newElement1
+        val expectedResource =
+            NestedElementResource(
+                element =
+                    NestingElement1(
+                        element = newElement1,
+                    ),
             )
-        )
         assertEquals(expectedResource, response.mappedResource)
         assertEquals(validation, response.validation)
     }
@@ -104,32 +112,37 @@ class MappingServiceTest {
         val element2 = NestingElement2(element1, FHIRString("other"))
         val resource = NestedElementResource2(element2)
 
-        val resourceMapper = mockk<ResourceMapper<NestedElementResource2>> {
-            every { supportedResource } returns NestedElementResource2::class
-            every { map(resource, tenant, null) } returns MapResponse(resource, validation)
-        }
+        val resourceMapper =
+            mockk<ResourceMapper<NestedElementResource2>> {
+                every { supportedResource } returns NestedElementResource2::class
+                every { map(resource, tenant, null) } returns MapResponse(resource, validation)
+            }
 
         val newElement2 = NestingElement2(element1, FHIRString("new other"))
-        val element2Mapper = mockk<ElementMapper<NestingElement2>> {
-            every { supportedElement } returns NestingElement2::class
-            every { map(element2, resource, tenant, any(), validation, null) } returns newElement2
-        }
+        val element2Mapper =
+            mockk<ElementMapper<NestingElement2>> {
+                every { supportedElement } returns NestingElement2::class
+                every { map(element2, resource, tenant, any(), validation, null) } returns newElement2
+            }
 
         val newElement1 = NestedElement(FHIRString("new value"))
-        val element1Mapper = mockk<ElementMapper<NestedElement>> {
-            every { supportedElement } returns NestedElement::class
-            every { map(element1, resource, tenant, any(), validation, null) } returns newElement1
-        }
+        val element1Mapper =
+            mockk<ElementMapper<NestedElement>> {
+                every { supportedElement } returns NestedElement::class
+                every { map(element1, resource, tenant, any(), validation, null) } returns newElement1
+            }
 
         val service = MappingService(listOf(resourceMapper), listOf(element2Mapper, element1Mapper))
         val response = service.map(resource, tenant, null)
 
-        val expectedResource = NestedElementResource2(
-            element = NestingElement2(
-                element = newElement1,
-                other = FHIRString("new other")
+        val expectedResource =
+            NestedElementResource2(
+                element =
+                    NestingElement2(
+                        element = newElement1,
+                        other = FHIRString("new other"),
+                    ),
             )
-        )
         assertEquals(expectedResource, response.mappedResource)
         assertEquals(validation, response.validation)
     }
@@ -140,19 +153,22 @@ class MappingServiceTest {
         val element2 = NestingElement2(element1, FHIRString("other"))
         val resource = NestedElementResource2(element2)
 
-        val resourceMapper = mockk<ResourceMapper<NestedElementResource2>> {
-            every { supportedResource } returns NestedElementResource2::class
-            every { map(resource, tenant, null) } returns MapResponse(resource, validation)
-        }
+        val resourceMapper =
+            mockk<ResourceMapper<NestedElementResource2>> {
+                every { supportedResource } returns NestedElementResource2::class
+                every { map(resource, tenant, null) } returns MapResponse(resource, validation)
+            }
 
-        val element2Mapper = mockk<ElementMapper<NestingElement2>> {
-            every { supportedElement } returns NestingElement2::class
-            every { map(element2, resource, tenant, any(), validation, null) } returns null
-        }
+        val element2Mapper =
+            mockk<ElementMapper<NestingElement2>> {
+                every { supportedElement } returns NestingElement2::class
+                every { map(element2, resource, tenant, any(), validation, null) } returns null
+            }
 
-        val element1Mapper = mockk<ElementMapper<NestedElement>> {
-            every { supportedElement } returns NestedElement::class
-        }
+        val element1Mapper =
+            mockk<ElementMapper<NestedElement>> {
+                every { supportedElement } returns NestedElement::class
+            }
 
         val service = MappingService(listOf(resourceMapper), listOf(element2Mapper, element1Mapper))
         val response = service.map(resource, tenant, null)
@@ -165,14 +181,16 @@ class MappingServiceTest {
     fun `dynamic values are not changed when not representing elements`() {
         val resource = DynamicValueResource(DynamicValue(DynamicValueType.STRING, FHIRString("example")))
 
-        val resourceMapper = mockk<ResourceMapper<DynamicValueResource>> {
-            every { supportedResource } returns DynamicValueResource::class
-            every { map(resource, tenant, null) } returns MapResponse(resource, validation)
-        }
+        val resourceMapper =
+            mockk<ResourceMapper<DynamicValueResource>> {
+                every { supportedResource } returns DynamicValueResource::class
+                every { map(resource, tenant, null) } returns MapResponse(resource, validation)
+            }
 
-        val fhirStringMapper = mockk<ElementMapper<FHIRString>> {
-            every { supportedElement } returns FHIRString::class
-        }
+        val fhirStringMapper =
+            mockk<ElementMapper<FHIRString>> {
+                every { supportedElement } returns FHIRString::class
+            }
 
         val service = MappingService(listOf(resourceMapper), listOf(fhirStringMapper))
         val response = service.map(resource, tenant, null)
@@ -185,23 +203,26 @@ class MappingServiceTest {
         val codeableConcept = CodeableConcept(text = FHIRString("text"))
         val resource = DynamicValueResource(DynamicValue(DynamicValueType.CODEABLE_CONCEPT, codeableConcept))
 
-        val resourceMapper = mockk<ResourceMapper<DynamicValueResource>> {
-            every { supportedResource } returns DynamicValueResource::class
-            every { map(resource, tenant, null) } returns MapResponse(resource, validation)
-        }
+        val resourceMapper =
+            mockk<ResourceMapper<DynamicValueResource>> {
+                every { supportedResource } returns DynamicValueResource::class
+                every { map(resource, tenant, null) } returns MapResponse(resource, validation)
+            }
 
         val newCodeableConcept = CodeableConcept(text = FHIRString("new text"))
-        val codeableConceptMapper = mockk<ElementMapper<CodeableConcept>> {
-            every { supportedElement } returns CodeableConcept::class
-            every { map(codeableConcept, resource, tenant, any(), validation, null) } returns newCodeableConcept
-        }
+        val codeableConceptMapper =
+            mockk<ElementMapper<CodeableConcept>> {
+                every { supportedElement } returns CodeableConcept::class
+                every { map(codeableConcept, resource, tenant, any(), validation, null) } returns newCodeableConcept
+            }
 
         val service = MappingService(listOf(resourceMapper), listOf(codeableConceptMapper))
         val response = service.map(resource, tenant, null)
 
-        val expectedResource = DynamicValueResource(
-            value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, newCodeableConcept)
-        )
+        val expectedResource =
+            DynamicValueResource(
+                value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, newCodeableConcept),
+            )
         assertEquals(expectedResource, response.mappedResource)
         assertEquals(validation, response.validation)
     }
@@ -210,14 +231,16 @@ class MappingServiceTest {
     fun `collection elements will not attempt mapping for primitive items`() {
         val resource = PrimitiveListResource(listOf(FHIRString("example"), FHIRString("example2")))
 
-        val resourceMapper = mockk<ResourceMapper<PrimitiveListResource>> {
-            every { supportedResource } returns PrimitiveListResource::class
-            every { map(resource, tenant, null) } returns MapResponse(resource, validation)
-        }
+        val resourceMapper =
+            mockk<ResourceMapper<PrimitiveListResource>> {
+                every { supportedResource } returns PrimitiveListResource::class
+                every { map(resource, tenant, null) } returns MapResponse(resource, validation)
+            }
 
-        val fhirStringMapper = mockk<ElementMapper<FHIRString>> {
-            every { supportedElement } returns FHIRString::class
-        }
+        val fhirStringMapper =
+            mockk<ElementMapper<FHIRString>> {
+                every { supportedElement } returns FHIRString::class
+            }
 
         val service = MappingService(listOf(resourceMapper), listOf(fhirStringMapper))
         val response = service.map(resource, tenant, null)
@@ -231,17 +254,19 @@ class MappingServiceTest {
         val codeableConcept2 = CodeableConcept(text = FHIRString("text2"))
         val resource = ElementListResource(listOf(codeableConcept1, codeableConcept2))
 
-        val resourceMapper = mockk<ResourceMapper<ElementListResource>> {
-            every { supportedResource } returns ElementListResource::class
-            every { map(resource, tenant, null) } returns MapResponse(resource, validation)
-        }
+        val resourceMapper =
+            mockk<ResourceMapper<ElementListResource>> {
+                every { supportedResource } returns ElementListResource::class
+                every { map(resource, tenant, null) } returns MapResponse(resource, validation)
+            }
 
         val newCodeableConcept1 = CodeableConcept(text = FHIRString("new text"))
-        val codeableConceptMapper = mockk<ElementMapper<CodeableConcept>> {
-            every { supportedElement } returns CodeableConcept::class
-            every { map(codeableConcept1, resource, tenant, any(), validation, null) } returns newCodeableConcept1
-            every { map(codeableConcept2, resource, tenant, any(), validation, null) } returns null
-        }
+        val codeableConceptMapper =
+            mockk<ElementMapper<CodeableConcept>> {
+                every { supportedElement } returns CodeableConcept::class
+                every { map(codeableConcept1, resource, tenant, any(), validation, null) } returns newCodeableConcept1
+                every { map(codeableConcept2, resource, tenant, any(), validation, null) } returns null
+            }
 
         val service = MappingService(listOf(resourceMapper), listOf(codeableConceptMapper))
         val response = service.map(resource, tenant, null)
@@ -252,40 +277,40 @@ class MappingServiceTest {
     }
 
     data class StringValueResource(
-        val value: FHIRString
+        val value: FHIRString,
     ) : DefaultResource<StringValueResource>()
 
     data class NestedElementResource(
-        val element: NestingElement1
+        val element: NestingElement1,
     ) : DefaultResource<NestedElementResource>()
 
     data class NestedElementResource2(
-        val element: NestingElement2
+        val element: NestingElement2,
     ) : DefaultResource<NestedElementResource2>()
 
     data class DynamicValueResource(
-        val value: DynamicValue<Any>
+        val value: DynamicValue<Any>,
     ) : DefaultResource<DynamicValueResource>()
 
     data class PrimitiveListResource(
-        val value: List<FHIRString>
+        val value: List<FHIRString>,
     ) : DefaultResource<PrimitiveListResource>()
 
     data class ElementListResource(
-        val value: List<CodeableConcept>
+        val value: List<CodeableConcept>,
     ) : DefaultResource<ElementListResource>()
 
     data class NestedElement(
-        val string: FHIRString
+        val string: FHIRString,
     ) : DefaultElement<NestedElement>()
 
     data class NestingElement1(
-        val element: NestedElement
+        val element: NestedElement,
     ) : DefaultElement<NestingElement1>()
 
     data class NestingElement2(
         val element: NestedElement,
-        val other: FHIRString
+        val other: FHIRString,
     ) : DefaultElement<NestingElement2>()
 
     abstract class DefaultResource<T : Resource<T>> : Resource<T> {
