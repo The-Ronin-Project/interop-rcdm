@@ -473,6 +473,84 @@ class RoninBloodPressureValidatorTest {
     }
 
     @Test
+    fun `validation fails if there's an unknown component `() {
+        val bloodPressure =
+            Observation(
+                id = Id("1234"),
+                meta = Meta(profile = listOf(RoninProfile.OBSERVATION_BLOOD_PRESSURE.canonical), source = Uri("source")),
+                identifier = requiredIdentifiers,
+                extension =
+                    listOf(
+                        Extension(
+                            url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
+                            value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "code".asFHIR())),
+                        ),
+                    ),
+                status = ObservationStatus.FINAL.asCode(),
+                code = CodeableConcept(coding = listOf(bloodPressureCoding)),
+                subject = Reference(reference = FHIRString("Patient/1234")),
+                category = listOf(vitalSignsCategoryConcept),
+                effective = DynamicValue(DynamicValueType.DATE_TIME, DateTime("2023")),
+                component =
+                    listOf(
+                        ObservationComponent(
+                            extension = listOf(sourceSystolicCodeExtension),
+                            code = systolicCodeableConcept,
+                            value =
+                                DynamicValue(
+                                    DynamicValueType.QUANTITY,
+                                    Quantity(
+                                        value = Decimal(BigDecimal.valueOf(110)),
+                                        unit = "mm[Hg]".asFHIR(),
+                                        system = CodeSystem.UCUM.uri,
+                                        code = Code("mm[Hg]"),
+                                    ),
+                                ),
+                        ),
+                        ObservationComponent(
+                            extension = listOf(sourceDiastolicCodeExtension),
+                            code = diastolicCodeableConcept,
+                            value =
+                                DynamicValue(
+                                    DynamicValueType.QUANTITY,
+                                    Quantity(
+                                        value = Decimal(BigDecimal.valueOf(65)),
+                                        unit = "mm[Hg]".asFHIR(),
+                                        system = CodeSystem.UCUM.uri,
+                                        code = Code("mm[Hg]"),
+                                    ),
+                                ),
+                        ),
+                        ObservationComponent(
+                            extension =
+                                listOf(
+                                    Extension(
+                                        url = RoninExtension.TENANT_SOURCE_OBSERVATION_COMPONENT_CODE.uri,
+                                        value =
+                                            DynamicValue(
+                                                DynamicValueType.CODEABLE_CONCEPT,
+                                                CodeableConcept(coding = emptyList()),
+                                            ),
+                                    ),
+                                ),
+                            code = CodeableConcept("code".asFHIR()),
+                            value =
+                                DynamicValue(
+                                    DynamicValueType.STRING,
+                                    "test",
+                                ),
+                        ),
+                    ),
+            )
+        val validation = validator.validate(bloodPressure, LocationContext(Observation::class))
+        assertEquals(1, validation.issues().size)
+        assertEquals(
+            "ERROR RONIN_BPOBS_001: Blood Pressure components must be either a Systolic or Diastolic @ Observation.component",
+            validation.issues().first().toString(),
+        )
+    }
+
+    @Test
     fun `validation succeeds with components`() {
         val bloodPressure =
             Observation(

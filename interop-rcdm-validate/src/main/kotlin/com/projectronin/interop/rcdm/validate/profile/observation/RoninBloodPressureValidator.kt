@@ -116,6 +116,17 @@ class RoninBloodPressureValidator(registryClient: NormalizationRegistryClient) :
                     ),
                     parentContext,
                 )
+                checkTrue(
+                    (components - diastolic.toSet() - systolic.toSet()).isEmpty(),
+                    FHIRError(
+                        code = "RONIN_BPOBS_001",
+                        severity = ValidationIssueSeverity.ERROR,
+                        description = "Blood Pressure components must be either a Systolic or Diastolic",
+                        location = LocationContext("Observation", "component"),
+                        metadata = emptyList(),
+                    ),
+                    parentContext,
+                )
             }
         }
     }
