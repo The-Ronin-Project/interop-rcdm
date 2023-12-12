@@ -11,7 +11,6 @@ import com.projectronin.interop.rcdm.common.enums.RoninProfile
 import com.projectronin.interop.rcdm.common.validation.ValidationClient
 import com.projectronin.interop.rcdm.validate.element.ElementValidator
 import com.projectronin.interop.rcdm.validate.profile.ProfileValidator
-import com.projectronin.interop.tenant.config.model.Tenant
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
 import kotlin.reflect.full.isSubclassOf
@@ -31,8 +30,8 @@ class ValidationService(
 
     fun <R : Resource<R>> validate(
         resource: R,
-        tenant: Tenant,
-    ): Boolean {
+        tenantMnemonic: String,
+    ): ValidationResponse {
         val qualifiedValidators = getQualifiedValidators(resource)
         if (qualifiedValidators.isEmpty()) {
             throw IllegalStateException(
@@ -63,10 +62,14 @@ class ValidationService(
             logger.warn(LogMarkers.VALIDATION_ISSUE) { "Failed to validate ${resource.resourceType}" }
             validation.issues()
                 .forEach { logger.warn(LogMarkers.VALIDATION_ISSUE) { it } } // makes mirth debugging much easier
-            validationClient.reportIssues(validation, resource, tenant.mnemonic)
+            validationClient.reportIssues(validation, resource, tenantMnemonic)
         }
 
-        return !validation.hasErrors()
+        return if (validation.hasErrors()) {
+            FailedValidation(validation.getErrorString()!!)
+        } else {
+            PassedValidation
+        }
     }
 
     @Suppress("UNCHECKED_CAST")

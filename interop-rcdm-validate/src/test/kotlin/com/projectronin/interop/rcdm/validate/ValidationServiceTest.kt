@@ -20,7 +20,6 @@ import com.projectronin.interop.rcdm.common.enums.RoninProfile
 import com.projectronin.interop.rcdm.common.validation.ValidationClient
 import com.projectronin.interop.rcdm.validate.element.ElementValidator
 import com.projectronin.interop.rcdm.validate.profile.ProfileValidator
-import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.Called
 import io.mockk.every
 import io.mockk.mockk
@@ -28,6 +27,7 @@ import io.mockk.slot
 import io.mockk.verify
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -57,10 +57,7 @@ class ValidationServiceTest {
             every { reportIssues(any(), any<Patient>(), any()) } answers { UUID.randomUUID() }
         }
 
-    private val tenant =
-        mockk<Tenant> {
-            every { mnemonic } returns "test"
-        }
+    private val tenant = "test"
 
     @Test
     fun `no validators defined for resource`() {
@@ -102,7 +99,10 @@ class ValidationServiceTest {
 
         val service = ValidationService(validationClient, listOf(profileValidator), listOf())
         val response = service.validate(patient, tenant)
-        assertFalse(response)
+        assertFalse(response.succeeded)
+
+        response as FailedValidation
+        assertNotNull(response.failureMessage)
 
         val validation = slot<Validation>()
         verify(exactly = 1) { validationClient.reportIssues(capture(validation), patient, "test") }
@@ -117,7 +117,7 @@ class ValidationServiceTest {
 
         val service = ValidationService(validationClient, listOf(profileValidator), listOf())
         val response = service.validate(patient, tenant)
-        assertTrue(response)
+        assertTrue(response.succeeded)
 
         verify { validationClient wasNot Called }
 
@@ -133,7 +133,7 @@ class ValidationServiceTest {
 
         val service = ValidationService(validationClient, listOf(profileValidator, profileValidator), listOf())
         val response = service.validate(patient, tenant)
-        assertTrue(response)
+        assertTrue(response.succeeded)
 
         verify { validationClient wasNot Called }
 
@@ -149,7 +149,7 @@ class ValidationServiceTest {
 
         val service = ValidationService(validationClient, listOf(profileValidator), listOf())
         val response = service.validate(patient, tenant)
-        assertTrue(response)
+        assertTrue(response.succeeded)
 
         verify { validationClient wasNot Called }
 
@@ -166,7 +166,10 @@ class ValidationServiceTest {
 
         val service = ValidationService(validationClient, listOf(profileValidator), listOf())
         val response = service.validate(patient, tenant)
-        assertFalse(response)
+        assertFalse(response.succeeded)
+
+        response as FailedValidation
+        assertNotNull(response.failureMessage)
 
         val validation = slot<Validation>()
         verify(exactly = 1) { validationClient.reportIssues(capture(validation), patient, "test") }
@@ -183,7 +186,7 @@ class ValidationServiceTest {
 
         val service = ValidationService(validationClient, listOf(profileValidator, profileValidator), listOf())
         val response = service.validate(patient, tenant)
-        assertTrue(response)
+        assertTrue(response.succeeded)
 
         verify { validationClient wasNot Called }
 
@@ -214,7 +217,7 @@ class ValidationServiceTest {
 
         val service = ValidationService(validationClient, listOf(profileValidator, profileValidator2), listOf())
         val response = service.validate(patient, tenant)
-        assertTrue(response)
+        assertTrue(response.succeeded)
 
         verify { validationClient wasNot Called }
 
@@ -250,7 +253,10 @@ class ValidationServiceTest {
 
         val service = ValidationService(validationClient, listOf(profileValidator), listOf(referenceValidator))
         val response = service.validate(patient, tenant)
-        assertFalse(response)
+        assertFalse(response.succeeded)
+
+        response as FailedValidation
+        assertNotNull(response.failureMessage)
 
         val validation = slot<Validation>()
         verify(exactly = 1) { validationClient.reportIssues(capture(validation), patient, "test") }
@@ -277,7 +283,7 @@ class ValidationServiceTest {
 
         val service = ValidationService(validationClient, listOf(profileValidator), listOf())
         val response = service.validate(patient, tenant)
-        assertTrue(response)
+        assertTrue(response.succeeded)
 
         verify { validationClient wasNot Called }
     }
@@ -306,7 +312,10 @@ class ValidationServiceTest {
 
         val service = ValidationService(validationClient, listOf(profileValidator), listOf(identifierValidator))
         val response = service.validate(patient, tenant)
-        assertFalse(response)
+        assertFalse(response.succeeded)
+
+        response as FailedValidation
+        assertNotNull(response.failureMessage)
 
         val validation = slot<Validation>()
         verify(exactly = 1) { validationClient.reportIssues(capture(validation), patient, "test") }
@@ -350,7 +359,10 @@ class ValidationServiceTest {
 
         val service = ValidationService(validationClient, listOf(profileValidator), listOf(identifierValidator))
         val response = service.validate(patient, tenant)
-        assertFalse(response)
+        assertFalse(response.succeeded)
+
+        response as FailedValidation
+        assertNotNull(response.failureMessage)
 
         val validation = slot<Validation>()
         verify(exactly = 1) { validationClient.reportIssues(capture(validation), patient, "test") }
@@ -382,7 +394,7 @@ class ValidationServiceTest {
 
         val service = ValidationService(validationClient, listOf(profileValidator), listOf())
         val response = service.validate(patient, tenant)
-        assertTrue(response)
+        assertTrue(response.succeeded)
 
         verify { validationClient wasNot Called }
     }
@@ -427,7 +439,10 @@ class ValidationServiceTest {
 
         val service = ValidationService(validationClient, listOf(profileValidator), listOf(identifierValidator))
         val response = service.validate(patient, tenant)
-        assertFalse(response)
+        assertFalse(response.succeeded)
+
+        response as FailedValidation
+        assertNotNull(response.failureMessage)
 
         val validation = slot<Validation>()
         verify(exactly = 1) { validationClient.reportIssues(capture(validation), patient, "test") }
@@ -450,7 +465,7 @@ class ValidationServiceTest {
 
         val service = ValidationService(validationClient, listOf(profileValidator), listOf())
         val response = service.validate(patient, tenant)
-        assertTrue(response)
+        assertTrue(response.succeeded)
 
         verify { validationClient wasNot Called }
     }
@@ -518,7 +533,10 @@ class ValidationServiceTest {
 
         val service = ValidationService(validationClient, listOf(profileValidator), listOf(identifierValidator))
         val response = service.validate(resource, tenant)
-        assertFalse(response)
+        assertFalse(response.succeeded)
+
+        response as FailedValidation
+        assertNotNull(response.failureMessage)
 
         val validation = slot<Validation>()
         verify(exactly = 1) { validationClient.reportIssues(capture(validation), resource, "test") }
@@ -562,7 +580,7 @@ class ValidationServiceTest {
 
         val service = ValidationService(validationClient, listOf(profileValidator), listOf())
         val response = service.validate(resource, tenant)
-        assertTrue(response)
+        assertTrue(response.succeeded)
 
         verify { validationClient wasNot Called }
     }

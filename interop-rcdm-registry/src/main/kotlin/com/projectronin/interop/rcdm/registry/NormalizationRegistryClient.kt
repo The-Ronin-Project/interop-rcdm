@@ -1,6 +1,8 @@
 package com.projectronin.interop.rcdm.registry
 
 import com.fasterxml.jackson.annotation.JsonValue
+import com.fasterxml.jackson.databind.PropertyNamingStrategies
+import com.fasterxml.jackson.databind.annotation.JsonNaming
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.benmanes.caffeine.cache.Cache
 import com.github.benmanes.caffeine.cache.Caffeine
@@ -611,6 +613,7 @@ internal data class CacheKey(
     val profileUrl: String? = null,
 )
 
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
 internal data class NormalizationRegistryItem(
     val registryUuid: String,
     // i.e. 'Appointment.status'
