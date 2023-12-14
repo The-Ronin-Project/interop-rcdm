@@ -19,7 +19,6 @@ import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 class MappingServiceTest {
     private val tenant = mockk<Tenant>()
@@ -30,11 +29,8 @@ class MappingServiceTest {
         val patient = Patient()
 
         val service = MappingService(listOf(), listOf())
-        val exception =
-            assertThrows<IllegalStateException> {
-                service.map(patient, tenant, null)
-            }
-        assertEquals("No ResourceMapper defined for Patient", exception.message)
+        val response = service.map(patient, tenant, null)
+        assertEquals(patient, response.mappedResource)
     }
 
     @Test

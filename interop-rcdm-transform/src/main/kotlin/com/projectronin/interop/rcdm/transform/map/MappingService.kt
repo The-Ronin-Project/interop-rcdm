@@ -53,8 +53,7 @@ class MappingService(
         forceCacheReloadTS: LocalDateTime?,
     ): MapResponse<R> {
         val resourceMapper =
-            mappersByResource[resource::class] as? ResourceMapper<R>
-                ?: throw IllegalStateException("No ResourceMapper defined for ${resource.resourceType}")
+            mappersByResource[resource::class] as? ResourceMapper<R> ?: return MapResponse(resource, Validation())
         return resourceMapper.map(resource, tenant, forceCacheReloadTS)
     }
 
