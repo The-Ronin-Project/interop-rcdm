@@ -1,11 +1,7 @@
 package com.projectronin.interop.rcdm.transform.profile
 
-import com.projectronin.interop.fhir.r4.datatype.DynamicValue
-import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
-import com.projectronin.interop.fhir.r4.datatype.Extension
 import com.projectronin.interop.fhir.r4.resource.CarePlan
 import com.projectronin.interop.rcdm.common.enums.RCDMVersion
-import com.projectronin.interop.rcdm.common.enums.RoninExtension
 import com.projectronin.interop.rcdm.common.enums.RoninProfile
 import com.projectronin.interop.rcdm.transform.model.TransformResponse
 import com.projectronin.interop.rcdm.transform.util.getRoninIdentifiers
@@ -24,18 +20,9 @@ class RoninCarePlanTransformer : ProfileTransformer<CarePlan>() {
         original: CarePlan,
         tenant: Tenant,
     ): TransformResponse<CarePlan>? {
-        val categoryExtensions =
-            original.category.map {
-                Extension(
-                    url = RoninExtension.TENANT_SOURCE_CARE_PLAN_CATEGORY.uri,
-                    value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, it),
-                )
-            }
-
         val transformed =
             original.copy(
                 identifier = original.getRoninIdentifiers(tenant),
-                extension = original.extension + categoryExtensions,
             )
         return TransformResponse(transformed)
     }

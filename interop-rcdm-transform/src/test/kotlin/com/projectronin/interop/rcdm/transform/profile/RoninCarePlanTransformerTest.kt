@@ -29,7 +29,6 @@ import com.projectronin.interop.fhir.r4.resource.CarePlanActivity
 import com.projectronin.interop.fhir.r4.resource.CarePlanDetail
 import com.projectronin.interop.fhir.r4.resource.Location
 import com.projectronin.interop.fhir.util.asCode
-import com.projectronin.interop.rcdm.common.enums.RoninExtension
 import com.projectronin.interop.rcdm.common.enums.RoninProfile
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
@@ -292,22 +291,6 @@ class RoninCarePlanTransformerTest {
                 Extension(
                     url = Uri("http://hl7.org/extension-1"),
                     value = DynamicValue(DynamicValueType.STRING, "value"),
-                ),
-                Extension(
-                    url = RoninExtension.TENANT_SOURCE_CARE_PLAN_CATEGORY.uri,
-                    value =
-                        DynamicValue(
-                            DynamicValueType.CODEABLE_CONCEPT,
-                            CodeableConcept(
-                                coding =
-                                    listOf(
-                                        Coding(
-                                            system = CodeSystem.CAREPLAN_CATEGORY.uri,
-                                            code = Code("assess-plan"),
-                                        ),
-                                    ),
-                            ),
-                        ),
                 ),
             ),
             transformed.extension,
