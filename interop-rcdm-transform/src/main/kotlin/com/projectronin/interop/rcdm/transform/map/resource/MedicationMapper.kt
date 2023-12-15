@@ -1,13 +1,9 @@
 package com.projectronin.interop.rcdm.transform.map.resource
 
-import com.projectronin.interop.fhir.r4.datatype.DynamicValue
-import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
-import com.projectronin.interop.fhir.r4.datatype.Extension
 import com.projectronin.interop.fhir.r4.resource.Medication
+import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.Validation
-import com.projectronin.interop.rcdm.common.enums.RoninExtension
 import com.projectronin.interop.rcdm.registry.NormalizationRegistryClient
-import com.projectronin.interop.rcdm.registry.model.ConceptMapCodeableConcept
 import com.projectronin.interop.rcdm.transform.map.BaseMapper
 import com.projectronin.interop.rcdm.transform.map.MapResponse
 import com.projectronin.interop.rcdm.transform.map.ResourceMapper
@@ -27,29 +23,11 @@ class MedicationMapper(registryClient: NormalizationRegistryClient) :
         forceCacheReloadTS: LocalDateTime?,
     ): MapResponse<Medication> {
         val validation = Validation()
-        // val parentContext = LocationContext(Medication::class)
+        val parentContext = LocationContext(Medication::class)
 
-        // TODO: apply concept maps to get Medication.code
-        // This just mocks the response we'd get from normalization client, once we want to start mapping
-        // we'd replace this with
-        //         val mappedCode = resource.code?.let {
-        //             getConceptMapping(it, Medication::code, resource, tenant, parentContext, validation, forceCacheReloadTS)
-        //         }
         val mappedCode =
             resource.code?.let {
-                ConceptMapCodeableConcept(
-                    codeableConcept = it,
-                    extension =
-                        Extension(
-                            url = RoninExtension.TENANT_SOURCE_MEDICATION_CODE.uri,
-                            value =
-                                DynamicValue(
-                                    type = DynamicValueType.CODEABLE_CONCEPT,
-                                    value = it,
-                                ),
-                        ),
-                    metadata = emptyList(),
-                )
+                getConceptMapping(it, Medication::code, resource, tenant, parentContext, validation, forceCacheReloadTS)
             }
 
         return MapResponse(
