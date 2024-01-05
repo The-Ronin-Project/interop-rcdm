@@ -57,25 +57,6 @@ class RoninCarePlanValidatorTest {
                 id = Id("1234"),
                 meta = Meta(profile = listOf(RoninProfile.CARE_PLAN.canonical)),
                 identifier = requiredIdentifiers,
-                extension =
-                    listOf(
-                        Extension(
-                            url = RoninExtension.TENANT_SOURCE_CARE_PLAN_CATEGORY.uri,
-                            value =
-                                DynamicValue(
-                                    DynamicValueType.CODEABLE_CONCEPT,
-                                    CodeableConcept(
-                                        coding =
-                                            listOf(
-                                                Coding(
-                                                    system = Uri("category-system"),
-                                                    code = Code("category-code"),
-                                                ),
-                                            ),
-                                    ),
-                                ),
-                        ),
-                    ),
                 category =
                     listOf(
                         CodeableConcept(
@@ -84,6 +65,25 @@ class RoninCarePlanValidatorTest {
                                     Coding(
                                         system = Uri("category-system"),
                                         code = Code("category-code"),
+                                    ),
+                                ),
+                            extension =
+                                listOf(
+                                    Extension(
+                                        url = RoninExtension.TENANT_SOURCE_CARE_PLAN_CATEGORY.uri,
+                                        value =
+                                            DynamicValue(
+                                                DynamicValueType.CODEABLE_CONCEPT,
+                                                CodeableConcept(
+                                                    coding =
+                                                        listOf(
+                                                            Coding(
+                                                                system = Uri("category-system"),
+                                                                code = Code("category-code"),
+                                                            ),
+                                                        ),
+                                                ),
+                                            ),
                                     ),
                                 ),
                         ),
@@ -101,29 +101,6 @@ class RoninCarePlanValidatorTest {
                 id = Id("1234"),
                 meta = Meta(profile = listOf(RoninProfile.CARE_PLAN.canonical)),
                 identifier = requiredIdentifiers,
-                extension =
-                    listOf(
-                        Extension(
-                            url = Uri("http://hl7.org/extension-1"),
-                            value = DynamicValue(DynamicValueType.STRING, "value"),
-                        ),
-                        Extension(
-                            url = RoninExtension.TENANT_SOURCE_CARE_PLAN_CATEGORY.uri,
-                            value =
-                                DynamicValue(
-                                    DynamicValueType.CODEABLE_CONCEPT,
-                                    CodeableConcept(
-                                        coding =
-                                            listOf(
-                                                Coding(
-                                                    system = Uri("category-system"),
-                                                    code = Code("category-code"),
-                                                ),
-                                            ),
-                                    ),
-                                ),
-                        ),
-                    ),
                 category =
                     listOf(
                         CodeableConcept(
@@ -132,6 +109,25 @@ class RoninCarePlanValidatorTest {
                                     Coding(
                                         system = Uri("category-system"),
                                         code = Code("category-code"),
+                                    ),
+                                ),
+                            extension =
+                                listOf(
+                                    Extension(
+                                        url = RoninExtension.TENANT_SOURCE_CARE_PLAN_CATEGORY.uri,
+                                        value =
+                                            DynamicValue(
+                                                DynamicValueType.CODEABLE_CONCEPT,
+                                                CodeableConcept(
+                                                    coding =
+                                                        listOf(
+                                                            Coding(
+                                                                system = Uri("category-system"),
+                                                                code = Code("category-code"),
+                                                            ),
+                                                        ),
+                                                ),
+                                            ),
                                     ),
                                 ),
                         ),
@@ -143,31 +139,12 @@ class RoninCarePlanValidatorTest {
     }
 
     @Test
-    fun `validate fails with extension filter on category extensions not matching size`() {
+    fun `validate fails with extension missing on category entry`() {
         val carePlan =
             CarePlan(
                 id = Id("1234"),
                 meta = Meta(profile = listOf(RoninProfile.CARE_PLAN.canonical)),
                 identifier = requiredIdentifiers,
-                extension =
-                    listOf(
-                        Extension(
-                            url = RoninExtension.TENANT_SOURCE_CARE_PLAN_CATEGORY.uri,
-                            value =
-                                DynamicValue(
-                                    DynamicValueType.CODEABLE_CONCEPT,
-                                    CodeableConcept(
-                                        coding =
-                                            listOf(
-                                                Coding(
-                                                    system = Uri("category-system"),
-                                                    code = Code("category-code"),
-                                                ),
-                                            ),
-                                    ),
-                                ),
-                        ),
-                    ),
                 category =
                     listOf(
                         CodeableConcept(
@@ -176,6 +153,25 @@ class RoninCarePlanValidatorTest {
                                     Coding(
                                         system = Uri("category-system"),
                                         code = Code("category-code"),
+                                    ),
+                                ),
+                            extension =
+                                listOf(
+                                    Extension(
+                                        url = RoninExtension.TENANT_SOURCE_CARE_PLAN_CATEGORY.uri,
+                                        value =
+                                            DynamicValue(
+                                                DynamicValueType.CODEABLE_CONCEPT,
+                                                CodeableConcept(
+                                                    coding =
+                                                        listOf(
+                                                            Coding(
+                                                                system = Uri("category-system"),
+                                                                code = Code("category-code"),
+                                                            ),
+                                                        ),
+                                                ),
+                                            ),
                                     ),
                                 ),
                         ),
@@ -194,7 +190,7 @@ class RoninCarePlanValidatorTest {
         val validation = validator.validate(carePlan, LocationContext(CarePlan::class))
         assertEquals(1, validation.issues().size)
         assertEquals(
-            "ERROR RONIN_CAREPLAN_001: CarePlan category list size must match the tenantSourceCarePlanCategory extension list size @ CarePlan.",
+            "ERROR RONIN_CAREPLAN_001: CarePlan category entries must each contain the tenantSourceCarePlanCategory extension @ CarePlan.category",
             validation.issues().first().toString(),
         )
     }

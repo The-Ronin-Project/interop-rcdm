@@ -1,7 +1,6 @@
 package com.projectronin.interop.rcdm.transform.map.resource
 
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
-import com.projectronin.interop.fhir.r4.datatype.Extension
 import com.projectronin.interop.fhir.r4.resource.CarePlan
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.Validation
@@ -26,7 +25,7 @@ class CarePlanMapper(registryClient: NormalizationRegistryClient) :
     ): MapResponse<CarePlan> {
         val validation = Validation()
         val parentContext = LocationContext(CarePlan::class)
-        val mappedCategoryAndExtension = mutableMapOf<CodeableConcept, Extension>()
+        val mappedCategories = mutableListOf<CodeableConcept>()
 
         resource.category.forEach { category ->
             getConceptMapping(
@@ -38,13 +37,16 @@ class CarePlanMapper(registryClient: NormalizationRegistryClient) :
                 validation,
                 forceCacheReloadTS,
             )?.let {
-                mappedCategoryAndExtension.put(it.codeableConcept, it.extension)
+                mappedCategories.add(
+                    it.codeableConcept.copy(
+                        extension = listOf(it.extension),
+                    ),
+                )
             }
         }
         val mappedCarePlan =
             resource.copy(
-                category = mappedCategoryAndExtension.keys.toList(),
-                extension = resource.extension + mappedCategoryAndExtension.values,
+                category = mappedCategories,
             )
         return MapResponse(mappedCarePlan, validation)
     }

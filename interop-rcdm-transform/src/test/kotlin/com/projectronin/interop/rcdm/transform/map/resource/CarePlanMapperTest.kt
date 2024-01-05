@@ -34,15 +34,33 @@ class CarePlanMapperTest {
         CodeableConcept(
             coding =
                 listOf(
-                    Coding(system = Uri("something-here-1"), code = Code("54321")),
+                    Coding(
+                        system = Uri("something-here-1"),
+                        code = Code("54321"),
+                    ),
                 ),
         )
     private val category2 =
         CodeableConcept(
             coding =
                 listOf(
-                    Coding(system = Uri("something-here-2"), code = Code("87654")),
+                    Coding(
+                        system = Uri("something-here-2"),
+                        code = Code("87654"),
+                    ),
                 ),
+        )
+    private val category3 =
+        CodeableConcept(
+            coding =
+                listOf(
+                    Coding(
+                        system = Uri("http://snomed.info/sct"),
+                        code = Code("736378000"),
+                        display = "Medication Management Plan".asFHIR(),
+                    ),
+                ),
+            text = "Medication Management Plan".asFHIR(),
         )
 
     @Test
@@ -63,7 +81,10 @@ class CarePlanMapperTest {
             CodeableConcept(
                 coding =
                     listOf(
-                        Coding(system = Uri("something-mapped-here"), code = Code("89012")),
+                        Coding(
+                            system = Uri("something-mapped-here"),
+                            code = Code("89012"),
+                        ),
                     ),
             )
         val mappedExtensionsCategory =
@@ -82,7 +103,7 @@ class CarePlanMapperTest {
         } returns ConceptMapCodeableConcept(mappedCategory, mappedExtensionsCategory, listOf())
         val (mappedResource, validation) = mapper.map(carePlan, tenant, null)
         mappedResource!!
-        assertEquals(listOf(mappedExtensionsCategory), mappedResource.extension)
+        assertEquals(listOf(mappedExtensionsCategory), mappedResource.category.first().extension)
         assertEquals(0, validation.issues().size)
     }
 
@@ -140,7 +161,49 @@ class CarePlanMapperTest {
 
         val (mappedResource, validation) = mapper.map(carePlan, tenant, null)
         mappedResource!!
-        assertEquals(listOf(mappedExtensionsCategory1, mappedExtensionsCategory2), mappedResource.extension)
+        assertEquals(listOf(mappedExtensionsCategory1), mappedResource.category.first().extension)
+        assertEquals(listOf(mappedExtensionsCategory2), mappedResource.category[1].extension)
+        assertEquals(0, validation.issues().size)
+    }
+
+    @Test
+    fun `maps category - with text`() {
+        val carePlan =
+            CarePlan(
+                status = RequestStatus.ACTIVE.asCode(),
+                category = listOf(category3),
+                intent = CarePlanIntent.ORDER.asCode(),
+                subject = Reference(reference = "Patient".asFHIR()),
+            )
+        val mappedCategory =
+            CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(
+                            system = Uri("http://snomed.info/sct"),
+                            code = Code("736378000"),
+                            display = "Medication Management Plan".asFHIR(),
+                        ),
+                    ),
+                text = "Medication Management Plan".asFHIR(),
+            )
+        val mappedExtensionsCategory =
+            Extension(
+                url = RoninExtension.TENANT_SOURCE_CARE_PLAN_CATEGORY.uri,
+                value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, category3),
+            )
+        every {
+            registryClient.getConceptMapping(
+                "tenant",
+                "CarePlan.category",
+                category3,
+                carePlan,
+                null,
+            )
+        } returns ConceptMapCodeableConcept(mappedCategory, mappedExtensionsCategory, listOf())
+        val (mappedResource, validation) = mapper.map(carePlan, tenant, null)
+        mappedResource!!
+        assertEquals(listOf(mappedExtensionsCategory), mappedResource.category.first().extension)
         assertEquals(0, validation.issues().size)
     }
 

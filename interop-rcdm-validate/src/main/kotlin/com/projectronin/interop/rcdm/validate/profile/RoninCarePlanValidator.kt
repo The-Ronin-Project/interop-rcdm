@@ -7,7 +7,6 @@ import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.fhir.validate.ValidationIssueSeverity
 import com.projectronin.interop.rcdm.common.enums.RCDMVersion
-import com.projectronin.interop.rcdm.common.enums.RoninExtension
 import com.projectronin.interop.rcdm.common.enums.RoninProfile
 import org.springframework.stereotype.Component
 import kotlin.reflect.KClass
@@ -24,9 +23,9 @@ class RoninCarePlanValidator : ProfileValidator<CarePlan>() {
     private val categoryListError =
         FHIRError(
             code = "RONIN_CAREPLAN_001",
-            description = "CarePlan category list size must match the tenantSourceCarePlanCategory extension list size",
+            description = "CarePlan category entries must each contain the tenantSourceCarePlanCategory extension",
             severity = ValidationIssueSeverity.ERROR,
-            location = LocationContext("", ""),
+            location = LocationContext(CarePlan::category),
         )
 
     override fun validate(
@@ -37,14 +36,14 @@ class RoninCarePlanValidator : ProfileValidator<CarePlan>() {
         validation.apply {
             // check if categories exist
             if (resource.category.isNotEmpty()) {
-                // check that careplan category list size and the tenantSourceCarePlanCategory extension list size are equal
-                val categoryExtensionList =
-                    resource.extension.filter { it.url == RoninExtension.TENANT_SOURCE_CARE_PLAN_CATEGORY.uri }
-                checkTrue(
-                    categoryExtensionList.size == resource.category.size,
-                    categoryListError,
-                    context,
-                )
+                // check that each category entry has tenantSourceCarePlanCategory extension
+                resource.category.forEach {
+                    checkTrue(
+                        it.extension.isNotEmpty(),
+                        categoryListError,
+                        context,
+                    )
+                }
             }
         }
     }
