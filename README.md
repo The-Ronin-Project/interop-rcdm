@@ -10,6 +10,7 @@ This project is divided into multiple projects involved in the RCDM process.
 * [interop-rcdm-transform](interop-rcdm-transform) contains our Transformation logic that converts R4 resources into the
   appropriate Ronin-defined profiles.
 * [interop-rcdm-validate](interop-rcdm-validate) contains our Validation logic that enforces the RCDM profiles.
+* [interop-fhir-ronin-generators](interop-fhir-ronin-generators) contains our RCDM data generators.
 
 ## Updating profiles
 
