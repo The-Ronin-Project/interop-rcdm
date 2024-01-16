@@ -9,7 +9,7 @@ interop-fhir = "9.1.1"
 interop-gradle = "4.0.2"
 interop-validation = "4.0.1"
 kotlinx-coroutines = "1.7.3"
-mockk = "1.13.8"
+mockk = "1.13.9"
 ronin-test = "0.2.0"
 
 [libraries]
