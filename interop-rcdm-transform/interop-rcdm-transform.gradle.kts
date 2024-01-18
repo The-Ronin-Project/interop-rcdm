@@ -13,6 +13,7 @@ dependencies {
     implementation(libs.interop.validation.client)
 
     testImplementation(libs.mockk)
+    testImplementation(libs.interop.commonHttp)
     testImplementation(libs.classgraph)
     testImplementation("org.springframework:spring-test")
 }

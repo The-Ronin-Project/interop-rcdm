@@ -1,16 +1,19 @@
 package com.projectronin.interop.rcdm.validate.spring
 
+import com.projectronin.interop.common.http.auth.InteropAuthenticationService
+import com.projectronin.interop.common.http.spring.HttpSpringConfig
 import com.projectronin.interop.rcdm.validate.ValidationService
 import com.projectronin.interop.validation.client.CommentClient
 import com.projectronin.interop.validation.client.IssueClient
 import com.projectronin.interop.validation.client.ResourceClient
-import com.projectronin.interop.validation.client.auth.ValidationAuthenticationService
+import com.projectronin.interop.validation.client.auth.ValidationAuthenticationConfig
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertInstanceOf
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.getBean
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Bean
@@ -20,7 +23,7 @@ import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 
 @ExtendWith(SpringExtension::class)
-@ContextConfiguration(classes = [ValidationSpringConfig::class, TestConfig::class])
+@ContextConfiguration(classes = [ValidationSpringConfig::class, TestConfig::class, HttpSpringConfig::class])
 class ValidationSpringConfigTest {
     @Autowired
     private lateinit var applicationContext: ApplicationContext
@@ -45,7 +48,8 @@ class TestConfig {
     fun issueClient() = mockk<IssueClient>(relaxed = true)
 
     @Bean
-    fun validationAuthenticationService() = mockk<ValidationAuthenticationService>(relaxed = true)
+    @Qualifier(ValidationAuthenticationConfig.AUTH_SERVICE_BEAN_NAME)
+    fun validationAuthenticationService() = mockk<InteropAuthenticationService>(relaxed = true)
 
     @Bean
     fun threadPoolTaskExecutor() = mockk<ThreadPoolTaskExecutor>(relaxed = true)

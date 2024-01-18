@@ -11,5 +11,6 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
 
     testImplementation(libs.mockk)
+    testImplementation(libs.interop.commonHttp)
     testImplementation("org.springframework:spring-test")
 }

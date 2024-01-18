@@ -13,6 +13,7 @@ dependencies {
     implementation(libs.event.interop.resource.internal)
 
     testImplementation(libs.mockk)
+    testImplementation(libs.interop.commonHttp)
     testImplementation(libs.classgraph)
     testImplementation("org.springframework:spring-test")
 }
