@@ -60,6 +60,10 @@ class TransformManager(
             validation.issues()
                 .forEach { logger.warn(LogMarkers.VALIDATION_ISSUE) { it } } // makes mirth debugging much easier
             validationClient.reportIssues(validation, reportedResource, tenant.mnemonic)
+
+            if (validation.hasErrors()) {
+                return null
+            }
         }
 
         return mappedResource

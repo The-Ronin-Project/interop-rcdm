@@ -39,9 +39,16 @@ class TransformManagerTest {
         mockk<Validation> {
             every { hasIssues() } returns false
         }
-    private val failingValidation =
+    private val warningValidation =
         mockk<Validation> {
             every { hasIssues() } returns true
+            every { hasErrors() } returns false
+            every { issues() } returns listOf(ValidationIssue(ValidationIssueSeverity.WARNING, "WARN", "Warning"))
+        }
+    private val errorValidation =
+        mockk<Validation> {
+            every { hasIssues() } returns true
+            every { hasErrors() } returns true
             every { issues() } returns listOf(ValidationIssue(ValidationIssueSeverity.ERROR, "ERR", "Error"))
         }
 
@@ -63,7 +70,7 @@ class TransformManagerTest {
                 every { normalize(original, tenant) } returns normalized
             }
 
-        every { mappingService.map(normalized, tenant, null) } returns MapResponse(null, failingValidation)
+        every { mappingService.map(normalized, tenant, null) } returns MapResponse(null, errorValidation)
 
         val transformer =
             mockk<ProfileTransformer<Patient>> {
@@ -75,19 +82,19 @@ class TransformManagerTest {
         val transformResponse = manager.transformResource(original, tenant)
         assertNull(transformResponse)
 
-        verify(exactly = 1) { validationClient.reportIssues(failingValidation, normalized, "tenant") }
+        verify(exactly = 1) { validationClient.reportIssues(errorValidation, normalized, "tenant") }
         verify(exactly = 0) { transformer.transform(any(), any()) }
         verify { localizer wasNot Called }
     }
 
     @Test
-    fun `mapping resource returns validation error with mapped resource`() {
+    fun `mapping resource returns validation warning with mapped resource`() {
         val normalizer =
             mockk<Normalizer> {
                 every { normalize(original, tenant) } returns normalized
             }
 
-        every { mappingService.map(normalized, tenant, null) } returns MapResponse(mapped, failingValidation)
+        every { mappingService.map(normalized, tenant, null) } returns MapResponse(mapped, warningValidation)
 
         val transformer =
             mockk<ProfileTransformer<Patient>> {
@@ -108,7 +115,32 @@ class TransformManagerTest {
         assertEquals(localized, transformResponse.resource)
         assertEquals(listOf<Resource<*>>(), transformResponse.embeddedResources)
 
-        verify(exactly = 1) { validationClient.reportIssues(failingValidation, mapped, "tenant") }
+        verify(exactly = 1) { validationClient.reportIssues(warningValidation, mapped, "tenant") }
+    }
+
+    @Test
+    fun `mapping resource returns null resource for error validation even if mappingService returns a resource`() {
+        val normalizer =
+            mockk<Normalizer> {
+                every { normalize(original, tenant) } returns normalized
+            }
+
+        every { mappingService.map(normalized, tenant, null) } returns MapResponse(mapped, errorValidation)
+
+        val transformer =
+            mockk<ProfileTransformer<Patient>> {
+                every { supportedResource } returns Patient::class
+            }
+
+        val localizer = mockk<Localizer> { }
+
+        val manager = TransformManager(normalizer, mappingService, validationClient, listOf(transformer), localizer)
+        val transformResponse = manager.transformResource(original, tenant)
+        assertNull(transformResponse)
+
+        verify(exactly = 1) { validationClient.reportIssues(errorValidation, mapped, "tenant") }
+        verify(exactly = 0) { transformer.transform(any(), any()) }
+        verify { localizer wasNot Called }
     }
 
     @Test
