@@ -20,9 +20,6 @@ enum class RoninExtension(val value: String) {
     TENANT_SOURCE_OBSERVATION_COMPONENT_CODE(
         "http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceObservationComponentCode",
     ),
-    TENANT_SOURCE_OBSERVATION_COMPONENT_INTERPRETATION(
-        "http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceObservationInterpretation",
-    ),
     TENANT_SOURCE_OBSERVATION_COMPONENT_VALUE(
         "http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceObservationComponentValueCodeableConcept",
     ),

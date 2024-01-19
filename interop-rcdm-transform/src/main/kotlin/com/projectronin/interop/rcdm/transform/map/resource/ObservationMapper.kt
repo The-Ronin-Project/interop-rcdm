@@ -31,25 +31,6 @@ class ObservationMapper(registryClient: NormalizationRegistryClient) : ResourceM
         val parentContext = LocationContext(Observation::class)
 
         val newExtensions = mutableListOf<Extension>()
-        val mappedInterpWithExtension = mutableListOf<CodeableConcept>()
-
-        resource.interpretation.forEach { interpretation ->
-            getConceptMapping(
-                interpretation,
-                Observation::interpretation,
-                resource,
-                tenant,
-                parentContext,
-                validation,
-                forceCacheReloadTS,
-            )?.let {
-                mappedInterpWithExtension.add(
-                    it.codeableConcept.copy(
-                        extension = listOf(it.extension),
-                    ),
-                )
-            }
-        }
 
         val mappedCode =
             resource.code?.let { code ->
@@ -133,32 +114,12 @@ class ObservationMapper(registryClient: NormalizationRegistryClient) : ResourceM
                         }
                     } ?: component.value
 
-                val mappedComponentInterpList = mutableListOf<CodeableConcept>()
-                component.interpretation.forEach { interp ->
-                    getConceptMapping(
-                        interp,
-                        LocationContext("Observation.component", "interpretation"),
-                        resource,
-                        tenant,
-                        componentContext,
-                        validation,
-                        forceCacheReloadTS,
-                    )?.let {
-                        mappedComponentInterpList.add(
-                            it.codeableConcept.copy(
-                                extension = listOf(it.extension),
-                            ),
-                        )
-                    }
-                }
-
                 if (newComponentExtensions.isEmpty()) {
                     component
                 } else {
                     component.copy(
                         code = mappedComponentCode,
                         value = mappedComponentValue,
-                        interpretation = mappedComponentInterpList,
                         extension = component.extension + newComponentExtensions,
                     )
                 }
@@ -170,7 +131,6 @@ class ObservationMapper(registryClient: NormalizationRegistryClient) : ResourceM
                 value = mappedValue,
                 component = mappedComponents,
                 extension = resource.extension + newExtensions,
-                interpretation = mappedInterpWithExtension,
             )
         return MapResponse(mapped, validation)
     }
