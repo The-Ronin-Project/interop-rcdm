@@ -110,58 +110,6 @@ class RoninProcedureValidatorTest {
     }
 
     @Test
-    fun `validate succeeds with category and category extension`() {
-        val procedure =
-            Procedure(
-                id = Id("1234"),
-                meta = Meta(profile = listOf(RoninProfile.PROCEDURE.canonical)),
-                extension =
-                    listOf(
-                        Extension(
-                            url = RoninExtension.TENANT_SOURCE_PROCEDURE_CODE.uri,
-                            value =
-                                DynamicValue(
-                                    type = DynamicValueType.CODEABLE_CONCEPT,
-                                    value = Coding(code = Code("something")),
-                                ),
-                        ),
-                        Extension(
-                            url = RoninExtension.TENANT_SOURCE_PROCEDURE_CATEGORY.uri,
-                            value =
-                                DynamicValue(
-                                    type = DynamicValueType.CODEABLE_CONCEPT,
-                                    value = Coding(code = Code("some-category")),
-                                ),
-                        ),
-                    ),
-                identifier = requiredIdentifiers,
-                code =
-                    CodeableConcept(
-                        coding =
-                            listOf(
-                                Coding(
-                                    system = Uri("Code"),
-                                    code = Code(value = "something"),
-                                ),
-                            ),
-                    ),
-                category =
-                    CodeableConcept(
-                        coding =
-                            listOf(
-                                Coding(
-                                    code = Code("some-category"),
-                                ),
-                            ),
-                    ),
-                status = Code(EventStatus.UNKNOWN.code),
-                subject = Reference(reference = "Patient".asFHIR()),
-            )
-        val validation = validator.validate(procedure, LocationContext(Procedure::class))
-        assertEquals(0, validation.issues().size)
-    }
-
-    @Test
     fun `validate fails with no performed based on status`() {
         val procedure =
             Procedure(
@@ -235,70 +183,6 @@ class RoninProcedureValidatorTest {
         assertEquals(1, validation.issues().size)
         assertEquals(
             "ERROR RONIN_PROC_001: Tenant source procedure code extension is missing or invalid @ Procedure.extension",
-            validation.issues().first().toString(),
-        )
-    }
-
-    @Test
-    fun `validate fails with multiple category extension`() {
-        val procedure =
-            Procedure(
-                id = Id("1234"),
-                meta = Meta(profile = listOf(RoninProfile.PROCEDURE.canonical)),
-                extension =
-                    listOf(
-                        Extension(
-                            url = RoninExtension.TENANT_SOURCE_PROCEDURE_CODE.uri,
-                            value =
-                                DynamicValue(
-                                    type = DynamicValueType.CODEABLE_CONCEPT,
-                                    value = Coding(code = Code("something")),
-                                ),
-                        ),
-                        Extension(
-                            url = RoninExtension.TENANT_SOURCE_PROCEDURE_CATEGORY.uri,
-                            value =
-                                DynamicValue(
-                                    type = DynamicValueType.CODEABLE_CONCEPT,
-                                    value = Coding(code = Code("some-category")),
-                                ),
-                        ),
-                        Extension(
-                            url = RoninExtension.TENANT_SOURCE_PROCEDURE_CATEGORY.uri,
-                            value =
-                                DynamicValue(
-                                    type = DynamicValueType.CODEABLE_CONCEPT,
-                                    value = Coding(code = Code("some-category")),
-                                ),
-                        ),
-                    ),
-                identifier = requiredIdentifiers,
-                category =
-                    CodeableConcept(
-                        coding =
-                            listOf(
-                                Coding(
-                                    code = Code("some-category"),
-                                ),
-                            ),
-                    ),
-                code =
-                    CodeableConcept(
-                        coding =
-                            listOf(
-                                Coding(
-                                    system = Uri("Code"),
-                                    code = Code(value = "something"),
-                                ),
-                            ),
-                    ),
-                status = Code(EventStatus.UNKNOWN.code),
-                subject = Reference(reference = "Patient".asFHIR()),
-            )
-        val validation = validator.validate(procedure, LocationContext(Procedure::class))
-        assertEquals(1, validation.issues().size)
-        assertEquals(
-            "ERROR RONIN_PROC_002: Tenant source procedure category extension is invalid @ Procedure.extension",
             validation.issues().first().toString(),
         )
     }

@@ -30,13 +30,6 @@ class RoninProcedureValidator : ProfileValidator<Procedure>() {
             severity = ValidationIssueSeverity.ERROR,
             location = LocationContext(Procedure::extension),
         )
-    private val requiredExtensionCategoryError =
-        FHIRError(
-            code = "RONIN_PROC_002",
-            description = "Tenant source procedure category extension is invalid",
-            severity = ValidationIssueSeverity.ERROR,
-            location = LocationContext(Procedure::extension),
-        )
     private val requiredPerformedError =
         FHIRError(
             code = "USCORE_PROC_001",
@@ -70,12 +63,6 @@ class RoninProcedureValidator : ProfileValidator<Procedure>() {
                         it.value?.type == DynamicValueType.CODEABLE_CONCEPT
                 },
                 requiredExtensionCodeError,
-                context,
-            )
-            // extension may include procedure category
-            checkTrue(
-                resource.extension.filter { it.url == RoninExtension.TENANT_SOURCE_PROCEDURE_CATEGORY.uri }.size <= 1,
-                requiredExtensionCategoryError,
                 context,
             )
         }

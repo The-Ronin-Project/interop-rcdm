@@ -41,7 +41,6 @@ class ProcedureMapperTest {
             Procedure(
                 status = Code(EventStatus.COMPLETED.code),
                 code = null,
-                category = null,
                 subject = Reference(reference = "Patient".asFHIR()),
             )
 
@@ -92,80 +91,6 @@ class ProcedureMapperTest {
         mappedResource!!
         assertEquals(mappedCode, mappedResource.code)
         assertEquals(listOf(mappedExtension), mappedResource.extension)
-        assertEquals(0, validation.issues().size)
-    }
-
-    @Test
-    fun `maps category and code`() {
-        val code =
-            CodeableConcept(
-                coding =
-                    listOf(
-                        Coding(system = Uri("http://snomed.info/sct"), code = Code("12345")),
-                    ),
-            )
-        val category =
-            CodeableConcept(
-                coding =
-                    listOf(
-                        Coding(system = Uri("something-here"), code = Code("54321")),
-                    ),
-            )
-        val procedure =
-            Procedure(
-                status = Code(EventStatus.COMPLETED.code),
-                code = code,
-                category = category,
-                subject = Reference(reference = "Patient".asFHIR()),
-            )
-
-        val mappedCode =
-            CodeableConcept(
-                coding =
-                    listOf(
-                        Coding(system = Uri("http://snomed.info/sct"), code = Code("67890")),
-                    ),
-            )
-        val mappedCategory =
-            CodeableConcept(
-                coding =
-                    listOf(
-                        Coding(system = Uri("something-here"), code = Code("89012")),
-                    ),
-            )
-        val mappedExtensionsCode =
-            Extension(
-                url = RoninExtension.TENANT_SOURCE_PROCEDURE_CODE.uri,
-                value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, code),
-            )
-        val mappedExtensionsCategory =
-            Extension(
-                url = RoninExtension.TENANT_SOURCE_PROCEDURE_CATEGORY.uri,
-                value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, code),
-            )
-
-        every {
-            registryClient.getConceptMapping(
-                "tenant",
-                "Procedure.code",
-                code,
-                procedure,
-                null,
-            )
-        } returns ConceptMapCodeableConcept(mappedCode, mappedExtensionsCode, listOf())
-        every {
-            registryClient.getConceptMapping(
-                "tenant",
-                "Procedure.category",
-                category,
-                procedure,
-                null,
-            )
-        } returns ConceptMapCodeableConcept(mappedCategory, mappedExtensionsCategory, listOf())
-        val (mappedResource, validation) = mapper.map(procedure, tenant, null)
-        mappedResource!!
-        assertEquals(mappedCode, mappedResource.code)
-        assertEquals(listOf(mappedExtensionsCode, mappedExtensionsCategory), mappedResource.extension)
         assertEquals(0, validation.issues().size)
     }
 
