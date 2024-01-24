@@ -52,7 +52,10 @@ abstract class BaseRoninConditionProfileValidator : ProfileValidator<Condition>(
             )
 
             checkNotNull(resource.code, requiredCodeError, context)
-            validateRoninNormalizedCodeableConcept(resource.code, Condition::code, null, context, validation)
+
+            // INT-2474: Ideally this would use the "do we map Conditions for this tenant?", but we're technically tenant-agnostic
+            // and we have some concerns of needing to keep the data consistent across APIs, so disabling this for now
+            // validateRoninNormalizedCodeableConcept(resource.code, Condition::code, null, context, validation)
 
             checkTrue(
                 resource.extension.any {

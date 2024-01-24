@@ -20,6 +20,7 @@ import com.projectronin.interop.rcdm.common.enums.RoninExtension
 import com.projectronin.interop.rcdm.common.enums.RoninProfile
 import com.projectronin.interop.rcdm.validate.profile.util.requiredIdentifiers
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 class BaseRoninConditionProfileValidatorTest {
@@ -131,6 +132,7 @@ class BaseRoninConditionProfileValidatorTest {
         )
     }
 
+    @Disabled("Not currently enabled due to some tenants not mapping Conditions")
     @Test
     fun `validate fails if invalid ronin normalized code`() {
         val condition =
