@@ -755,6 +755,20 @@ class ProfileValidatorTest {
     }
 
     @Test
+    fun `validateReferenceType succeeds when reference has no reference type`() {
+        val patient =
+            Patient(
+                id = Id("1234"),
+                meta = Meta(profile = listOf(RoninProfile.PATIENT.canonical)),
+                identifier = requiredIdentifiers,
+                managingOrganization = Reference(identifier = Identifier(FHIRString("TEST IDENTIFIER"))),
+            )
+
+        val validation = TestValidator().validate(patient, LocationContext(Patient::class))
+        assertEquals(0, validation.issues().size)
+    }
+
+    @Test
     fun `validateReferenceType succeeds when reference is remote and for type`() {
         val patient =
             Patient(

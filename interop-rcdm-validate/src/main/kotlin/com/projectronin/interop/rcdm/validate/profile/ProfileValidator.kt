@@ -165,7 +165,7 @@ abstract class ProfileValidator<R : Resource<R>> {
                     }
                 } else {
                     checkTrue(
-                        reference.isInTypeList(resourceTypesStringList),
+                        reference.isTypeNullOrInTypeList(resourceTypesStringList),
                         InvalidReferenceType(Reference::reference, resourceTypesList),
                         context,
                     )
@@ -174,8 +174,11 @@ abstract class ProfileValidator<R : Resource<R>> {
         }
     }
 
-    private fun Reference?.isInTypeList(resourceTypeList: List<String>): Boolean {
+    private fun Reference?.isTypeNullOrInTypeList(resourceTypeList: List<String>): Boolean {
         this?.let { reference ->
+            if (reference.type == null && reference.decomposedType() == null) {
+                return true
+            }
             resourceTypeList.forEach { value ->
                 if (reference.isForType(value)) {
                     return true

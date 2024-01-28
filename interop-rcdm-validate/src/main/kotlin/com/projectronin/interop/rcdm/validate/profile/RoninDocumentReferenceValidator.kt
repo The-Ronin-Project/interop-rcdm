@@ -6,7 +6,6 @@ import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
 import com.projectronin.interop.fhir.r4.datatype.primitive.Url
 import com.projectronin.interop.fhir.r4.resource.DocumentReference
-import com.projectronin.interop.fhir.r4.resource.DocumentReferenceContext
 import com.projectronin.interop.fhir.r4.validate.resource.R4DocumentReferenceValidator
 import com.projectronin.interop.fhir.validate.FHIRError
 import com.projectronin.interop.fhir.validate.LocationContext
@@ -53,13 +52,6 @@ class RoninDocumentReferenceValidator : ProfileValidator<DocumentReference>() {
             severity = ValidationIssueSeverity.ERROR,
             description = "Datalake Attachment URL extension is missing or invalid",
             location = LocationContext(Url::extension),
-        )
-    private val requiredEncounter =
-        FHIRError(
-            code = "RONIN_DOCREF_004",
-            severity = ValidationIssueSeverity.ERROR,
-            description = "No more than one encounter is allowed for this type",
-            location = LocationContext(DocumentReferenceContext::encounter),
         )
 
     override fun validate(
@@ -112,19 +104,6 @@ class RoninDocumentReferenceValidator : ProfileValidator<DocumentReference>() {
                 LocationContext(DocumentReference::subject),
                 validation,
             )
-
-            resource.context?.let { docRefContext ->
-                val contextLocationContext = context.append(LocationContext(DocumentReference::context))
-
-                checkTrue(docRefContext.encounter.size < 2, requiredEncounter, contextLocationContext)
-
-                validateReferenceType(
-                    docRefContext.encounter.firstOrNull(),
-                    listOf(ResourceType.Encounter),
-                    contextLocationContext.append(LocationContext("", "encounter[0]")),
-                    validation,
-                )
-            }
 
             // USCore adds an optional code (0.*) of Clinical Note, in the category attribute,
             // but the base binding is still an example binding and there should remain unconstrained.

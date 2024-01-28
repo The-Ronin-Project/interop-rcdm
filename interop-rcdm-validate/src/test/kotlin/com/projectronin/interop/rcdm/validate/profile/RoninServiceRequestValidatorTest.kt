@@ -417,7 +417,7 @@ class RoninServiceRequestValidatorTest {
                 subject =
                     Reference(
                         id = "888".asFHIR(),
-                        reference = "blah/888".asFHIR(),
+                        reference = "HealthcareService/888".asFHIR(),
                     ),
                 code =
                     CodeableConcept(
