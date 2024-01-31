@@ -478,7 +478,7 @@ class BaseRoninVitalSignProfileValidatorTest {
     }
 
     @Test
-    fun `validateVitalSignValue succeeds when value is not quantity`() {
+    fun `validateVitalSignValue fails when value is not quantity`() {
         val observation =
             Observation(
                 id = Id("1234"),
@@ -514,7 +514,11 @@ class BaseRoninVitalSignProfileValidatorTest {
                 value = DynamicValue(DynamicValueType.STRING, "20".asFHIR()),
             )
         val validation = valueValidator.validate(observation, LocationContext(Observation::class))
-        assertEquals(0, validation.issues().size)
+        assertEquals(1, validation.issues().size)
+        assertEquals(
+            "ERROR RONIN_INV_DYN_VAL: http://projectronin.io/fhir/StructureDefinition/ronin-observation profile restricts value to one of: Quantity @ Observation.value",
+            validation.issues().first().toString(),
+        )
     }
 
     @Test

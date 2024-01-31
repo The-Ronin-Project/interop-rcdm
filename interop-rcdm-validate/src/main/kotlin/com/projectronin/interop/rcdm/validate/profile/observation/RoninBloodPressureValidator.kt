@@ -1,5 +1,6 @@
 package com.projectronin.interop.rcdm.validate.profile.observation
 
+import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
 import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.validate.FHIRError
 import com.projectronin.interop.fhir.validate.LocationContext
@@ -16,10 +17,13 @@ import org.springframework.stereotype.Component
 class RoninBloodPressureValidator(registryClient: NormalizationRegistryClient) :
     BaseRoninVitalSignProfileValidator(registryClient) {
     override val profile: RoninProfile = RoninProfile.OBSERVATION_BLOOD_PRESSURE
-    override val rcdmVersion: RCDMVersion = RCDMVersion.V3_26_1
-    override val profileVersion: Int = 4
+    override val rcdmVersion: RCDMVersion = RCDMVersion.V3_36_1
+    override val profileVersion: Int = 6
 
     private val validBloodPressureUnits = listOf("mm[Hg]")
+
+    override val acceptedValueTypes: List<DynamicValueType> =
+        listOf(DynamicValueType.QUANTITY, DynamicValueType.INTEGER, DynamicValueType.RATIO, DynamicValueType.STRING)
 
     private fun validSystolicValueSet(): ValueSetList =
         registryClient.getRequiredValueSet("Observation.component:systolic.code", profile.value)

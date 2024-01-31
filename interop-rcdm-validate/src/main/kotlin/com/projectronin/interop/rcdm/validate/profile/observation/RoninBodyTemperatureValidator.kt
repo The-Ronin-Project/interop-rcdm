@@ -12,8 +12,8 @@ import org.springframework.stereotype.Component
 class RoninBodyTemperatureValidator(registryClient: NormalizationRegistryClient) :
     BaseRoninVitalSignProfileValidator(registryClient) {
     override val profile: RoninProfile = RoninProfile.OBSERVATION_BODY_TEMPERATURE
-    override val rcdmVersion: RCDMVersion = RCDMVersion.V3_26_1
-    override val profileVersion: Int = 3
+    override val rcdmVersion: RCDMVersion = RCDMVersion.V3_36_1
+    override val profileVersion: Int = 4
 
     override fun validateVitalSign(
         resource: Observation,

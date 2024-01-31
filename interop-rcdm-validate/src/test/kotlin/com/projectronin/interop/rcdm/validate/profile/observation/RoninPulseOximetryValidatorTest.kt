@@ -120,6 +120,48 @@ class RoninPulseOximetryValidatorTest {
     }
 
     @Test
+    fun `validation fails if invalid value type`() {
+        val pulseOximetry =
+            Observation(
+                id = Id("1234"),
+                meta =
+                    Meta(
+                        profile = listOf(RoninProfile.OBSERVATION_PULSE_OXIMETRY.canonical),
+                        source = Uri("source"),
+                    ),
+                identifier = requiredIdentifiers,
+                extension =
+                    listOf(
+                        Extension(
+                            url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
+                            value =
+                                DynamicValue(
+                                    DynamicValueType.CODEABLE_CONCEPT,
+                                    CodeableConcept(text = "code".asFHIR()),
+                                ),
+                        ),
+                    ),
+                status = ObservationStatus.FINAL.asCode(),
+                code = CodeableConcept(coding = listOf(pulseOximetryCoding)),
+                subject = Reference(reference = FHIRString("Patient/1234")),
+                category = listOf(vitalSignsCategoryConcept),
+                effective = DynamicValue(DynamicValueType.DATE_TIME, DateTime("2023")),
+                dataAbsentReason = CodeableConcept(text = "Unknown".asFHIR()),
+                value =
+                    DynamicValue(
+                        DynamicValueType.STRING,
+                        FHIRString("value"),
+                    ),
+            )
+        val validation = validator.validate(pulseOximetry, LocationContext(Observation::class))
+        assertEquals(1, validation.issues().size)
+        assertEquals(
+            "ERROR RONIN_INV_DYN_VAL: http://projectronin.io/fhir/StructureDefinition/ronin-observationPulseOximetry profile restricts value to one of: Quantity @ Observation.value",
+            validation.issues().first().toString(),
+        )
+    }
+
+    @Test
     fun `validation fails if invalid value`() {
         val pulseOximetry =
             Observation(
@@ -467,13 +509,21 @@ class RoninPulseOximetryValidatorTest {
         val pulseOximetry =
             Observation(
                 id = Id("1234"),
-                meta = Meta(profile = listOf(RoninProfile.OBSERVATION_PULSE_OXIMETRY.canonical), source = Uri("source")),
+                meta =
+                    Meta(
+                        profile = listOf(RoninProfile.OBSERVATION_PULSE_OXIMETRY.canonical),
+                        source = Uri("source"),
+                    ),
                 identifier = requiredIdentifiers,
                 extension =
                     listOf(
                         Extension(
                             url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
-                            value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "code".asFHIR())),
+                            value =
+                                DynamicValue(
+                                    DynamicValueType.CODEABLE_CONCEPT,
+                                    CodeableConcept(text = "code".asFHIR()),
+                                ),
                         ),
                     ),
                 status = ObservationStatus.FINAL.asCode(),
@@ -580,13 +630,21 @@ class RoninPulseOximetryValidatorTest {
         val pulseOximetry =
             Observation(
                 id = Id("1234"),
-                meta = Meta(profile = listOf(RoninProfile.OBSERVATION_PULSE_OXIMETRY.canonical), source = Uri("source")),
+                meta =
+                    Meta(
+                        profile = listOf(RoninProfile.OBSERVATION_PULSE_OXIMETRY.canonical),
+                        source = Uri("source"),
+                    ),
                 identifier = requiredIdentifiers,
                 extension =
                     listOf(
                         Extension(
                             url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
-                            value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "code".asFHIR())),
+                            value =
+                                DynamicValue(
+                                    DynamicValueType.CODEABLE_CONCEPT,
+                                    CodeableConcept(text = "code".asFHIR()),
+                                ),
                         ),
                     ),
                 status = ObservationStatus.FINAL.asCode(),
@@ -638,13 +696,21 @@ class RoninPulseOximetryValidatorTest {
         val pulseOximetry =
             Observation(
                 id = Id("1234"),
-                meta = Meta(profile = listOf(RoninProfile.OBSERVATION_PULSE_OXIMETRY.canonical), source = Uri("source")),
+                meta =
+                    Meta(
+                        profile = listOf(RoninProfile.OBSERVATION_PULSE_OXIMETRY.canonical),
+                        source = Uri("source"),
+                    ),
                 identifier = requiredIdentifiers,
                 extension =
                     listOf(
                         Extension(
                             url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
-                            value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "code".asFHIR())),
+                            value =
+                                DynamicValue(
+                                    DynamicValueType.CODEABLE_CONCEPT,
+                                    CodeableConcept(text = "code".asFHIR()),
+                                ),
                         ),
                     ),
                 status = ObservationStatus.FINAL.asCode(),
@@ -679,13 +745,21 @@ class RoninPulseOximetryValidatorTest {
         val pulseOximetry =
             Observation(
                 id = Id("1234"),
-                meta = Meta(profile = listOf(RoninProfile.OBSERVATION_PULSE_OXIMETRY.canonical), source = Uri("source")),
+                meta =
+                    Meta(
+                        profile = listOf(RoninProfile.OBSERVATION_PULSE_OXIMETRY.canonical),
+                        source = Uri("source"),
+                    ),
                 identifier = requiredIdentifiers,
                 extension =
                     listOf(
                         Extension(
                             url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
-                            value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "code".asFHIR())),
+                            value =
+                                DynamicValue(
+                                    DynamicValueType.CODEABLE_CONCEPT,
+                                    CodeableConcept(text = "code".asFHIR()),
+                                ),
                         ),
                     ),
                 status = ObservationStatus.FINAL.asCode(),

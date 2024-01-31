@@ -30,6 +30,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 
+@Suppress("ktlint:standard:max-line-length")
 class RoninRespiratoryRateValidatorTest {
     private val respiratoryRateCoding =
         Coding(
@@ -63,17 +64,67 @@ class RoninRespiratoryRateValidatorTest {
     }
 
     @Test
-    fun `validate fails for invalid value`() {
+    fun `validate fails for invalid value type`() {
         val respiratoryRate =
             Observation(
                 id = Id("1234"),
-                meta = Meta(profile = listOf(RoninProfile.OBSERVATION_RESPIRATORY_RATE.canonical), source = Uri("source")),
+                meta =
+                    Meta(
+                        profile = listOf(RoninProfile.OBSERVATION_RESPIRATORY_RATE.canonical),
+                        source = Uri("source"),
+                    ),
                 identifier = requiredIdentifiers,
                 extension =
                     listOf(
                         Extension(
                             url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
-                            value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "code".asFHIR())),
+                            value =
+                                DynamicValue(
+                                    DynamicValueType.CODEABLE_CONCEPT,
+                                    CodeableConcept(text = "code".asFHIR()),
+                                ),
+                        ),
+                    ),
+                status = com.projectronin.interop.fhir.r4.valueset.ObservationStatus.FINAL.asCode(),
+                code = CodeableConcept(coding = listOf(respiratoryRateCoding)),
+                subject = Reference(reference = FHIRString("Patient/1234")),
+                category = listOf(vitalSignsCategoryConcept),
+                effective = DynamicValue(DynamicValueType.DATE_TIME, DateTime("2023")),
+                value =
+                    DynamicValue(
+                        DynamicValueType.STRING,
+                        FHIRString("value"),
+                    ),
+                bodySite = null,
+            )
+        val validation = validator.validate(respiratoryRate, LocationContext(Observation::class))
+        assertEquals(1, validation.issues().size)
+        assertEquals(
+            "ERROR RONIN_INV_DYN_VAL: http://projectronin.io/fhir/StructureDefinition/ronin-observationRespiratoryRate profile restricts value to one of: Quantity @ Observation.value",
+            validation.issues().first().toString(),
+        )
+    }
+
+    @Test
+    fun `validate fails for invalid value`() {
+        val respiratoryRate =
+            Observation(
+                id = Id("1234"),
+                meta =
+                    Meta(
+                        profile = listOf(RoninProfile.OBSERVATION_RESPIRATORY_RATE.canonical),
+                        source = Uri("source"),
+                    ),
+                identifier = requiredIdentifiers,
+                extension =
+                    listOf(
+                        Extension(
+                            url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
+                            value =
+                                DynamicValue(
+                                    DynamicValueType.CODEABLE_CONCEPT,
+                                    CodeableConcept(text = "code".asFHIR()),
+                                ),
                         ),
                     ),
                 status = com.projectronin.interop.fhir.r4.valueset.ObservationStatus.FINAL.asCode(),
@@ -106,13 +157,21 @@ class RoninRespiratoryRateValidatorTest {
         val respiratoryRate =
             Observation(
                 id = Id("1234"),
-                meta = Meta(profile = listOf(RoninProfile.OBSERVATION_RESPIRATORY_RATE.canonical), source = Uri("source")),
+                meta =
+                    Meta(
+                        profile = listOf(RoninProfile.OBSERVATION_RESPIRATORY_RATE.canonical),
+                        source = Uri("source"),
+                    ),
                 identifier = requiredIdentifiers,
                 extension =
                     listOf(
                         Extension(
                             url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
-                            value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "code".asFHIR())),
+                            value =
+                                DynamicValue(
+                                    DynamicValueType.CODEABLE_CONCEPT,
+                                    CodeableConcept(text = "code".asFHIR()),
+                                ),
                         ),
                     ),
                 status = com.projectronin.interop.fhir.r4.valueset.ObservationStatus.FINAL.asCode(),

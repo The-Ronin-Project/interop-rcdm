@@ -21,6 +21,8 @@ import com.projectronin.interop.rcdm.validate.error.RoninInvalidDynamicValueErro
  */
 abstract class BaseRoninVitalSignProfileValidator(registryClient: NormalizationRegistryClient) :
     BaseRoninObservationProfileValidator(registryClient) {
+    open val acceptedValueTypes: List<DynamicValueType> = listOf(DynamicValueType.QUANTITY)
+
     override fun getSupportedCategories(): List<Coding> =
         listOf(Coding(system = CodeSystem.OBSERVATION_CATEGORY.uri, code = Code("vital-signs")))
 
@@ -45,6 +47,14 @@ abstract class BaseRoninVitalSignProfileValidator(registryClient: NormalizationR
         validation: Validation,
     ) {
         validation.apply {
+            resource.value?.let { value ->
+                checkTrue(
+                    acceptedValueTypes.contains(value.type),
+                    RoninInvalidDynamicValueError(Observation::value, acceptedValueTypes, profile.value),
+                    parentContext,
+                )
+            }
+
             resource.effective?.let { data ->
                 checkTrue(
                     acceptedEffectiveTypes.contains(data.type),

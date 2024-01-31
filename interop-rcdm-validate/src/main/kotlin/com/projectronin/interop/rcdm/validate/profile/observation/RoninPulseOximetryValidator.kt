@@ -16,8 +16,8 @@ import org.springframework.stereotype.Component
 class RoninPulseOximetryValidator(registryClient: NormalizationRegistryClient) :
     BaseRoninVitalSignProfileValidator(registryClient) {
     override val profile: RoninProfile = RoninProfile.OBSERVATION_PULSE_OXIMETRY
-    override val rcdmVersion: RCDMVersion = RCDMVersion.V3_26_1
-    override val profileVersion: Int = 3
+    override val rcdmVersion: RCDMVersion = RCDMVersion.V3_36_1
+    override val profileVersion: Int = 4
 
     private val validPulseOximetryUnits = listOf("%")
     private val validFlowRateUnits = listOf("L/min")

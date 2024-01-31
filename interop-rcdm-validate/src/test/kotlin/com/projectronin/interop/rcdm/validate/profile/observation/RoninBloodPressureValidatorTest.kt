@@ -12,6 +12,7 @@ import com.projectronin.interop.fhir.r4.datatype.Reference
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.DateTime
 import com.projectronin.interop.fhir.r4.datatype.primitive.Decimal
+import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRBoolean
 import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
@@ -33,6 +34,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 
+@Suppress("ktlint:standard:max-line-length")
 class RoninBloodPressureValidatorTest {
     private val bloodPressureCoding =
         Coding(
@@ -123,13 +125,21 @@ class RoninBloodPressureValidatorTest {
         val bloodPressure =
             Observation(
                 id = Id("1234"),
-                meta = Meta(profile = listOf(RoninProfile.OBSERVATION_BLOOD_PRESSURE.canonical), source = Uri("source")),
+                meta =
+                    Meta(
+                        profile = listOf(RoninProfile.OBSERVATION_BLOOD_PRESSURE.canonical),
+                        source = Uri("source"),
+                    ),
                 identifier = requiredIdentifiers,
                 extension =
                     listOf(
                         Extension(
                             url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
-                            value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "code".asFHIR())),
+                            value =
+                                DynamicValue(
+                                    DynamicValueType.CODEABLE_CONCEPT,
+                                    CodeableConcept(text = "code".asFHIR()),
+                                ),
                         ),
                     ),
                 status = ObservationStatus.FINAL.asCode(),
@@ -168,13 +178,21 @@ class RoninBloodPressureValidatorTest {
         val bloodPressure =
             Observation(
                 id = Id("1234"),
-                meta = Meta(profile = listOf(RoninProfile.OBSERVATION_BLOOD_PRESSURE.canonical), source = Uri("source")),
+                meta =
+                    Meta(
+                        profile = listOf(RoninProfile.OBSERVATION_BLOOD_PRESSURE.canonical),
+                        source = Uri("source"),
+                    ),
                 identifier = requiredIdentifiers,
                 extension =
                     listOf(
                         Extension(
                             url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
-                            value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "code".asFHIR())),
+                            value =
+                                DynamicValue(
+                                    DynamicValueType.CODEABLE_CONCEPT,
+                                    CodeableConcept(text = "code".asFHIR()),
+                                ),
                         ),
                     ),
                 status = ObservationStatus.FINAL.asCode(),
@@ -241,13 +259,21 @@ class RoninBloodPressureValidatorTest {
         val bloodPressure =
             Observation(
                 id = Id("1234"),
-                meta = Meta(profile = listOf(RoninProfile.OBSERVATION_BLOOD_PRESSURE.canonical), source = Uri("source")),
+                meta =
+                    Meta(
+                        profile = listOf(RoninProfile.OBSERVATION_BLOOD_PRESSURE.canonical),
+                        source = Uri("source"),
+                    ),
                 identifier = requiredIdentifiers,
                 extension =
                     listOf(
                         Extension(
                             url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
-                            value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "code".asFHIR())),
+                            value =
+                                DynamicValue(
+                                    DynamicValueType.CODEABLE_CONCEPT,
+                                    CodeableConcept(text = "code".asFHIR()),
+                                ),
                         ),
                     ),
                 status = ObservationStatus.FINAL.asCode(),
@@ -300,13 +326,21 @@ class RoninBloodPressureValidatorTest {
         val bloodPressure =
             Observation(
                 id = Id("1234"),
-                meta = Meta(profile = listOf(RoninProfile.OBSERVATION_BLOOD_PRESSURE.canonical), source = Uri("source")),
+                meta =
+                    Meta(
+                        profile = listOf(RoninProfile.OBSERVATION_BLOOD_PRESSURE.canonical),
+                        source = Uri("source"),
+                    ),
                 identifier = requiredIdentifiers,
                 extension =
                     listOf(
                         Extension(
                             url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
-                            value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "code".asFHIR())),
+                            value =
+                                DynamicValue(
+                                    DynamicValueType.CODEABLE_CONCEPT,
+                                    CodeableConcept(text = "code".asFHIR()),
+                                ),
                         ),
                     ),
                 status = ObservationStatus.FINAL.asCode(),
@@ -345,13 +379,21 @@ class RoninBloodPressureValidatorTest {
         val bloodPressure =
             Observation(
                 id = Id("1234"),
-                meta = Meta(profile = listOf(RoninProfile.OBSERVATION_BLOOD_PRESSURE.canonical), source = Uri("source")),
+                meta =
+                    Meta(
+                        profile = listOf(RoninProfile.OBSERVATION_BLOOD_PRESSURE.canonical),
+                        source = Uri("source"),
+                    ),
                 identifier = requiredIdentifiers,
                 extension =
                     listOf(
                         Extension(
                             url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
-                            value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "code".asFHIR())),
+                            value =
+                                DynamicValue(
+                                    DynamicValueType.CODEABLE_CONCEPT,
+                                    CodeableConcept(text = "code".asFHIR()),
+                                ),
                         ),
                     ),
                 status = ObservationStatus.FINAL.asCode(),
@@ -418,13 +460,21 @@ class RoninBloodPressureValidatorTest {
         val bloodPressure =
             Observation(
                 id = Id("1234"),
-                meta = Meta(profile = listOf(RoninProfile.OBSERVATION_BLOOD_PRESSURE.canonical), source = Uri("source")),
+                meta =
+                    Meta(
+                        profile = listOf(RoninProfile.OBSERVATION_BLOOD_PRESSURE.canonical),
+                        source = Uri("source"),
+                    ),
                 identifier = requiredIdentifiers,
                 extension =
                     listOf(
                         Extension(
                             url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
-                            value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "code".asFHIR())),
+                            value =
+                                DynamicValue(
+                                    DynamicValueType.CODEABLE_CONCEPT,
+                                    CodeableConcept(text = "code".asFHIR()),
+                                ),
                         ),
                     ),
                 status = ObservationStatus.FINAL.asCode(),
@@ -477,13 +527,21 @@ class RoninBloodPressureValidatorTest {
         val bloodPressure =
             Observation(
                 id = Id("1234"),
-                meta = Meta(profile = listOf(RoninProfile.OBSERVATION_BLOOD_PRESSURE.canonical), source = Uri("source")),
+                meta =
+                    Meta(
+                        profile = listOf(RoninProfile.OBSERVATION_BLOOD_PRESSURE.canonical),
+                        source = Uri("source"),
+                    ),
                 identifier = requiredIdentifiers,
                 extension =
                     listOf(
                         Extension(
                             url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
-                            value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "code".asFHIR())),
+                            value =
+                                DynamicValue(
+                                    DynamicValueType.CODEABLE_CONCEPT,
+                                    CodeableConcept(text = "code".asFHIR()),
+                                ),
                         ),
                     ),
                 status = ObservationStatus.FINAL.asCode(),
@@ -551,17 +609,97 @@ class RoninBloodPressureValidatorTest {
     }
 
     @Test
-    fun `validation succeeds with components`() {
+    fun `validation fails with invalid value type`() {
         val bloodPressure =
             Observation(
                 id = Id("1234"),
-                meta = Meta(profile = listOf(RoninProfile.OBSERVATION_BLOOD_PRESSURE.canonical), source = Uri("source")),
+                meta =
+                    Meta(
+                        profile = listOf(RoninProfile.OBSERVATION_BLOOD_PRESSURE.canonical),
+                        source = Uri("source"),
+                    ),
                 identifier = requiredIdentifiers,
                 extension =
                     listOf(
                         Extension(
                             url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
-                            value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "code".asFHIR())),
+                            value =
+                                DynamicValue(
+                                    DynamicValueType.CODEABLE_CONCEPT,
+                                    CodeableConcept(text = "code".asFHIR()),
+                                ),
+                        ),
+                    ),
+                status = ObservationStatus.FINAL.asCode(),
+                code = CodeableConcept(coding = listOf(bloodPressureCoding)),
+                subject = Reference(reference = FHIRString("Patient/1234")),
+                category = listOf(vitalSignsCategoryConcept),
+                effective = DynamicValue(DynamicValueType.DATE_TIME, DateTime("2023")),
+                component =
+                    listOf(
+                        ObservationComponent(
+                            extension = listOf(sourceSystolicCodeExtension),
+                            code = systolicCodeableConcept,
+                            value =
+                                DynamicValue(
+                                    DynamicValueType.QUANTITY,
+                                    Quantity(
+                                        value = Decimal(BigDecimal.valueOf(110)),
+                                        unit = "mm[Hg]".asFHIR(),
+                                        system = CodeSystem.UCUM.uri,
+                                        code = Code("mm[Hg]"),
+                                    ),
+                                ),
+                        ),
+                        ObservationComponent(
+                            extension = listOf(sourceDiastolicCodeExtension),
+                            code = diastolicCodeableConcept,
+                            value =
+                                DynamicValue(
+                                    DynamicValueType.QUANTITY,
+                                    Quantity(
+                                        value = Decimal(BigDecimal.valueOf(65)),
+                                        unit = "mm[Hg]".asFHIR(),
+                                        system = CodeSystem.UCUM.uri,
+                                        code = Code("mm[Hg]"),
+                                    ),
+                                ),
+                        ),
+                    ),
+                value =
+                    DynamicValue(
+                        DynamicValueType.BOOLEAN,
+                        FHIRBoolean.TRUE,
+                    ),
+            )
+        val validation = validator.validate(bloodPressure, LocationContext(Observation::class))
+        assertEquals(1, validation.issues().size)
+        assertEquals(
+            "ERROR RONIN_INV_DYN_VAL: http://projectronin.io/fhir/StructureDefinition/ronin-observationBloodPressure profile restricts value to one of: Quantity, Integer, Ratio, String @ Observation.value",
+            validation.issues().first().toString(),
+        )
+    }
+
+    @Test
+    fun `validation succeeds with components`() {
+        val bloodPressure =
+            Observation(
+                id = Id("1234"),
+                meta =
+                    Meta(
+                        profile = listOf(RoninProfile.OBSERVATION_BLOOD_PRESSURE.canonical),
+                        source = Uri("source"),
+                    ),
+                identifier = requiredIdentifiers,
+                extension =
+                    listOf(
+                        Extension(
+                            url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
+                            value =
+                                DynamicValue(
+                                    DynamicValueType.CODEABLE_CONCEPT,
+                                    CodeableConcept(text = "code".asFHIR()),
+                                ),
                         ),
                     ),
                 status = ObservationStatus.FINAL.asCode(),
@@ -610,13 +748,21 @@ class RoninBloodPressureValidatorTest {
         val bloodPressure =
             Observation(
                 id = Id("1234"),
-                meta = Meta(profile = listOf(RoninProfile.OBSERVATION_BLOOD_PRESSURE.canonical), source = Uri("source")),
+                meta =
+                    Meta(
+                        profile = listOf(RoninProfile.OBSERVATION_BLOOD_PRESSURE.canonical),
+                        source = Uri("source"),
+                    ),
                 identifier = requiredIdentifiers,
                 extension =
                     listOf(
                         Extension(
                             url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
-                            value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "code".asFHIR())),
+                            value =
+                                DynamicValue(
+                                    DynamicValueType.CODEABLE_CONCEPT,
+                                    CodeableConcept(text = "code".asFHIR()),
+                                ),
                         ),
                     ),
                 status = ObservationStatus.FINAL.asCode(),
@@ -625,6 +771,74 @@ class RoninBloodPressureValidatorTest {
                 category = listOf(vitalSignsCategoryConcept),
                 effective = DynamicValue(DynamicValueType.DATE_TIME, DateTime("2023")),
                 dataAbsentReason = CodeableConcept(text = "Unknown".asFHIR()),
+            )
+        val validation = validator.validate(bloodPressure, LocationContext(Observation::class))
+        assertEquals(0, validation.issues().size)
+    }
+
+    @Test
+    fun `validation succeeds with valid value type`() {
+        val bloodPressure =
+            Observation(
+                id = Id("1234"),
+                meta =
+                    Meta(
+                        profile = listOf(RoninProfile.OBSERVATION_BLOOD_PRESSURE.canonical),
+                        source = Uri("source"),
+                    ),
+                identifier = requiredIdentifiers,
+                extension =
+                    listOf(
+                        Extension(
+                            url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
+                            value =
+                                DynamicValue(
+                                    DynamicValueType.CODEABLE_CONCEPT,
+                                    CodeableConcept(text = "code".asFHIR()),
+                                ),
+                        ),
+                    ),
+                status = ObservationStatus.FINAL.asCode(),
+                code = CodeableConcept(coding = listOf(bloodPressureCoding)),
+                subject = Reference(reference = FHIRString("Patient/1234")),
+                category = listOf(vitalSignsCategoryConcept),
+                effective = DynamicValue(DynamicValueType.DATE_TIME, DateTime("2023")),
+                component =
+                    listOf(
+                        ObservationComponent(
+                            extension = listOf(sourceSystolicCodeExtension),
+                            code = systolicCodeableConcept,
+                            value =
+                                DynamicValue(
+                                    DynamicValueType.QUANTITY,
+                                    Quantity(
+                                        value = Decimal(BigDecimal.valueOf(110)),
+                                        unit = "mm[Hg]".asFHIR(),
+                                        system = CodeSystem.UCUM.uri,
+                                        code = Code("mm[Hg]"),
+                                    ),
+                                ),
+                        ),
+                        ObservationComponent(
+                            extension = listOf(sourceDiastolicCodeExtension),
+                            code = diastolicCodeableConcept,
+                            value =
+                                DynamicValue(
+                                    DynamicValueType.QUANTITY,
+                                    Quantity(
+                                        value = Decimal(BigDecimal.valueOf(65)),
+                                        unit = "mm[Hg]".asFHIR(),
+                                        system = CodeSystem.UCUM.uri,
+                                        code = Code("mm[Hg]"),
+                                    ),
+                                ),
+                        ),
+                    ),
+                value =
+                    DynamicValue(
+                        DynamicValueType.STRING,
+                        FHIRString("value"),
+                    ),
             )
         val validation = validator.validate(bloodPressure, LocationContext(Observation::class))
         assertEquals(0, validation.issues().size)
