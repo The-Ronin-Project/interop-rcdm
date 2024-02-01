@@ -13,7 +13,6 @@ import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 
@@ -33,15 +32,10 @@ abstract class BaseGeneratorSpringTest {
 class TestConfig {
     @Bean
     @Primary
-    fun validationClient() =
-        mockk<ValidationClient>(relaxed = true) {
-        }
+    fun validationClient() = mockk<ValidationClient>(relaxed = true)
 
     @Bean
     fun httpClient() = mockk<HttpClient>(relaxed = true)
-
-    @Bean
-    fun threadPool() = mockk<ThreadPoolTaskExecutor>(relaxed = true)
 
     @Bean
     @Primary

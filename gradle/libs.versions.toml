@@ -2,7 +2,7 @@
 caffeine = "3.1.8"
 classgraph = "4.8.165"
 interop-common = "4.1.0"
-interop-datalake = "9.0.0"
+interop-datalake = "9.1.0"
 interop-ehr = "13.1.1"
 interop-event-resource-internal = "1.2.3"
 interop-fhir = "9.1.1"
