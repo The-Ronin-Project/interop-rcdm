@@ -79,6 +79,20 @@ abstract class BaseRoninObservationProfileValidator(protected val registryClient
             severity = ValidationIssueSeverity.ERROR,
             location = LocationContext(ObservationComponent::extension),
         )
+    private val requiredComponentExtensionInterpretation =
+        FHIRError(
+            code = "RONIN_OBS_008",
+            description = "Observation component interpretation entries must each contain the sourceObservationInterpretation extension",
+            severity = ValidationIssueSeverity.ERROR,
+            location = LocationContext(ObservationComponent::interpretation),
+        )
+    private val requiredExtensionInterpretationError =
+        FHIRError(
+            code = "RONIN_OBS_009",
+            description = "Observation interpretation entries must each contain the sourceObservationInterpretation extension",
+            severity = ValidationIssueSeverity.ERROR,
+            location = LocationContext(Observation::interpretation),
+        )
 
     override fun validate(
         resource: Observation,
@@ -134,6 +148,20 @@ abstract class BaseRoninObservationProfileValidator(protected val registryClient
                 requiredExtensionCodeError,
                 context,
             )
+
+            if (resource.interpretation.isNotEmpty()) {
+                resource.interpretation.forEach {
+                    checkTrue(
+                        it.extension.isNotEmpty() &&
+                            it.extension.all {
+                                it.url == RoninExtension.TENANT_SOURCE_OBSERVATION_COMPONENT_INTERPRETATION.uri
+                            },
+                        requiredExtensionInterpretationError,
+                        context,
+                    )
+                }
+            }
+
             if (resource.value?.type == DynamicValueType.CODEABLE_CONCEPT) {
                 checkTrue(
                     resource.extension.any {
@@ -164,6 +192,18 @@ abstract class BaseRoninObservationProfileValidator(protected val registryClient
                         requiredComponentExtensionValueError,
                         componentContext,
                     )
+                }
+                if (observationComponent.interpretation.isNotEmpty()) {
+                    observationComponent.interpretation.forEach {
+                        checkTrue(
+                            it.extension.isNotEmpty() &&
+                                it.extension.all {
+                                    it.url == RoninExtension.TENANT_SOURCE_OBSERVATION_COMPONENT_INTERPRETATION.uri
+                                },
+                            requiredComponentExtensionInterpretation,
+                            componentContext,
+                        )
+                    }
                 }
             }
 

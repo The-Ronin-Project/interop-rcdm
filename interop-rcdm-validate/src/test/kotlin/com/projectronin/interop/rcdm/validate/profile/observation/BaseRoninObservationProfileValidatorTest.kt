@@ -674,6 +674,102 @@ class BaseRoninObservationProfileValidatorTest {
     }
 
     @Test
+    fun `validation fails for interpretation without extension`() {
+        val observation =
+            Observation(
+                id = Id("1234"),
+                meta = Meta(profile = listOf(RoninProfile.OBSERVATION.canonical), source = Uri("source")),
+                identifier = requiredIdentifiers,
+                extension =
+                    listOf(
+                        Extension(
+                            url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
+                            value =
+                                DynamicValue(
+                                    DynamicValueType.CODEABLE_CONCEPT,
+                                    CodeableConcept(text = "code".asFHIR()),
+                                ),
+                        ),
+                    ),
+                status = ObservationStatus.FINAL.asCode(),
+                code = CodeableConcept(coding = listOf(validCoding)),
+                subject = Reference(reference = FHIRString("Patient/1234")),
+                interpretation =
+                    listOf(
+                        CodeableConcept(
+                            coding =
+                                listOf(
+                                    Coding(system = Uri("some-SYSTEM"), code = Code("some-CODE")),
+                                ),
+                        ),
+                    ),
+            )
+        val validation = validator.validate(observation, LocationContext(Observation::class))
+        assertEquals(1, validation.issues().size)
+        assertEquals(
+            "ERROR RONIN_OBS_009: Observation interpretation entries must each contain the sourceObservationInterpretation extension @ Observation.interpretation",
+            validation.issues().first().toString(),
+        )
+    }
+
+    @Test
+    fun `validation fails with component interpretation not having extension`() {
+        val observation =
+            Observation(
+                id = Id("1234"),
+                meta = Meta(profile = listOf(RoninProfile.OBSERVATION.canonical), source = Uri("source")),
+                identifier = requiredIdentifiers,
+                extension =
+                    listOf(
+                        Extension(
+                            url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
+                            value =
+                                DynamicValue(
+                                    DynamicValueType.CODEABLE_CONCEPT,
+                                    CodeableConcept(text = "code".asFHIR()),
+                                ),
+                        ),
+                    ),
+                status = ObservationStatus.FINAL.asCode(),
+                code = CodeableConcept(coding = listOf(validCoding)),
+                subject = Reference(reference = FHIRString("Patient/1234")),
+                component =
+                    listOf(
+                        ObservationComponent(
+                            extension =
+                                listOf(
+                                    Extension(
+                                        url = RoninExtension.TENANT_SOURCE_OBSERVATION_COMPONENT_CODE.uri,
+                                        value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept()),
+                                    ),
+                                    Extension(
+                                        url = RoninExtension.TENANT_SOURCE_OBSERVATION_COMPONENT_VALUE.uri,
+                                        value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept()),
+                                    ),
+                                ),
+                            code = CodeableConcept(),
+                            value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept()),
+                            interpretation =
+                                listOf(
+                                    CodeableConcept(
+                                        coding =
+                                            listOf(
+                                                Coding(system = Uri("some-SYSTEM"), code = Code("some-CODE")),
+                                            ),
+                                    ),
+                                ),
+                        ),
+                    ),
+            )
+        val validation = validator.validate(observation, LocationContext(Observation::class))
+        assertEquals(1, validation.issues().size)
+        assertEquals(
+            "ERROR RONIN_OBS_008: Observation component interpretation entries must each contain the sourceObservationInterpretation extension @ Observation.component[0].interpretation",
+            validation.issues().first().toString(),
+        )
+    }
+
+    @Test
     fun `validation succeeds`() {
         val observation =
             Observation(
@@ -802,6 +898,71 @@ class BaseRoninObservationProfileValidatorTest {
                                 ),
                             code = CodeableConcept(),
                             value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept()),
+                        ),
+                    ),
+            )
+
+        val validation = validator.validate(observation, LocationContext(Observation::class))
+        assertEquals(0, validation.issues().size)
+    }
+
+    @Test
+    fun `validation succeeds with component interpretation`() {
+        val observation =
+            Observation(
+                id = Id("1234"),
+                meta = Meta(profile = listOf(RoninProfile.OBSERVATION.canonical), source = Uri("source")),
+                identifier = requiredIdentifiers,
+                extension =
+                    listOf(
+                        Extension(
+                            url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
+                            value =
+                                DynamicValue(
+                                    DynamicValueType.CODEABLE_CONCEPT,
+                                    CodeableConcept(text = "code".asFHIR()),
+                                ),
+                        ),
+                    ),
+                status = ObservationStatus.FINAL.asCode(),
+                code = CodeableConcept(coding = listOf(validCoding)),
+                subject = Reference(reference = FHIRString("Patient/1234")),
+                component =
+                    listOf(
+                        ObservationComponent(
+                            extension =
+                                listOf(
+                                    Extension(
+                                        url = RoninExtension.TENANT_SOURCE_OBSERVATION_COMPONENT_CODE.uri,
+                                        value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept()),
+                                    ),
+                                    Extension(
+                                        url = RoninExtension.TENANT_SOURCE_OBSERVATION_COMPONENT_VALUE.uri,
+                                        value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept()),
+                                    ),
+                                ),
+                            code = CodeableConcept(),
+                            value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept()),
+                            interpretation =
+                                listOf(
+                                    CodeableConcept(
+                                        coding =
+                                            listOf(
+                                                Coding(system = Uri("some-SYSTEM"), code = Code("some-CODE")),
+                                            ),
+                                        extension =
+                                            listOf(
+                                                Extension(
+                                                    url = RoninExtension.TENANT_SOURCE_OBSERVATION_COMPONENT_INTERPRETATION.uri,
+                                                    value =
+                                                        DynamicValue(
+                                                            DynamicValueType.CODEABLE_CONCEPT,
+                                                            CodeableConcept(),
+                                                        ),
+                                                ),
+                                            ),
+                                    ),
+                                ),
                         ),
                     ),
             )

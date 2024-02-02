@@ -504,6 +504,13 @@ class ObservationMapperTest {
                         Coding(system = Uri("http://snomed.info/sct"), code = Code("12345")),
                     ),
             )
+        val interpretation =
+            CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(system = Uri("http://snomed.info/sct"), code = Code("12345")),
+                    ),
+            )
         val componentCode =
             CodeableConcept(
                 coding =
@@ -518,16 +525,25 @@ class ObservationMapperTest {
                         Coding(system = Uri("http://snomed.info/sct"), code = Code("12345")),
                     ),
             )
+        val componentInterp =
+            CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(system = Uri("http://snomed.info/sct"), code = Code("12345")),
+                    ),
+            )
         val observation =
             Observation(
                 status = ObservationStatus.FINAL.asCode(),
                 code = code,
                 value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, value),
+                interpretation = listOf(interpretation),
                 component =
                     listOf(
                         ObservationComponent(
                             code = componentCode,
                             value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, componentValue),
+                            interpretation = listOf(componentInterp),
                         ),
                     ),
             )
@@ -575,7 +591,27 @@ class ObservationMapperTest {
                 null,
             )
         } returns ConceptMapCodeableConcept(mappedValue, mappedValueExtension, listOf())
-
+        val mappedInterpretation =
+            CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(system = Uri("http://snomed.info/sct"), code = Code("67890")),
+                    ),
+            )
+        val mappedInterpretationExtension =
+            Extension(
+                url = RoninExtension.TENANT_SOURCE_OBSERVATION_COMPONENT_INTERPRETATION.uri,
+                value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, interpretation),
+            )
+        every {
+            registryClient.getConceptMapping(
+                "tenant",
+                "Observation.interpretation",
+                value,
+                observation,
+                null,
+            )
+        } returns ConceptMapCodeableConcept(mappedInterpretation, mappedInterpretationExtension, listOf())
         val mappedComponentCode =
             CodeableConcept(
                 coding =
@@ -620,16 +656,53 @@ class ObservationMapperTest {
             )
         } returns ConceptMapCodeableConcept(mappedComponentValue, mappedComponentValueExtension, listOf())
 
+        val mappedComponentInterp =
+            CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(system = Uri("http://snomed.info/sct"), code = Code("67890")),
+                    ),
+            )
+        val mappedComponentInterpExtension =
+            Extension(
+                url = RoninExtension.TENANT_SOURCE_OBSERVATION_COMPONENT_INTERPRETATION.uri,
+                value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, componentInterp),
+            )
+        every {
+            registryClient.getConceptMapping(
+                "tenant",
+                "Observation.component.interpretation",
+                componentInterp,
+                observation,
+                null,
+            )
+        } returns ConceptMapCodeableConcept(mappedComponentInterp, mappedComponentInterpExtension, listOf())
         val (mappedResource, validation) = mapper.map(observation, tenant, null)
         mappedResource!!
         assertEquals(mappedCode, mappedResource.code)
         assertEquals(DynamicValue(DynamicValueType.CODEABLE_CONCEPT, mappedValue), mappedResource.value)
         assertEquals(
             listOf(
+                CodeableConcept(
+                    coding = mappedInterpretation.coding,
+                    extension = listOf(mappedInterpretationExtension),
+                ),
+            ),
+            mappedResource.interpretation,
+        )
+        assertEquals(
+            listOf(
                 ObservationComponent(
                     extension = listOf(mappedComponentCodeExtension, mappedComponentValueExtension),
                     code = mappedComponentCode,
                     value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, mappedComponentValue),
+                    interpretation =
+                        listOf(
+                            CodeableConcept(
+                                coding = mappedComponentInterp.coding,
+                                extension = listOf(mappedComponentInterpExtension),
+                            ),
+                        ),
                 ),
             ),
             mappedResource.component,
@@ -686,6 +759,334 @@ class ObservationMapperTest {
         assertNull(mappedResource.value)
         assertEquals(listOf<ObservationComponent>(), mappedResource.component)
         assertEquals(listOf(mappedExtension), mappedResource.extension)
+
+        assertEquals(0, validation.issues().size)
+    }
+
+    @Test
+    fun `maps component interpretation`() {
+        val requiredCode =
+            CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(system = Uri("http://snomed.info/sct"), code = Code("00000")),
+                    ),
+            )
+        val interp =
+            CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(system = Uri("http://snomed.info/sct"), code = Code("12345")),
+                    ),
+            )
+        val observation =
+            Observation(
+                status = ObservationStatus.FINAL.asCode(),
+                code = null,
+                value = null,
+                component =
+                    listOf(
+                        ObservationComponent(
+                            code = requiredCode,
+                            interpretation = listOf(interp),
+                        ),
+                    ),
+            )
+
+        val mappedInterp =
+            CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(system = Uri("http://snomed.info/sct"), code = Code("67890")),
+                    ),
+            )
+        val mappedCode =
+            CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(system = Uri("http://snomed.info/sct"), code = Code("11111")),
+                    ),
+            )
+        val mappedInterpExtension =
+            Extension(
+                url = RoninExtension.TENANT_SOURCE_OBSERVATION_COMPONENT_INTERPRETATION.uri,
+                value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, interp),
+            )
+        val mappedCodeExtension =
+            Extension(
+                url = RoninExtension.TENANT_SOURCE_OBSERVATION_COMPONENT_CODE.uri,
+                value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, requiredCode),
+            )
+        every {
+            registryClient.getConceptMapping(
+                "tenant",
+                "Observation.component.interpretation",
+                interp,
+                observation,
+                null,
+            )
+        } returns ConceptMapCodeableConcept(mappedInterp, mappedInterpExtension, listOf())
+        every {
+            registryClient.getConceptMapping(
+                "tenant",
+                "Observation.component.code",
+                requiredCode,
+                observation,
+                null,
+            )
+        } returns ConceptMapCodeableConcept(mappedCode, mappedCodeExtension, listOf())
+
+        val (mappedResource, validation) = mapper.map(observation, tenant, null)
+        mappedResource!!
+        assertNull(mappedResource.code)
+        assertNull(mappedResource.value)
+        assertEquals(
+            listOf(
+                ObservationComponent(
+                    code = mappedCode,
+                    extension = listOf(mappedCodeExtension),
+                    interpretation =
+                        listOf(
+                            CodeableConcept(
+                                coding = mappedInterp.coding,
+                                extension = listOf(mappedInterpExtension),
+                            ),
+                        ),
+                ),
+            ),
+            mappedResource.component,
+        )
+        assertEquals(listOf<Extension>(), mappedResource.extension)
+
+        assertEquals(0, validation.issues().size)
+    }
+
+    @Test
+    fun `maps multiple component interpretation`() {
+        val requiredCode =
+            CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(system = Uri("http://snomed.info/sct"), code = Code("00000")),
+                    ),
+            )
+        val interp1 =
+            CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(system = Uri("http://snomed.info/sct"), code = Code("12345")),
+                    ),
+            )
+        val interp2 =
+            CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(system = Uri("http://snomed.info/sct"), code = Code("22222")),
+                    ),
+            )
+        val observation =
+            Observation(
+                status = ObservationStatus.FINAL.asCode(),
+                code = null,
+                value = null,
+                component =
+                    listOf(
+                        ObservationComponent(
+                            code = requiredCode,
+                            interpretation = listOf(interp1, interp2),
+                        ),
+                    ),
+            )
+
+        val mappedInterp1 =
+            CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(system = Uri("http://snomed.info/sct"), code = Code("67890")),
+                    ),
+            )
+        val mappedInterp2 =
+            CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(system = Uri("http://snomed.info/sct"), code = Code("33333")),
+                    ),
+            )
+        val mappedCode =
+            CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(system = Uri("http://snomed.info/sct"), code = Code("11111")),
+                    ),
+            )
+        val mappedInterp1Extension =
+            Extension(
+                url = RoninExtension.TENANT_SOURCE_OBSERVATION_COMPONENT_INTERPRETATION.uri,
+                value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, interp1),
+            )
+        val mappedInterp2Extension =
+            Extension(
+                url = RoninExtension.TENANT_SOURCE_OBSERVATION_COMPONENT_INTERPRETATION.uri,
+                value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, interp2),
+            )
+        val mappedCodeExtension =
+            Extension(
+                url = RoninExtension.TENANT_SOURCE_OBSERVATION_COMPONENT_CODE.uri,
+                value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, requiredCode),
+            )
+        every {
+            registryClient.getConceptMapping(
+                "tenant",
+                "Observation.component.interpretation",
+                interp1,
+                observation,
+                null,
+            )
+        } returns ConceptMapCodeableConcept(mappedInterp1, mappedInterp1Extension, listOf())
+        every {
+            registryClient.getConceptMapping(
+                "tenant",
+                "Observation.component.interpretation",
+                interp2,
+                observation,
+                null,
+            )
+        } returns ConceptMapCodeableConcept(mappedInterp2, mappedInterp2Extension, listOf())
+        every {
+            registryClient.getConceptMapping(
+                "tenant",
+                "Observation.component.code",
+                requiredCode,
+                observation,
+                null,
+            )
+        } returns ConceptMapCodeableConcept(mappedCode, mappedCodeExtension, listOf())
+
+        val (mappedResource, validation) = mapper.map(observation, tenant, null)
+        mappedResource!!
+        assertNull(mappedResource.code)
+        assertNull(mappedResource.value)
+        assertEquals(
+            listOf(
+                ObservationComponent(
+                    code = mappedCode,
+                    extension = listOf(mappedCodeExtension),
+                    interpretation =
+                        listOf(
+                            CodeableConcept(
+                                coding = mappedInterp1.coding,
+                                extension = listOf(mappedInterp1Extension),
+                            ),
+                            CodeableConcept(
+                                coding = mappedInterp2.coding,
+                                extension = listOf(mappedInterp2Extension),
+                            ),
+                        ),
+                ),
+            ),
+            mappedResource.component,
+        )
+        assertEquals(listOf<Extension>(), mappedResource.extension)
+
+        assertEquals(0, validation.issues().size)
+    }
+
+    @Test
+    fun `maps interpretation`() {
+        val requiredCode =
+            CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(system = Uri("http://snomed.info/sct"), code = Code("00000")),
+                    ),
+            )
+        val interp1 =
+            CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(system = Uri("http://snomed.info/sct"), code = Code("12345")),
+                    ),
+            )
+        val observation =
+            Observation(
+                status = ObservationStatus.FINAL.asCode(),
+                code = null,
+                value = null,
+                interpretation = listOf(interp1),
+                component =
+                    listOf(
+                        ObservationComponent(
+                            code = requiredCode,
+                        ),
+                    ),
+            )
+
+        val mappedInterp1 =
+            CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(system = Uri("http://snomed.info/sct"), code = Code("67890")),
+                    ),
+            )
+        val mappedCode =
+            CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(system = Uri("http://snomed.info/sct"), code = Code("11111")),
+                    ),
+            )
+        val mappedInterp1Extension =
+            Extension(
+                url = RoninExtension.TENANT_SOURCE_OBSERVATION_COMPONENT_INTERPRETATION.uri,
+                value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, interp1),
+            )
+        val mappedCodeExtension =
+            Extension(
+                url = RoninExtension.TENANT_SOURCE_OBSERVATION_COMPONENT_CODE.uri,
+                value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, requiredCode),
+            )
+        every {
+            registryClient.getConceptMapping(
+                "tenant",
+                "Observation.interpretation",
+                interp1,
+                observation,
+                null,
+            )
+        } returns ConceptMapCodeableConcept(mappedInterp1, mappedInterp1Extension, listOf())
+        every {
+            registryClient.getConceptMapping(
+                "tenant",
+                "Observation.component.code",
+                requiredCode,
+                observation,
+                null,
+            )
+        } returns ConceptMapCodeableConcept(mappedCode, mappedCodeExtension, listOf())
+
+        val (mappedResource, validation) = mapper.map(observation, tenant, null)
+        mappedResource!!
+        assertNull(mappedResource.code)
+        assertNull(mappedResource.value)
+        assertEquals(
+            listOf(
+                CodeableConcept(
+                    coding = mappedInterp1.coding,
+                    extension = listOf(mappedInterp1Extension),
+                ),
+            ),
+            mappedResource.interpretation,
+        )
+        assertEquals(
+            listOf(
+                ObservationComponent(
+                    code = mappedCode,
+                    extension = listOf(mappedCodeExtension),
+                ),
+            ),
+            mappedResource.component,
+        )
+        assertEquals(listOf<Extension>(), mappedResource.extension)
 
         assertEquals(0, validation.issues().size)
     }
