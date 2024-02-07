@@ -12,8 +12,8 @@ import org.springframework.stereotype.Component
 class RoninLaboratoryResultTransformer(registryClient: NormalizationRegistryClient) :
     BaseRoninObservationTransformer(registryClient) {
     override val profile: RoninProfile = RoninProfile.OBSERVATION_LABORATORY_RESULT
-    override val rcdmVersion: RCDMVersion = RCDMVersion.V3_29_0
-    override val profileVersion: Int = 4
+    override val rcdmVersion: RCDMVersion = RCDMVersion.V3_37_0
+    override val profileVersion: Int = 5
 
     override fun getQualifyingCategories(): List<Coding> =
         listOf(Coding(system = CodeSystem.OBSERVATION_CATEGORY.uri, code = Code("laboratory")))

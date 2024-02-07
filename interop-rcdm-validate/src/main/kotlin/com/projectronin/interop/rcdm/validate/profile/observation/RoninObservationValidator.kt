@@ -13,8 +13,8 @@ import org.springframework.stereotype.Component
 class RoninObservationValidator(registryClient: NormalizationRegistryClient) :
     BaseRoninObservationProfileValidator(registryClient) {
     override val profile: RoninProfile = RoninProfile.OBSERVATION
-    override val rcdmVersion: RCDMVersion = RCDMVersion.V3_29_0
-    override val profileVersion: Int = 5
+    override val rcdmVersion: RCDMVersion = RCDMVersion.V3_37_0
+    override val profileVersion: Int = 6
 
     override fun getSupportedValueSet(): ValueSetList = ValueSetList(emptyList(), null)
 

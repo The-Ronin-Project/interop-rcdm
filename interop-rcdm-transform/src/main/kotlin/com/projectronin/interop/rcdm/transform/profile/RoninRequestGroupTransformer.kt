@@ -14,7 +14,7 @@ class RoninRequestGroupTransformer : ProfileTransformer<RequestGroup>() {
     override val supportedResource: KClass<RequestGroup> = RequestGroup::class
     override val profile: RoninProfile = RoninProfile.REQUEST_GROUP
     override val rcdmVersion = RCDMVersion.V3_19_0
-    override val profileVersion = 2
+    override val profileVersion = 1
 
     override fun transformInternal(
         original: RequestGroup,

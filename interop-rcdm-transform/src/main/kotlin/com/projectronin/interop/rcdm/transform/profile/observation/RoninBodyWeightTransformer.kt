@@ -10,8 +10,8 @@ import org.springframework.stereotype.Component
 class RoninBodyWeightTransformer(registryClient: NormalizationRegistryClient) :
     BaseRoninVitalSignsTransformer(registryClient) {
     override val profile: RoninProfile = RoninProfile.OBSERVATION_BODY_WEIGHT
-    override val rcdmVersion: RCDMVersion = RCDMVersion.V3_26_1
-    override val profileVersion: Int = 3
+    override val rcdmVersion: RCDMVersion = RCDMVersion.V3_37_0
+    override val profileVersion: Int = 5
 
     override fun getTransformedBodySite(bodySite: CodeableConcept?): CodeableConcept? = null
 }

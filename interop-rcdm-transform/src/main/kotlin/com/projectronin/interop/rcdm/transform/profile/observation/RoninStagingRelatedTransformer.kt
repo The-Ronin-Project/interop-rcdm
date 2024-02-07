@@ -11,8 +11,8 @@ import org.springframework.stereotype.Component
 class RoninStagingRelatedTransformer(registryClient: NormalizationRegistryClient) :
     BaseRoninObservationTransformer(registryClient) {
     override val profile: RoninProfile = RoninProfile.OBSERVATION_STAGING_RELATED
-    override val rcdmVersion: RCDMVersion = RCDMVersion.V3_26_1
-    override val profileVersion: Int = 3
+    override val rcdmVersion: RCDMVersion = RCDMVersion.V3_37_0
+    override val profileVersion: Int = 4
 
     override fun qualifies(resource: Observation): Boolean {
         // code.coding must exist in the valueSet

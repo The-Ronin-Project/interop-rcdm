@@ -12,8 +12,8 @@ import org.springframework.stereotype.Component
 class RoninBodySurfaceAreaValidator(registryClient: NormalizationRegistryClient) :
     BaseRoninVitalSignProfileValidator(registryClient) {
     override val profile: RoninProfile = RoninProfile.OBSERVATION_BODY_SURFACE_AREA
-    override val rcdmVersion: RCDMVersion = RCDMVersion.V3_36_1
-    override val profileVersion: Int = 4
+    override val rcdmVersion: RCDMVersion = RCDMVersion.V3_37_0
+    override val profileVersion: Int = 5
 
     override fun validateVitalSign(
         resource: Observation,

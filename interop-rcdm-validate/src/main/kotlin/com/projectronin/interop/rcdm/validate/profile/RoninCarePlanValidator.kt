@@ -17,8 +17,8 @@ class RoninCarePlanValidator : ProfileValidator<CarePlan>() {
     override val supportedResource: KClass<CarePlan> = CarePlan::class
     override val r4Validator: R4ProfileValidator<CarePlan> = R4CarePlanValidator
     override val profile: RoninProfile = RoninProfile.CARE_PLAN
-    override val rcdmVersion: RCDMVersion = RCDMVersion.V3_27_0
-    override val profileVersion: Int = 7
+    override val rcdmVersion: RCDMVersion = RCDMVersion.V3_35_0
+    override val profileVersion: Int = 8
 
     private val categoryListError =
         FHIRError(

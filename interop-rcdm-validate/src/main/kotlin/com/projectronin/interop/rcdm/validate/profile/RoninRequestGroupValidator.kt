@@ -16,7 +16,7 @@ class RoninRequestGroupValidator : ProfileValidator<RequestGroup>() {
     override val supportedResource: KClass<RequestGroup> = RequestGroup::class
     override val r4Validator: R4ProfileValidator<RequestGroup> = R4RequestGroupValidator
     override val profile: RoninProfile = RoninProfile.REQUEST_GROUP
-    override val rcdmVersion = RCDMVersion.V3_22_1
+    override val rcdmVersion = RCDMVersion.V3_19_0
     override val profileVersion = 1
     val requiredSubject = RequiredFieldError(RequestGroup::subject)
 

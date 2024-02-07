@@ -17,8 +17,8 @@ import org.springframework.stereotype.Component
 class RoninBloodPressureValidator(registryClient: NormalizationRegistryClient) :
     BaseRoninVitalSignProfileValidator(registryClient) {
     override val profile: RoninProfile = RoninProfile.OBSERVATION_BLOOD_PRESSURE
-    override val rcdmVersion: RCDMVersion = RCDMVersion.V3_36_1
-    override val profileVersion: Int = 6
+    override val rcdmVersion: RCDMVersion = RCDMVersion.V3_37_0
+    override val profileVersion: Int = 7
 
     private val validBloodPressureUnits = listOf("mm[Hg]")
 

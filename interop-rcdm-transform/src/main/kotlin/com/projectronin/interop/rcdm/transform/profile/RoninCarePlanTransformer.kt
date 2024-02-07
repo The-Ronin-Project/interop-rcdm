@@ -13,8 +13,8 @@ import kotlin.reflect.KClass
 class RoninCarePlanTransformer : ProfileTransformer<CarePlan>() {
     override val supportedResource: KClass<CarePlan> = CarePlan::class
     override val profile: RoninProfile = RoninProfile.CARE_PLAN
-    override val rcdmVersion: RCDMVersion = RCDMVersion.V3_27_0
-    override val profileVersion: Int = 7
+    override val rcdmVersion: RCDMVersion = RCDMVersion.V3_35_0
+    override val profileVersion: Int = 8
 
     override fun transformInternal(
         original: CarePlan,
