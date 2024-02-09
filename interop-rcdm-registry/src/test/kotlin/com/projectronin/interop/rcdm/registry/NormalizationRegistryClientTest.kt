@@ -45,7 +45,7 @@ import java.time.LocalDateTime
 @Suppress("ktlint:standard:max-line-length")
 class NormalizationRegistryClientTest {
     private val ociClient = mockk<OCIClient>()
-    private val registryPath = "/DataNormalizationRegistry/v2/registry.json"
+    private val registryPath = "/DataNormalizationRegistry/v5/registry.json"
     private val medicationDependsOnEvaluator =
         mockk<DependsOnEvaluator<Medication>> { every { resourceType } returns Medication::class }
 
@@ -55,20 +55,14 @@ class NormalizationRegistryClientTest {
 
     private val sourceAtoTargetAAA =
         SourceConcept(
-            element =
-                setOf(
-                    SourceKey(
-                        value = "valueA",
-                        system = "systemA",
-                    ),
-                ),
+            codeableConcept = CodeableConcept(coding = listOf(Coding(code = Code("valueA"), system = Uri("systemA")))),
         ) to
             listOf(
                 TargetConcept(
                     text = "textAAA",
                     element =
                         listOf(
-                            TargetValue(
+                            TargetConceptMapValue(
                                 "targetValueAAA",
                                 "targetSystemAAA",
                                 "targetDisplayAAA",
@@ -79,20 +73,14 @@ class NormalizationRegistryClientTest {
             )
     private val sourceBtoTargetBBB =
         SourceConcept(
-            element =
-                setOf(
-                    SourceKey(
-                        value = "valueB",
-                        system = "systemB",
-                    ),
-                ),
+            codeableConcept = CodeableConcept(coding = listOf(Coding(code = Code("valueB"), system = Uri("systemB")))),
         ) to
             listOf(
                 TargetConcept(
                     text = "textBBB",
                     element =
                         listOf(
-                            TargetValue(
+                            TargetConceptMapValue(
                                 "targetValueBBB",
                                 "targetSystemBBB",
                                 "targetDisplayBBB",
@@ -133,7 +121,18 @@ class NormalizationRegistryClientTest {
                   "element": [
                     {
                       "id": "06c19b8e4718f1bf6e81f992cfc12c1e",
-                      "code": "{\"valueCodeableConcept\": {\"coding\": [{\"code\": \"72166-2\", \"display\": null, \"system\": \"http://loinc.org\"}]}}",
+                      "_code": {
+                        "extension": [ {
+                          "id": "sourceExtension1",
+                          "url": "http://projectronin.io/fhir/StructureDefinition/Extension/canonicalSourceData",
+                          "valueCodeableConcept": {
+                            "coding": [ {
+                              "code": "72166-2",
+                              "system": "http://loinc.org"
+                            } ]
+                          }
+                        } ]
+                      },
                       "display": "Tobacco smoking status",
                       "target": [
                         {
@@ -146,36 +145,20 @@ class NormalizationRegistryClientTest {
                       ]
                     },
                     {
-                      "id": "64be7ece9ab75a3eff827188c55c64db",
-                      "code": "{\"valueCodeableConcept\": {\"coding\": [{\"code\": \"363905002\", \"display\": \"Details of alcohol drinking behavior (observable entity)\", \"system\": \"http://snomed.info/sct\"}]}}",
-                      "display": "Details of alcohol drinking behavior (observable entity)",
-                      "target": [
-                        {
-                          "id": "8a3e6071d30318b9fbc23f3a1cd7de5a",
-                          "code": "74013-4",
-                          "display": "Alcoholic drinks per day",
-                          "equivalence": "narrower",
-                          "comment": "source-is-broader-than-target"
-                        }
-                      ]
-                    },
-                    {
-                      "id": "8015a7419c2d19d6f515ccec9fb86c94",
-                      "code": "{\"valueCodeableConcept\": {\"coding\": [{\"code\": \"88028-6\", \"display\": null, \"system\": \"http://loinc.org\"}]}}",
-                      "display": "Tobacco",
-                      "target": [
-                        {
-                          "id": "751254b27af4ca8f6ea012292dc864cc",
-                          "code": "88028-6",
-                          "display": "Tobacco use panel",
-                          "equivalence": "equivalent",
-                          "comment": null
-                        }
-                      ]
-                    },
-                    {
                       "id": "921618c5505606cff5626f3468d4b396",
-                      "code": "{\"valueCodeableConcept\": {\"coding\": [{\"code\": \"85354-9\", \"display\": \"Blood pressure panel with all children optional\", \"system\": \"http://loinc.org\"}]}}",
+                      "_code": {
+                        "extension": [ {
+                          "id": "sourceExtension1",
+                          "url": "http://projectronin.io/fhir/StructureDefinition/Extension/canonicalSourceData",
+                          "valueCodeableConcept": {
+                            "coding": [ {
+                              "code": "85354-9",
+                              "system": "http://loinc.org",
+                              "display": "Blood pressure panel with all children optional"
+                            } ]
+                          }
+                        } ]
+                      },
                       "display": "Blood pressure",
                       "target": [
                         {
@@ -203,7 +186,22 @@ class NormalizationRegistryClientTest {
                     },
                     {
                       "id": "5aec5a329873f3842748e2beeb69643b",
-                      "code": "{\"valueCodeableConcept\": {\"coding\": [{\"code\": \"21704910\", \"display\": \"Potassium Level\", \"system\": \"https://fhir.cerner.com/ec2458f2-1e24-41c8-b71b-0e701af7583d/codeSet/72\"},{\"code\": \"2823-3\", \"display\": null, \"system\": \"http://loinc.org\"}]}}",
+                      "_code": {
+                        "extension": [ {
+                          "id": "sourceExtension2",
+                          "url": "http://projectronin.io/fhir/StructureDefinition/Extension/canonicalSourceData",
+                          "valueCodeableConcept": {
+                            "coding": [ {
+                              "code": "21704910",
+                              "system": "https://fhir.cerner.com/ec2458f2-1e24-41c8-b71b-0e701af7583d/codeSet/72",
+                              "display": "Potassium Level"
+                            }, {
+                              "code": "2823-3",
+                              "system": "http://loinc.org"
+                            } ]
+                          }
+                        } ]
+                      },
                       "display": "Potassium Level",
                       "target": [
                         {
@@ -257,176 +255,20 @@ class NormalizationRegistryClientTest {
               "targetVersion": "2023-03-01",
               "element": [
                 {
-                  "id": "195a31953334437c3e8742cd36c8b5a7",
-                  "code": "{\"valueCodeableConcept\": {\"coding\": [{\"code\": \"SNOMED#385355006\", \"display\": null, \"system\": \"http://snomed.info/sct\"},{\"code\": \"EPIC#42394\", \"display\": \"residual tumor (R)\", \"system\": \"urn:oid:1.2.840.114350.1.13.297.2.7.2.727688\"}]}}",
-                  "display": "FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - RESIDUAL TUMOR (R)",
-                  "target": [
-                    {
-                      "id": "341901d82797f62a91d9416d297f8465",
-                      "code": "1222601005",
-                      "display": "American Joint Committee on Cancer residual tumor allowable value (qualifier value)",
-                      "equivalence": "equivalent",
-                      "comment": null
-                    }
-                  ]
-                },
-                {
-                  "id": "5c21f8ce34b34b2ad1dbc84c293c68e0",
-                  "code": "{\"valueCodeableConcept\": {\"coding\": [{\"code\": \"SNOMED#385002007\", \"display\": null, \"system\": \"http://snomed.info/sct\"},{\"code\": \"EPIC#42761\", \"display\": \"Gleason tertiary pattern\", \"system\": \"urn:oid:1.2.840.114350.1.13.297.2.7.2.727688\"}]}}",
-                  "display": "FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - PROGNOSTIC INDICATORS - GLEASON TERTIARY PATTERN",
-                  "target": [
-                    {
-                      "id": "db524dba8f3db52711a6a63dbd1d13d2",
-                      "code": "385002007",
-                      "display": "Tertiary Gleason pattern (observable entity)",
-                      "equivalence": "equivalent",
-                      "comment": null
-                    }
-                  ]
-                },
-                {
-                  "id": "4951ec609b239add67ce50c5740643fd",
-                  "code": "{\"valueCodeableConcept\": {\"coding\": [{\"code\": \"SNOMED#399651003\", \"display\": null, \"system\": \"http://snomed.info/sct\"},{\"code\": \"EPIC#46451\", \"display\": \"stage date\", \"system\": \"urn:oid:1.2.840.114350.1.13.297.2.7.2.727688\"}]}}",
-                  "display": "FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - STAGE DATE",
-                  "target": [
-                    {
-                      "id": "45c01a327811f45697b914959615b3f6",
-                      "code": "399651003",
-                      "display": "Date of report (observable entity)",
-                      "equivalence": "equivalent",
-                      "comment": null
-                    }
-                  ]
-                },
-                {
-                  "id": "d2a2fdf0239f391f2b1156ac63df51f4",
-                  "code": "{\"valueCodeableConcept\": {\"coding\": [{\"code\": \"SNOMED#385419004\", \"display\": null, \"system\": \"http://snomed.info/sct\"},{\"code\": \"EPIC#42393\", \"display\": \"venous invasion (V)\", \"system\": \"urn:oid:1.2.840.114350.1.13.297.2.7.2.727688\"}]}}",
-                  "display": "FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - VENOUS INVASION (V)",
-                  "target": [
-                    {
-                      "id": "0b2fc24e824f01d50160e3d419bf86e3",
-                      "code": "385419004",
-                      "display": "Venous (large vessel)/lymphatic (small vessel) tumor invasion finding (finding)",
-                      "equivalence": "equivalent",
-                      "comment": null
-                    }
-                  ]
-                },
-                {
-                  "id": "f79339795b4cfb11d85751cbeda0483f",
-                  "code": "{\"valueCodeableConcept\": {\"coding\": [{\"code\": \"SNOMED#384995005\", \"display\": null, \"system\": \"http://snomed.info/sct\"},{\"code\": \"EPIC#42760\", \"display\": \"Gleason secondary pattern\", \"system\": \"urn:oid:1.2.840.114350.1.13.297.2.7.2.727688\"}]}}",
-                  "display": "FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - PROGNOSTIC INDICATORS - GLEASON SECONDARY PATTERN",
-                  "target": [
-                    {
-                      "id": "a7cc0d1dc555890dadf4f63a97aa0c04",
-                      "code": "384995005",
-                      "display": "Secondary Gleason pattern (observable entity)",
-                      "equivalence": "equivalent",
-                      "comment": null
-                    }
-                  ]
-                },
-                {
-                  "id": "1258c3fc9f48cf6a60a64ffef8948606",
-                  "code": "{\"valueCodeableConcept\": {\"coding\": [{\"code\": \"SNOMED#384994009\", \"display\": null, \"system\": \"http://snomed.info/sct\"},{\"code\": \"EPIC#42759\", \"display\": \"Gleason primary pattern\", \"system\": \"urn:oid:1.2.840.114350.1.13.297.2.7.2.727688\"}]}}",
-                  "display": "FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - PROGNOSTIC INDICATORS - GLEASON PRIMARY PATTERN",
-                  "target": [
-                    {
-                      "id": "18e6f75c5971c968fa8a28120ead584c",
-                      "code": "384994009",
-                      "display": "Primary Gleason pattern (observable entity)",
-                      "equivalence": "equivalent",
-                      "comment": null
-                    }
-                  ]
-                },
-                {
-                  "id": "7cb1019a0db3479dd40cba16dc5899ab",
-                  "code": "{\"valueCodeableConcept\": {\"coding\": [{\"code\": \"SNOMED#260878002\", \"display\": null, \"system\": \"http://snomed.info/sct\"},{\"code\": \"EPIC#42383\", \"display\": \"primary tumor (T)\", \"system\": \"urn:oid:1.2.840.114350.1.13.297.2.7.2.727688\"}]}}",
-                  "display": "FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - TNM CLASSIFICATION - AJCC T - PRIMARY TUMOR (T)",
-                  "target": [
-                    {
-                      "id": "32b2cdd11d772b39c58bc85efbd20968",
-                      "code": "260878002",
-                      "display": "T - Tumor stage (attribute)",
-                      "equivalence": "equivalent",
-                      "comment": null
-                    }
-                  ]
-                },
-                {
-                  "id": "0b0f965e675ec9b46724ee8ce6a4ec0c",
-                  "code": "{\"valueCodeableConcept\": {\"coding\": [{\"code\": \"SNOMED#263605001\", \"display\": null, \"system\": \"http://snomed.info/sct\"},{\"code\": \"EPIC#42381\", \"display\": \"tumor size (mm)\", \"system\": \"urn:oid:1.2.840.114350.1.13.297.2.7.2.727688\"}]}}",
-                  "display": "FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - TUMOR SIZE (MM)",
-                  "target": [
-                    {
-                      "id": "6829e2f2dd4f21c350adcfda80dff455",
-                      "code": "263605001",
-                      "display": "Length dimension of neoplasm (observable entity)",
-                      "equivalence": "equivalent",
-                      "comment": null
-                    }
-                  ]
-                },
-                {
-                  "id": "8ba61a5649cbd2f326d526acdcc459ff",
-                  "code": "{\"valueCodeableConcept\": {\"coding\": [{\"code\": \"SNOMED#260767000\", \"display\": null, \"system\": \"http://snomed.info/sct\"},{\"code\": \"EPIC#42384\", \"display\": \"regional lymph nodes (N)\", \"system\": \"urn:oid:1.2.840.114350.1.13.297.2.7.2.727688\"}]}}",
-                  "display": "FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - TNM CLASSIFICATION - AJCC N - REGIONAL LYMPH NODES (N)",
-                  "target": [
-                    {
-                      "id": "73cb15052d834f3ffe2fb2484c2d7ef9",
-                      "code": "260767000",
-                      "display": "N - Regional lymph node stage (attribute)",
-                      "equivalence": "equivalent",
-                      "comment": null
-                    }
-                  ]
-                },
-                {
-                  "id": "24d99f648dcf773d706ec493524ee906",
-                  "code": "{\"valueCodeableConcept\": {\"coding\": [{\"code\": \"SNOMED#260875004\", \"display\": null, \"system\": \"http://snomed.info/sct\"},{\"code\": \"EPIC#42385\", \"display\": \"distant metastasis (M)\", \"system\": \"urn:oid:1.2.840.114350.1.13.297.2.7.2.727688\"}]}}",
-                  "display": "FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - TNM CLASSIFICATION - AJCC M - DISTANT METASTASIS (M)",
-                  "target": [
-                    {
-                      "id": "28cc218ca61ae7e73cb051162532a621",
-                      "code": "260875004",
-                      "display": "M - Distant metastasis stage (attribute)",
-                      "equivalence": "equivalent",
-                      "comment": null
-                    }
-                  ]
-                },
-                {
-                  "id": "c03a8b85e707dfb39c984466273724e8",
-                  "code": "{\"valueCodeableConcept\": {\"coding\": [{\"code\": \"SNOMED#385348009\", \"display\": null, \"system\": \"http://snomed.info/sct\"},{\"code\": \"EPIC#55984\", \"display\": \"Breslow depth (mm)\", \"system\": \"urn:oid:1.2.840.114350.1.13.297.2.7.2.727688\"}]}}",
-                  "display": "FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - BRESLOW DEPTH (MM)",
-                  "target": [
-                    {
-                      "id": "7cac4422ef11b1b4165d31395b4cc2c4",
-                      "code": "385348009",
-                      "display": "Breslow depth finding for melanoma (finding)",
-                      "equivalence": "equivalent",
-                      "comment": null
-                    }
-                  ]
-                },
-                {
-                  "id": "939ea57bf2755aa6053b4c514582bfb7",
-                  "code": "{\"valueCodeableConcept\": {\"coding\": [{\"code\": \"SNOMED#385414009\", \"display\": null, \"system\": \"http://snomed.info/sct\"},{\"code\": \"EPIC#42392\", \"display\": \"lymphatic vessel invasion (L)\", \"system\": \"urn:oid:1.2.840.114350.1.13.297.2.7.2.727688\"}]}}",
-                  "display": "FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - LYMPHATIC VESSEL INVASION (L)",
-                  "target": [
-                    {
-                      "id": "82318ec7d7623993740dcb3a7cc8ea2b",
-                      "code": "385414009",
-                      "display": "Lymphatic (small vessel) tumor invasion finding (finding)",
-                      "equivalence": "equivalent",
-                      "comment": null
-                    }
-                  ]
-                },
-                {
                   "id": "972b1bb1122980f015626063d44c950f",
-                  "code": "{\"valueCodeableConcept\": {\"coding\": [{\"code\": \"EPIC#44065\", \"display\": \"Clark's level\", \"system\": \"urn:oid:1.2.840.114350.1.13.297.2.7.2.727688\"}]}}",
+                  "_code": {
+                    "extension": [ {
+                      "id": "sourceExtension1",
+                      "url": "http://projectronin.io/fhir/StructureDefinition/Extension/canonicalSourceData",
+                      "valueCodeableConcept": {
+                        "coding": [ {
+                          "code": "EPIC#44065",
+                          "system": "urn:oid:1.2.840.114350.1.13.297.2.7.2.727688",
+                          "display": "Clark's level"
+                        } ]
+                      }
+                    } ]
+                  },
                   "display": "FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - PROGNOSTIC INDICATORS - CLARK'S LEVEL",
                   "target": [
                     {
@@ -439,22 +281,20 @@ class NormalizationRegistryClientTest {
                   ]
                 },
                 {
-                  "id": "58ca30808a5de848ab6f0e33f8f5e1e3",
-                  "code": "{\"valueCodeableConcept\": {\"coding\": [{\"code\": \"EPIC#31000073346\", \"display\": \"WHO/ISUP grade (low/high)\", \"system\": \"urn:oid:1.2.840.114350.1.13.297.2.7.2.727688\"}]}}",
-                  "display": "FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - WHO/ISUP GRADE (LOW/HIGH)",
-                  "target": [
-                    {
-                      "id": "e7674b7ff6e68a57d7859c1b643264f1",
-                      "code": "396659000",
-                      "display": "Histologic grade of urothelial carcinoma by World Health Organization and International Society of Urological Pathology technique (observable entity)",
-                      "equivalence": "equivalent",
-                      "comment": null
-                    }
-                  ]
-                },
-                {
                   "id": "827f75db7803e5fc9ba811c19ccf4fbb",
-                  "code": "{\"valueCodeableConcept\": {\"coding\": [{\"code\": \"EPIC#42391\", \"display\": \"lymph-vascular invasion (LVI)\", \"system\": \"urn:oid:1.2.840.114350.1.13.297.2.7.2.727688\"}]}}",
+                  "_code": {
+                    "extension": [ {
+                      "id": "sourceExtension1",
+                      "url": "http://projectronin.io/fhir/StructureDefinition/Extension/canonicalSourceData",
+                      "valueCodeableConcept": {
+                        "coding": [ {
+                          "code": "EPIC#42391",
+                          "system": "urn:oid:1.2.840.114350.1.13.297.2.7.2.727688",
+                          "display": "lymph-vascular invasion (LVI)"
+                        } ]
+                      }
+                    } ]
+                  },
                   "display": "FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - LYMPH-VASCULAR INVASION (LVI)",
                   "target": [
                     {
@@ -467,28 +307,84 @@ class NormalizationRegistryClientTest {
                   ]
                 },
                 {
-                  "id": "dcc915b3ac8b4b154ccc051847a8db43",
-                  "code": "{\"valueCodeableConcept\": {\"coding\": [{\"code\": \"EPIC#45453\", \"display\": \"estrogen receptor status\", \"system\": \"urn:oid:1.2.840.114350.1.13.297.2.7.2.727688\"}]}}",
-                  "display": "FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - PROGNOSTIC INDICATORS - ESTROGEN RECEPTOR STATUS",
-                  "target": [
-                    {
-                      "id": "8b51ed3859b702324993dfa734f3b3dc",
-                      "code": "445028008",
-                      "display": "Presence of estrogen receptor in neoplasm (observable entity)",
-                      "equivalence": "equivalent",
-                      "comment": null
-                    }
-                  ]
-                },
-                {
                   "id": "fc8e25ae3ed568f4dbf4b5d447452a18",
-                  "code": "{\"valueCodeableConcept\": {\"coding\": [{\"code\": \"SNOMED#246111003\", \"display\": null, \"system\": \"http://snomed.info/sct\"},{\"code\": \"EPIC#42388\", \"display\": \"anatomic stage/prognostic group\", \"system\": \"urn:oid:1.2.840.114350.1.13.297.2.7.2.727688\"}]}}",
+                  "_code": {
+                    "extension": [ {
+                      "id": "sourceExtension1",
+                      "url": "http://projectronin.io/fhir/StructureDefinition/Extension/canonicalSourceData",
+                      "valueCodeableConcept": {
+                        "coding": [ {
+                          "code": "SNOMED#246111003",
+                          "system": "http://snomed.info/sct"
+                        }, {
+                          "code": "EPIC#42388",
+                          "system": "urn:oid:1.2.840.114350.1.13.297.2.7.2.727688",
+                          "display": "anatomic stage/prognostic group"
+                        } ]
+                      }
+                    } ]
+                  },
                   "display": "FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - ANATOMIC STAGE/PROGNOSTIC GROUP",
                   "target": [
                     {
                       "id": "ae2c9f8e00c7426b0557cb1f4f0dded5",
                       "code": "246111003",
                       "display": "Prognostic score (attribute)",
+                      "equivalence": "equivalent",
+                      "comment": null
+                    }
+                  ]
+                },
+                {
+                  "id": "58ca30808a5de848ab6f0e33f8f5e1e3",
+                  "_code": {
+                    "extension": [ {
+                      "id": "sourceExtension1",
+                      "url": "http://projectronin.io/fhir/StructureDefinition/Extension/canonicalSourceData",
+                      "valueCodeableConcept": {
+                        "coding": [ {
+                          "code": "EPIC#31000073346",
+                          "system": "urn:oid:1.2.840.114350.1.13.297.2.7.2.727688",
+                          "display": "WHO/ISUP grade (low/high)"
+                        } ]
+                      }
+                    } ]
+                  },
+                  "display": "FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - WHO/ISUP GRADE (LOW/HIGH)",
+                  "target": [
+                    {
+                      "id": "e7674b7ff6e68a57d7859c1b643264f1",
+                      "code": "396659000",
+                      "display": "Histologic grade of urothelial carcinoma by World Health Organization and International Society of Urological Pathology technique (observable entity)",
+                      "equivalence": "equivalent",
+                      "comment": null
+                    }
+                  ]
+                },
+                {
+                  "id": "8ba61a5649cbd2f326d526acdcc459ff",
+                  "_code": {
+                    "extension": [ {
+                      "id": "sourceExtension1",
+                      "url": "http://projectronin.io/fhir/StructureDefinition/Extension/canonicalSourceData",
+                      "valueCodeableConcept": {
+                        "coding": [ {
+                          "code": "SNOMED#260767000",
+                          "system": "http://snomed.info/sct"
+                        }, {
+                          "code": "EPIC#42384",
+                          "system": "urn:oid:1.2.840.114350.1.13.297.2.7.2.727688",
+                          "display": "regional lymph nodes (N)"
+                        } ]
+                      }
+                    } ]
+                  },
+                  "display": "FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - TNM CLASSIFICATION - AJCC N - REGIONAL LYMPH NODES (N)",
+                  "target": [
+                    {
+                      "id": "73cb15052d834f3ffe2fb2484c2d7ef9",
+                      "code": "260767000",
+                      "display": "N - Regional lymph node stage (attribute)",
                       "equivalence": "equivalent",
                       "comment": null
                     }
@@ -536,160 +432,157 @@ class NormalizationRegistryClientTest {
     }
 
     @Test
-    fun `getConceptMapping for Coding with no matching registry`() {
-        val coding =
-            RoninConceptMap.CODE_SYSTEMS.toCoding(
-                tenant,
-                "ContactPoint.system",
-                "phone",
-            )
-        val mapping =
-            client.getConceptMapping(
-                tenant,
-                "Patient.telecom.system",
-                coding,
-                mockk<Patient>(),
-            )
-        assertNull(mapping)
-    }
+    fun `getConceptMapData supports V4 formats`() {
+        // We support 3 different formats of data for V4.
+        val conceptMapJson =
+            """
+                {
+                  "resourceType": "ConceptMap",
+                  "title": "Test Observations Mashup (for Dev Testing ONLY)",
+                  "id": "TestObservationsMashup-id",
+                  "name": "TestObservationsMashup-name",
+                  "contact": [
+                    {
+                      "name": "Interops (for Dev Testing ONLY)"
+                    }
+                  ],
+                  "url": "http://projectronin.io/fhir/StructureDefinition/ConceptMap/TestObservationsMashup",
+                  "description": "Interops  (for Dev Testing ONLY)",
+                  "purpose": "Testing",
+                  "publisher": "Project Ronin",
+                  "experimental": true,
+                  "date": "2023-05-26",
+                  "version": 1,
+                  "group": [
+                    {
+                      "source": "http://projectronin.io/fhir/CodeSystem/test/TestObservationsMashup",
+                      "sourceVersion": "1.0",
+                      "target": "http://loinc.org",
+                      "targetVersion": "0.0.1",
+                      "element": [
+                        {
+                          "id": "06c19b8e4718f1bf6e81f992cfc12c1e",
+                          "code": "{\"valueCodeableConcept\": {\"coding\": [{\"code\": \"72166-2\", \"display\": null, \"system\": \"http://loinc.org\"}, {\"code\": \"Something else\", \"display\": null, \"system\": \"http://joshscodingsystem.org\"}]}}",
+                          "display": "Tobacco smoking status",
+                          "target": [
+                            {
+                              "id": "836cc342c39afcc7a8dee6277abc7b75",
+                              "code": "72166-2",
+                              "display": "Tobacco smoking status",
+                              "equivalence": "equivalent",
+                              "comment": null
+                            }
+                          ]
+                        },
+                        {
+                          "id": "64be7ece9ab75a3eff827188c55c64db",
+                          "code": "{\"coding\": [{\"code\": \"363905002\", \"display\": \"Details of alcohol drinking behavior (observable entity)\", \"system\": \"http://snomed.info/sct\"}]}",
+                          "display": "Details of alcohol drinking behavior (observable entity)",
+                          "target": [
+                            {
+                              "id": "8a3e6071d30318b9fbc23f3a1cd7de5a",
+                              "code": "74013-4",
+                              "display": "Alcoholic drinks per day",
+                              "equivalence": "narrower",
+                              "comment": "source-is-broader-than-target"
+                            }
+                          ]
+                        },
+                        {
+                          "id": "8015a7419c2d19d6f515ccec9fb86c94",
+                          "code": "Tobacco",
+                          "display": "Tobacco",
+                          "target": [
+                            {
+                              "id": "751254b27af4ca8f6ea012292dc864cc",
+                              "code": "88028-6",
+                              "display": "Tobacco use panel",
+                              "equivalence": "equivalent",
+                              "comment": null
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "extension": [
+                    {
+                      "url": "http://projectronin.io/fhir/StructureDefinition/Extension/ronin-conceptMapSchema",
+                      "valueString": "1.0.0"
+                    }
+                  ],
+                  "meta": {
+                    "lastUpdated": "2023-05-26T12:49:56.285403+00:00"
+                  }
+            }
+            """.trimIndent()
 
-    @Test
-    fun `getConceptMapping for Coding pulls new registry and maps`() {
-        val cmTestRegistry =
-            listOf(
-                NormalizationRegistryItem(
-                    dataElement = "Appointment.status",
-                    registryUuid = "12345",
-                    filename = "file1.json",
-                    conceptMapName = "AppointmentStatus-tenant",
-                    conceptMapUuid = "cm-111",
-                    registryEntryType = RegistryType.CONCEPT_MAP,
-                    version = "1",
-                    sourceExtensionUrl = "ext1",
-                    resourceType = "Appointment",
-                    tenantId = "test",
+        every { ociClient.getObjectFromINFX("sample-data.json") } returns conceptMapJson
+
+        val client = NormalizationRegistryClient(ociClient, listOf(), "/DataNormalizationRegistry/v4/registry.json")
+        val data = client.getConceptMapData("sample-data.json")
+        assertEquals(3, data.size)
+
+        val sourceConcept1 =
+            SourceConcept(
+                codeableConcept =
+                    CodeableConcept(
+                        coding =
+                            listOf(
+                                Coding(system = Uri("http://joshscodingsystem.org"), code = Code("Something else")),
+                                Coding(system = Uri("http://loinc.org"), code = Code("72166-2")),
+                            ),
+                    ),
+            )
+        val targetConcept1 =
+            TargetConcept(
+                listOf(
+                    TargetConceptMapValue(
+                        "72166-2",
+                        "http://loinc.org",
+                        "Tobacco smoking status",
+                        "0.0.1",
+                    ),
                 ),
-                NormalizationRegistryItem(
-                    dataElement = "Patient.telecom.use",
-                    registryUuid = "67890",
-                    filename = "file2.json",
-                    conceptMapName = "PatientTelecomUse-tenant",
-                    conceptMapUuid = "cm-222",
-                    registryEntryType = RegistryType.CONCEPT_MAP,
-                    version = "1",
-                    sourceExtensionUrl = "ext2",
-                    resourceType = "Patient",
-                    tenantId = "test",
+                "Tobacco smoking status",
+            )
+        assertEquals(listOf(targetConcept1), data[sourceConcept1])
+
+        val sourceConcept2 =
+            SourceConcept(
+                codeableConcept =
+                    CodeableConcept(
+                        coding =
+                            listOf(
+                                Coding(
+                                    system = Uri("http://snomed.info/sct"),
+                                    code = Code("363905002"),
+                                    display = "Details of alcohol drinking behavior (observable entity)".asFHIR(),
+                                ),
+                            ),
+                    ),
+            )
+        val targetConcept2 =
+            TargetConcept(
+                listOf(
+                    TargetConceptMapValue(
+                        "74013-4",
+                        "http://loinc.org",
+                        "Alcoholic drinks per day",
+                        "0.0.1",
+                    ),
                 ),
+                "Details of alcohol drinking behavior (observable entity)",
             )
-        val mockkMap1 =
-            mockk<ConceptMap> {
-                every { group } returns
-                    listOf(
-                        mockk {
-                            every { target?.value } returns "targetSystemAAA"
-                            every { targetVersion?.value } returns "targetVersionAAA"
-                            every { source?.value } returns "sourceSystemA"
-                            every { element } returns
-                                listOf(
-                                    mockk {
-                                        every { code?.value } returns "sourceValueA"
-                                        every { display?.value } returns "targetTextAAA"
-                                        every { target } returns
-                                            listOf(
-                                                mockk {
-                                                    every { code?.value } returns "targetValueAAA"
-                                                    every { display?.value } returns "targetDisplayAAA"
-                                                    every { dependsOn } returns emptyList()
-                                                },
-                                            )
-                                    },
-                                    mockk {
-                                        every { code?.value } returns "sourceValueB"
-                                        every { display?.value } returns "targetTextBBB"
-                                        every { target } returns
-                                            listOf(
-                                                mockk {
-                                                    every { code?.value } returns "targetValueBBB"
-                                                    every { display?.value } returns "targetDisplayBBB"
-                                                    every { dependsOn } returns emptyList()
-                                                },
-                                            )
-                                    },
-                                )
-                        },
-                    )
-            }
-        val mockkMap2 =
-            mockk<ConceptMap> {
-                every { group } returns
-                    listOf(
-                        mockk {
-                            every { target?.value } returns "targetSystem222"
-                            every { targetVersion?.value } returns "targetVersion222"
-                            every { source?.value } returns "sourceSystem2"
-                            every { element } returns
-                                listOf(
-                                    mockk {
-                                        every { code?.value } returns "sourceValue2"
-                                        every { display?.value } returns "targetText222"
-                                        every { target } returns
-                                            listOf(
-                                                mockk {
-                                                    every { code?.value } returns "targetValue222"
-                                                    every { display?.value } returns "targetDisplay222"
-                                                    every { dependsOn } returns emptyList()
-                                                },
-                                            )
-                                    },
-                                )
-                        },
-                    )
-            }
-        mockkObject(JacksonUtil)
-        every { ociClient.getObjectFromINFX(registryPath) } returns "registryJson"
-        every {
-            JacksonUtil.readJsonList(
-                "registryJson",
-                NormalizationRegistryItem::class,
+        assertEquals(listOf(targetConcept2), data[sourceConcept2])
+
+        val sourceConcept3 = SourceConcept(code = Code("Tobacco"))
+        val targetConcept3 =
+            TargetConcept(
+                listOf(TargetConceptMapValue("88028-6", "http://loinc.org", "Tobacco use panel", "0.0.1")),
+                "Tobacco",
             )
-        } returns cmTestRegistry
-        every { ociClient.getObjectFromINFX("file1.json") } returns "mapJson1"
-        every { JacksonUtil.readJsonObject("mapJson1", ConceptMap::class) } returns mockkMap1
-        every { ociClient.getObjectFromINFX("file2.json") } returns "mapJson2"
-        every { JacksonUtil.readJsonObject("mapJson2", ConceptMap::class) } returns mockkMap2
-        val coding1 =
-            Coding(
-                code = Code(value = "sourceValueA"),
-                system = Uri(value = "sourceSystemA"),
-            )
-        val mapping1 =
-            client.getConceptMapping(
-                tenant,
-                "Appointment.status",
-                coding1,
-                mockk<Appointment>(),
-            )!!
-        assertEquals(mapping1.coding.code!!.value, "targetValueAAA")
-        assertEquals(mapping1.coding.system!!.value, "targetSystemAAA")
-        assertEquals(mapping1.extension.url!!.value, "ext1")
-        assertEquals(mapping1.extension.value!!.value, coding1)
-        val coding2 =
-            Coding(
-                code = Code(value = "sourceValue2"),
-                system = Uri(value = "sourceSystem2"),
-            )
-        val mapping2 =
-            client.getConceptMapping(
-                tenant,
-                "Patient.telecom.use",
-                coding2,
-                mockk<Patient>(),
-            )!!
-        assertEquals(mapping2.coding.code!!.value, "targetValue222")
-        assertEquals(mapping2.coding.system!!.value, "targetSystem222")
-        assertEquals(mapping2.extension.url!!.value, "ext2")
-        assertEquals(mapping2.extension.value!!.value, coding2)
+        assertEquals(listOf(targetConcept3), data[sourceConcept3])
     }
 
     @Test
@@ -752,23 +645,19 @@ class NormalizationRegistryClientTest {
                 map =
                     mapOf(
                         SourceConcept(
-                            element =
-                                setOf(
-                                    SourceKey(
-                                        value = "MyPhone",
-                                        system = "http://projectronin.io/fhir/CodeSystem/ContactPointSystem",
-                                    ),
-                                ),
+                            code = Code("MyPhone"),
                         ) to
                             listOf(
                                 TargetConcept(
                                     element =
                                         listOf(
-                                            TargetValue(
+                                            TargetConceptMapValue(
                                                 "good-or-bad-for-enum",
                                                 "good-or-bad-for-enum",
                                                 "good-or-bad-for-enum",
                                                 "1",
+                                                sourceId = "source1",
+                                                targetId = "target1",
                                             ),
                                         ),
                                     text = "good-or-bad-for-enum, not validated here",
@@ -942,7 +831,7 @@ class NormalizationRegistryClientTest {
             ValueSetItem(
                 set =
                     listOf(
-                        TargetValue(
+                        TargetValueSetValue(
                             "code1",
                             "system1",
                             "display1",
@@ -976,7 +865,7 @@ class NormalizationRegistryClientTest {
             ValueSetItem(
                 set =
                     listOf(
-                        TargetValue(
+                        TargetValueSetValue(
                             "code1",
                             "system1",
                             "display1",
@@ -1020,192 +909,6 @@ class NormalizationRegistryClientTest {
             "Required value set for specialPatient and Patient.telecom.system not found",
             exception.message,
         )
-    }
-
-    @Test
-    fun `getConceptMapping for Coding with no system`() {
-        val registry =
-            ConceptMapItem(
-                sourceExtensionUrl = "ext-AB",
-                map = mapAB,
-                metadata = listOf(conceptMapMetadata),
-            )
-        val key =
-            CacheKey(
-                RegistryType.CONCEPT_MAP,
-                "Observation.code",
-                tenant,
-            )
-        client.conceptMapCache.put(key, registry)
-
-        val sourceCoding1 =
-            Coding(
-                code = Code("valueA"),
-            )
-
-        val mappedResult1 =
-            client.getConceptMapping(
-                tenant,
-                "Observation.code",
-                sourceCoding1,
-                mockk<Observation>(),
-            )
-        assertNull(mappedResult1)
-    }
-
-    @Test
-    fun `getConceptMapping for Coding with no value`() {
-        val registry =
-            ConceptMapItem(
-                sourceExtensionUrl = "ext-AB",
-                map = mapAB,
-                metadata = listOf(conceptMapMetadata),
-            )
-        val key =
-            CacheKey(
-                RegistryType.CONCEPT_MAP,
-                "Observation.code",
-                tenant,
-            )
-        client.conceptMapCache.put(key, registry)
-
-        val sourceCoding1 =
-            Coding(
-                system = Uri("system"),
-            )
-
-        val mappedResult1 =
-            client.getConceptMapping(
-                tenant,
-                "Observation.code",
-                sourceCoding1,
-                mockk<Observation>(),
-            )
-        assertNull(mappedResult1)
-    }
-
-    @Test
-    fun `getConceptMapping for Coding - correctly selects 1 entry from many in same map`() {
-        val registry =
-            ConceptMapItem(
-                sourceExtensionUrl = "ext-AB",
-                map = mapAB,
-                metadata = listOf(conceptMapMetadata),
-            )
-        val key =
-            CacheKey(
-                RegistryType.CONCEPT_MAP,
-                "Observation.code",
-                tenant,
-            )
-        client.conceptMapCache.put(key, registry)
-        client.registryLastUpdated = LocalDateTime.now()
-
-        val sourceCoding1 =
-            Coding(
-                system = Uri("systemA"),
-                code = Code("valueA"),
-            )
-        val targetCoding1 =
-            Coding(
-                system = Uri("targetSystemAAA"),
-                code = Code("targetValueAAA"),
-                display = "targetDisplayAAA".asFHIR(),
-                version = "targetVersionAAA".asFHIR(),
-            )
-        val targetSourceExtension1 =
-            Extension(
-                url = Uri(value = "ext-AB"),
-                value =
-                    DynamicValue(
-                        type = DynamicValueType.CODING,
-                        value = sourceCoding1,
-                    ),
-            )
-        val mappedResult1 =
-            client.getConceptMapping(
-                tenant,
-                "Observation.code",
-                sourceCoding1,
-                mockk<Observation>(),
-            )
-        assertEquals(
-            targetCoding1,
-            mappedResult1?.coding,
-        )
-        assertEquals(
-            targetSourceExtension1,
-            mappedResult1?.extension,
-        )
-
-        val sourceCoding2 =
-            Coding(
-                system = Uri("systemB"),
-                code = Code("valueB"),
-            )
-        val targetCoding2 =
-            Coding(
-                system = Uri("targetSystemBBB"),
-                code = Code("targetValueBBB"),
-                display = "targetDisplayBBB".asFHIR(),
-                version = "targetVersionBBB".asFHIR(),
-            )
-        val targetSourceExtension2 =
-            Extension(
-                url = Uri(value = "ext-AB"),
-                value =
-                    DynamicValue(
-                        type = DynamicValueType.CODING,
-                        value = sourceCoding2,
-                    ),
-            )
-        val mappedResult2 =
-            client.getConceptMapping(
-                tenant,
-                "Observation.code",
-                sourceCoding2,
-                mockk<Observation>(),
-            )
-        assertEquals(
-            targetCoding2,
-            mappedResult2?.coding,
-        )
-        assertEquals(
-            targetSourceExtension2,
-            mappedResult2?.extension,
-        )
-    }
-
-    @Test
-    fun `getConceptMapping for Coding - map found - contains no matching code`() {
-        val registry1 =
-            ConceptMapItem(
-                sourceExtensionUrl = "sourceExtensionUrl",
-                map = mapA,
-                metadata = listOf(conceptMapMetadata),
-            )
-        val key1hr =
-            CacheKey(
-                RegistryType.CONCEPT_MAP,
-                "Observation.code",
-                tenant,
-            )
-        client.conceptMapCache.put(key1hr, registry1)
-
-        val sourceCoding =
-            Coding(
-                system = Uri("systemB"),
-                code = Code("valueB"),
-            )
-
-        val mappedResult =
-            client.getConceptMapping(
-                tenant,
-                "Observation.code",
-                sourceCoding,
-                mockk<Observation>(),
-            )
-        assertNull(mappedResult)
     }
 
     @Test
@@ -1267,11 +970,26 @@ class NormalizationRegistryClientTest {
                             every { element } returns
                                 listOf(
                                     mockk {
-                                        every { code?.value } returns "sourceValueA"
+                                        every { code?.extension } returns
+                                            listOf(
+                                                createClinicalSourceDataExtension(
+                                                    CodeableConcept(
+                                                        coding =
+                                                            listOf(
+                                                                Coding(
+                                                                    code = Code("sourceValueA"),
+                                                                    system = Uri("sourceSystemA"),
+                                                                ),
+                                                            ),
+                                                    ),
+                                                    "sourceA",
+                                                ),
+                                            )
                                         every { display?.value } returns "targetTextAAA"
                                         every { target } returns
                                             listOf(
                                                 mockk {
+                                                    every { id } returns null
                                                     every { code?.value } returns "targetValueAAA"
                                                     every { display?.value } returns "targetDisplayAAA"
                                                     every { dependsOn } returns emptyList()
@@ -1279,11 +997,26 @@ class NormalizationRegistryClientTest {
                                             )
                                     },
                                     mockk {
-                                        every { code?.value } returns "sourceValueB"
+                                        every { code?.extension } returns
+                                            listOf(
+                                                createClinicalSourceDataExtension(
+                                                    CodeableConcept(
+                                                        coding =
+                                                            listOf(
+                                                                Coding(
+                                                                    code = Code("sourceValueB"),
+                                                                    system = Uri("sourceSystemA"),
+                                                                ),
+                                                            ),
+                                                    ),
+                                                    "sourceB",
+                                                ),
+                                            )
                                         every { display?.value } returns "targetTextBBB"
                                         every { target } returns
                                             listOf(
                                                 mockk {
+                                                    every { id } returns null
                                                     every { code?.value } returns "targetValueBBB"
                                                     every { display?.value } returns "targetDisplayBBB"
                                                     every { dependsOn } returns emptyList()
@@ -1305,11 +1038,26 @@ class NormalizationRegistryClientTest {
                             every { element } returns
                                 listOf(
                                     mockk {
-                                        every { code?.value } returns "sourceValue2"
+                                        every { code?.extension } returns
+                                            listOf(
+                                                createClinicalSourceDataExtension(
+                                                    CodeableConcept(
+                                                        coding =
+                                                            listOf(
+                                                                Coding(
+                                                                    code = Code("sourceValue2"),
+                                                                    system = Uri("sourceSystem2"),
+                                                                ),
+                                                            ),
+                                                    ),
+                                                    "source2",
+                                                ),
+                                            )
                                         every { display?.value } returns "targetText222"
                                         every { target } returns
                                             listOf(
                                                 mockk {
+                                                    every { id } returns null
                                                     every { code?.value } returns "targetValue222"
                                                     every { display?.value } returns "targetDisplay222"
                                                     every { dependsOn } returns emptyList()
@@ -1374,7 +1122,6 @@ class NormalizationRegistryClientTest {
         assertEquals(mapping2.extension.value!!.value, concept2)
     }
 
-    @Test
     fun `getConceptMapping for CodeableConcept - correctly selects 1 entry from many in same map`() {
         val registry =
             ConceptMapItem(
@@ -1519,21 +1266,18 @@ class NormalizationRegistryClientTest {
                 map =
                     mapOf(
                         SourceConcept(
-                            element =
-                                setOf(
-                                    SourceKey(
-                                        value = "valueA",
-                                        system = "systemA",
-                                    ),
+                            codeableConcept =
+                                CodeableConcept(
+                                    coding = listOf(Coding(code = Code("valueA"), system = Uri("systemA"))),
+                                    text = "to-be-replaced".asFHIR(),
                                 ),
-                            text = "to-be-replaced",
                         ) to
                             listOf(
                                 TargetConcept(
                                     text = "replaced-it",
                                     element =
                                         listOf(
-                                            TargetValue(
+                                            TargetConceptMapValue(
                                                 "AAA",
                                                 "AAA",
                                                 "AAA",
@@ -1655,11 +1399,26 @@ class NormalizationRegistryClientTest {
                             every { element } returns
                                 listOf(
                                     mockk {
-                                        every { code?.value } returns "sourceValueA"
+                                        every { code?.extension } returns
+                                            listOf(
+                                                createClinicalSourceDataExtension(
+                                                    CodeableConcept(
+                                                        coding =
+                                                            listOf(
+                                                                Coding(
+                                                                    code = Code("sourceValueA"),
+                                                                    system = Uri("system-Staging-1"),
+                                                                ),
+                                                            ),
+                                                    ),
+                                                    "sourceA",
+                                                ),
+                                            )
                                         every { display?.value } returns "targetTextAAA"
                                         every { target } returns
                                             listOf(
                                                 mockk {
+                                                    every { id } returns null
                                                     every { code?.value } returns "targetValueAAA"
                                                     every { display?.value } returns "targetDisplayAAA"
                                                     every { dependsOn } returns emptyList()
@@ -1667,11 +1426,26 @@ class NormalizationRegistryClientTest {
                                             )
                                     },
                                     mockk {
-                                        every { code?.value } returns "sourceValueB"
+                                        every { code?.extension } returns
+                                            listOf(
+                                                createClinicalSourceDataExtension(
+                                                    CodeableConcept(
+                                                        coding =
+                                                            listOf(
+                                                                Coding(
+                                                                    code = Code("sourceValueB"),
+                                                                    system = Uri("system-Staging-1"),
+                                                                ),
+                                                            ),
+                                                    ),
+                                                    "sourceB",
+                                                ),
+                                            )
                                         every { display?.value } returns "targetTextBBB"
                                         every { target } returns
                                             listOf(
                                                 mockk {
+                                                    every { id } returns null
                                                     every { code?.value } returns "targetValueBBB"
                                                     every { display?.value } returns "targetDisplayBBB"
                                                     every { dependsOn } returns emptyList()
@@ -1693,11 +1467,26 @@ class NormalizationRegistryClientTest {
                             every { element } returns
                                 listOf(
                                     mockk {
-                                        every { code?.value } returns "sourceValueX"
+                                        every { code?.extension } returns
+                                            listOf(
+                                                createClinicalSourceDataExtension(
+                                                    CodeableConcept(
+                                                        coding =
+                                                            listOf(
+                                                                Coding(
+                                                                    code = Code("sourceValueX"),
+                                                                    system = Uri("system-AllVitals-2"),
+                                                                ),
+                                                            ),
+                                                    ),
+                                                    "sourceX",
+                                                ),
+                                            )
                                         every { display?.value } returns "targetTextXXX"
                                         every { target } returns
                                             listOf(
                                                 mockk {
+                                                    every { id } returns null
                                                     every { code?.value } returns "targetValueXXX"
                                                     every { display?.value } returns "targetDisplayXXX"
                                                     every { dependsOn } returns emptyList()
@@ -1705,11 +1494,26 @@ class NormalizationRegistryClientTest {
                                             )
                                     },
                                     mockk {
-                                        every { code?.value } returns "sourceValueY"
+                                        every { code?.extension } returns
+                                            listOf(
+                                                createClinicalSourceDataExtension(
+                                                    CodeableConcept(
+                                                        coding =
+                                                            listOf(
+                                                                Coding(
+                                                                    code = Code("sourceValueY"),
+                                                                    system = Uri("system-AllVitals-2"),
+                                                                ),
+                                                            ),
+                                                    ),
+                                                    "sourceY",
+                                                ),
+                                            )
                                         every { display?.value } returns "targetTextYYY"
                                         every { target } returns
                                             listOf(
                                                 mockk {
+                                                    every { id } returns null
                                                     every { code?.value } returns "targetValueYYY"
                                                     every { display?.value } returns "targetDisplayYYY"
                                                     every { dependsOn } returns emptyList()
@@ -1717,11 +1521,26 @@ class NormalizationRegistryClientTest {
                                             )
                                     },
                                     mockk {
-                                        every { code?.value } returns "sourceValueZ"
+                                        every { code?.extension } returns
+                                            listOf(
+                                                createClinicalSourceDataExtension(
+                                                    CodeableConcept(
+                                                        coding =
+                                                            listOf(
+                                                                Coding(
+                                                                    code = Code("sourceValueZ"),
+                                                                    system = Uri("system-AllVitals-2"),
+                                                                ),
+                                                            ),
+                                                    ),
+                                                    "sourceZ",
+                                                ),
+                                            )
                                         every { display?.value } returns "targetTextZZZ"
                                         every { target } returns
                                             listOf(
                                                 mockk {
+                                                    every { id } returns null
                                                     every { code?.value } returns "targetValueZZZ"
                                                     every { display?.value } returns "targetDisplayZZZ"
                                                     every { dependsOn } returns emptyList()
@@ -1743,11 +1562,26 @@ class NormalizationRegistryClientTest {
                             every { element } returns
                                 listOf(
                                     mockk {
-                                        every { code?.value } returns "sourceValueC"
+                                        every { code?.extension } returns
+                                            listOf(
+                                                createClinicalSourceDataExtension(
+                                                    CodeableConcept(
+                                                        coding =
+                                                            listOf(
+                                                                Coding(
+                                                                    code = Code("sourceValueC"),
+                                                                    system = Uri("system-HeartRate-3"),
+                                                                ),
+                                                            ),
+                                                    ),
+                                                    "sourceC",
+                                                ),
+                                            )
                                         every { display?.value } returns "targetTextCCC"
                                         every { target } returns
                                             listOf(
                                                 mockk {
+                                                    every { id } returns null
                                                     every { code?.value } returns "targetValueCCC"
                                                     every { display?.value } returns "targetDisplayCCC"
                                                     every { dependsOn } returns emptyList()
@@ -1755,11 +1589,26 @@ class NormalizationRegistryClientTest {
                                             )
                                     },
                                     mockk {
-                                        every { code?.value } returns "sourceValueD"
+                                        every { code?.extension } returns
+                                            listOf(
+                                                createClinicalSourceDataExtension(
+                                                    CodeableConcept(
+                                                        coding =
+                                                            listOf(
+                                                                Coding(
+                                                                    code = Code("sourceValueD"),
+                                                                    system = Uri("system-HeartRate-3"),
+                                                                ),
+                                                            ),
+                                                    ),
+                                                    "sourceD",
+                                                ),
+                                            )
                                         every { display?.value } returns "targetTextDDD"
                                         every { target } returns
                                             listOf(
                                                 mockk {
+                                                    every { id } returns null
                                                     every { code?.value } returns "targetValueDDD"
                                                     every { display?.value } returns "targetDisplayDDD"
                                                     every { dependsOn } returns emptyList()
@@ -1933,11 +1782,26 @@ class NormalizationRegistryClientTest {
                             every { element } returns
                                 listOf(
                                     mockk {
-                                        every { code?.value } returns "sourceValueA"
+                                        every { code?.extension } returns
+                                            listOf(
+                                                createClinicalSourceDataExtension(
+                                                    CodeableConcept(
+                                                        coding =
+                                                            listOf(
+                                                                Coding(
+                                                                    code = Code("sourceValueA"),
+                                                                    system = Uri("system-Staging-1"),
+                                                                ),
+                                                            ),
+                                                    ),
+                                                    "sourceA",
+                                                ),
+                                            )
                                         every { display?.value } returns "targetTextAAA"
                                         every { target } returns
                                             listOf(
                                                 mockk {
+                                                    every { id } returns null
                                                     every { code?.value } returns "targetValueAAA"
                                                     every { display?.value } returns "targetDisplayAAA"
                                                     every { dependsOn } returns emptyList()
@@ -1945,11 +1809,26 @@ class NormalizationRegistryClientTest {
                                             )
                                     },
                                     mockk {
-                                        every { code?.value } returns "sourceValueB"
+                                        every { code?.extension } returns
+                                            listOf(
+                                                createClinicalSourceDataExtension(
+                                                    CodeableConcept(
+                                                        coding =
+                                                            listOf(
+                                                                Coding(
+                                                                    code = Code("sourceValueB"),
+                                                                    system = Uri("system-Staging-1"),
+                                                                ),
+                                                            ),
+                                                    ),
+                                                    "sourceB",
+                                                ),
+                                            )
                                         every { display?.value } returns "targetTextBBB"
                                         every { target } returns
                                             listOf(
                                                 mockk {
+                                                    every { id } returns null
                                                     every { code?.value } returns "targetValueBBB"
                                                     every { display?.value } returns "targetDisplayBBB"
                                                     every { dependsOn } returns emptyList()
@@ -1971,11 +1850,26 @@ class NormalizationRegistryClientTest {
                             every { element } returns
                                 listOf(
                                     mockk {
-                                        every { code?.value } returns "sourceValueX"
+                                        every { code?.extension } returns
+                                            listOf(
+                                                createClinicalSourceDataExtension(
+                                                    CodeableConcept(
+                                                        coding =
+                                                            listOf(
+                                                                Coding(
+                                                                    code = Code("sourceValueX"),
+                                                                    system = Uri("system-AllVitals-2"),
+                                                                ),
+                                                            ),
+                                                    ),
+                                                    "sourceX",
+                                                ),
+                                            )
                                         every { display?.value } returns "targetTextXXX"
                                         every { target } returns
                                             listOf(
                                                 mockk {
+                                                    every { id } returns null
                                                     every { code?.value } returns "targetValueXXX"
                                                     every { display?.value } returns "targetDisplayXXX"
                                                     every { dependsOn } returns emptyList()
@@ -1983,11 +1877,26 @@ class NormalizationRegistryClientTest {
                                             )
                                     },
                                     mockk {
-                                        every { code?.value } returns "sourceValueY"
+                                        every { code?.extension } returns
+                                            listOf(
+                                                createClinicalSourceDataExtension(
+                                                    CodeableConcept(
+                                                        coding =
+                                                            listOf(
+                                                                Coding(
+                                                                    code = Code("sourceValueY"),
+                                                                    system = Uri("system-AllVitals-2"),
+                                                                ),
+                                                            ),
+                                                    ),
+                                                    "sourceY",
+                                                ),
+                                            )
                                         every { display?.value } returns "targetTextYYY"
                                         every { target } returns
                                             listOf(
                                                 mockk {
+                                                    every { id } returns null
                                                     every { code?.value } returns "targetValueYYY"
                                                     every { display?.value } returns "targetDisplayYYY"
                                                     every { dependsOn } returns emptyList()
@@ -1995,11 +1904,26 @@ class NormalizationRegistryClientTest {
                                             )
                                     },
                                     mockk {
-                                        every { code?.value } returns "sourceValueZ"
+                                        every { code?.extension } returns
+                                            listOf(
+                                                createClinicalSourceDataExtension(
+                                                    CodeableConcept(
+                                                        coding =
+                                                            listOf(
+                                                                Coding(
+                                                                    code = Code("sourceValueZ"),
+                                                                    system = Uri("system-AllVitals-2"),
+                                                                ),
+                                                            ),
+                                                    ),
+                                                    "sourceZ",
+                                                ),
+                                            )
                                         every { display?.value } returns "targetTextZZZ"
                                         every { target } returns
                                             listOf(
                                                 mockk {
+                                                    every { id } returns null
                                                     every { code?.value } returns "targetValueZZZ"
                                                     every { display?.value } returns "targetDisplayZZZ"
                                                     every { dependsOn } returns emptyList()
@@ -2156,16 +2080,32 @@ class NormalizationRegistryClientTest {
                             every { element } returns
                                 listOf(
                                     mockk {
-                                        every { code?.value } returns "sourceValueAB"
+                                        every { code?.extension } returns
+                                            listOf(
+                                                createClinicalSourceDataExtension(
+                                                    CodeableConcept(
+                                                        coding =
+                                                            listOf(
+                                                                Coding(
+                                                                    code = Code("sourceValueAB"),
+                                                                    system = Uri("system-Staging-1"),
+                                                                ),
+                                                            ),
+                                                    ),
+                                                    "sourceAB",
+                                                ),
+                                            )
                                         every { display?.value } returns "targetTextAB"
                                         every { target } returns
                                             listOf(
                                                 mockk {
+                                                    every { id } returns null
                                                     every { code?.value } returns "targetValueAAA"
                                                     every { display?.value } returns "targetDisplayAAA"
                                                     every { dependsOn } returns emptyList()
                                                 },
                                                 mockk {
+                                                    every { id } returns null
                                                     every { code?.value } returns "targetValueBBB"
                                                     every { display?.value } returns "targetDisplayBBB"
                                                     every { dependsOn } returns emptyList()
@@ -2187,21 +2127,38 @@ class NormalizationRegistryClientTest {
                             every { element } returns
                                 listOf(
                                     mockk {
-                                        every { code?.value } returns "sourceValueXYZ"
+                                        every { code?.extension } returns
+                                            listOf(
+                                                createClinicalSourceDataExtension(
+                                                    CodeableConcept(
+                                                        coding =
+                                                            listOf(
+                                                                Coding(
+                                                                    code = Code("sourceValueXYZ"),
+                                                                    system = Uri("system-AllVitals-2"),
+                                                                ),
+                                                            ),
+                                                    ),
+                                                    "sourceXYZ",
+                                                ),
+                                            )
                                         every { display?.value } returns "targetTextXYZ"
                                         every { target } returns
                                             listOf(
                                                 mockk {
+                                                    every { id } returns null
                                                     every { code?.value } returns "targetValueXXX"
                                                     every { display?.value } returns "targetDisplayXXX"
                                                     every { dependsOn } returns emptyList()
                                                 },
                                                 mockk {
+                                                    every { id } returns null
                                                     every { code?.value } returns "targetValueYYY"
                                                     every { display?.value } returns "targetDisplayYYY"
                                                     every { dependsOn } returns emptyList()
                                                 },
                                                 mockk {
+                                                    every { id } returns null
                                                     every { code?.value } returns "targetValueZZZ"
                                                     every { display?.value } returns "targetDisplayZZZ"
                                                     every { dependsOn } returns emptyList()
@@ -2223,16 +2180,32 @@ class NormalizationRegistryClientTest {
                             every { element } returns
                                 listOf(
                                     mockk {
-                                        every { code?.value } returns "sourceValueCD"
+                                        every { code?.extension } returns
+                                            listOf(
+                                                createClinicalSourceDataExtension(
+                                                    CodeableConcept(
+                                                        coding =
+                                                            listOf(
+                                                                Coding(
+                                                                    code = Code("sourceValueCD"),
+                                                                    system = Uri("system-HeartRate-3"),
+                                                                ),
+                                                            ),
+                                                    ),
+                                                    "sourceCD",
+                                                ),
+                                            )
                                         every { display?.value } returns "targetTextCD"
                                         every { target } returns
                                             listOf(
                                                 mockk {
+                                                    every { id } returns null
                                                     every { code?.value } returns "targetValueCCC"
                                                     every { display?.value } returns "targetDisplayCCC"
                                                     every { dependsOn } returns emptyList()
                                                 },
                                                 mockk {
+                                                    every { id } returns null
                                                     every { code?.value } returns "targetValueDDD"
                                                     every { display?.value } returns "targetDisplayDDD"
                                                     every { dependsOn } returns emptyList()
@@ -3151,7 +3124,6 @@ class NormalizationRegistryClientTest {
                         ),
                         Coding(
                             code = Code(value = "EPIC#42384"),
-                            // code = Code(value = "EPIC#442384"),
                             system = Uri(value = "urn:oid:1.2.840.114350.1.13.297.2.7.2.727688"),
                             display = "regional lymph nodes (N)".asFHIR(),
                         ),
@@ -3295,11 +3267,26 @@ class NormalizationRegistryClientTest {
                             every { element } returns
                                 listOf(
                                     mockk {
-                                        every { code?.value } returns "sourceValueA"
+                                        every { code?.extension } returns
+                                            listOf(
+                                                createClinicalSourceDataExtension(
+                                                    CodeableConcept(
+                                                        coding =
+                                                            listOf(
+                                                                Coding(
+                                                                    code = Code("sourceValueA"),
+                                                                    system = Uri("system-Staging-1"),
+                                                                ),
+                                                            ),
+                                                    ),
+                                                    "sourceA",
+                                                ),
+                                            )
                                         every { display?.value } returns "targetTextAAA"
                                         every { target } returns
                                             listOf(
                                                 mockk {
+                                                    every { id } returns null
                                                     every { code?.value } returns "targetValueAAA"
                                                     every { display?.value } returns "targetDisplayAAA"
                                                     every { dependsOn } returns emptyList()
@@ -3307,11 +3294,26 @@ class NormalizationRegistryClientTest {
                                             )
                                     },
                                     mockk {
-                                        every { code?.value } returns "sourceValueB"
+                                        every { code?.extension } returns
+                                            listOf(
+                                                createClinicalSourceDataExtension(
+                                                    CodeableConcept(
+                                                        coding =
+                                                            listOf(
+                                                                Coding(
+                                                                    code = Code("sourceValueB"),
+                                                                    system = Uri("system-Staging-1"),
+                                                                ),
+                                                            ),
+                                                    ),
+                                                    "sourceB",
+                                                ),
+                                            )
                                         every { display?.value } returns "targetTextBBB"
                                         every { target } returns
                                             listOf(
                                                 mockk {
+                                                    every { id } returns null
                                                     every { code?.value } returns "targetValueBBB"
                                                     every { display?.value } returns "targetDisplayBBB"
                                                     every { dependsOn } returns emptyList()
@@ -3333,11 +3335,26 @@ class NormalizationRegistryClientTest {
                             every { element } returns
                                 listOf(
                                     mockk {
-                                        every { code?.value } returns "sourceValueX"
+                                        every { code?.extension } returns
+                                            listOf(
+                                                createClinicalSourceDataExtension(
+                                                    CodeableConcept(
+                                                        coding =
+                                                            listOf(
+                                                                Coding(
+                                                                    code = Code("sourceValueX"),
+                                                                    system = Uri("system-AllVitals-2"),
+                                                                ),
+                                                            ),
+                                                    ),
+                                                    "sourceX",
+                                                ),
+                                            )
                                         every { display?.value } returns "targetTextXXX"
                                         every { target } returns
                                             listOf(
                                                 mockk {
+                                                    every { id } returns null
                                                     every { code?.value } returns "targetValueXXX"
                                                     every { display?.value } returns "targetDisplayXXX"
                                                     every { dependsOn } returns emptyList()
@@ -3345,11 +3362,26 @@ class NormalizationRegistryClientTest {
                                             )
                                     },
                                     mockk {
-                                        every { code?.value } returns "sourceValueY"
+                                        every { code?.extension } returns
+                                            listOf(
+                                                createClinicalSourceDataExtension(
+                                                    CodeableConcept(
+                                                        coding =
+                                                            listOf(
+                                                                Coding(
+                                                                    code = Code("sourceValueY"),
+                                                                    system = Uri("system-AllVitals-2"),
+                                                                ),
+                                                            ),
+                                                    ),
+                                                    "sourceY",
+                                                ),
+                                            )
                                         every { display?.value } returns "targetTextYYY"
                                         every { target } returns
                                             listOf(
                                                 mockk {
+                                                    every { id } returns null
                                                     every { code?.value } returns "targetValueYYY"
                                                     every { display?.value } returns "targetDisplayYYY"
                                                     every { dependsOn } returns emptyList()
@@ -3357,11 +3389,26 @@ class NormalizationRegistryClientTest {
                                             )
                                     },
                                     mockk {
-                                        every { code?.value } returns "sourceValueZ"
+                                        every { code?.extension } returns
+                                            listOf(
+                                                createClinicalSourceDataExtension(
+                                                    CodeableConcept(
+                                                        coding =
+                                                            listOf(
+                                                                Coding(
+                                                                    code = Code("sourceValueZ"),
+                                                                    system = Uri("system-AllVitals-2"),
+                                                                ),
+                                                            ),
+                                                    ),
+                                                    "sourceZ",
+                                                ),
+                                            )
                                         every { display?.value } returns "targetTextZZZ"
                                         every { target } returns
                                             listOf(
                                                 mockk {
+                                                    every { id } returns null
                                                     every { code?.value } returns "targetValueZZZ"
                                                     every { display?.value } returns "targetDisplayZZZ"
                                                     every { dependsOn } returns emptyList()
@@ -3383,11 +3430,26 @@ class NormalizationRegistryClientTest {
                             every { element } returns
                                 listOf(
                                     mockk {
-                                        every { code?.value } returns "sourceValueC"
+                                        every { code?.extension } returns
+                                            listOf(
+                                                createClinicalSourceDataExtension(
+                                                    CodeableConcept(
+                                                        coding =
+                                                            listOf(
+                                                                Coding(
+                                                                    code = Code("sourceValueC"),
+                                                                    system = Uri("system-HeartRate-3"),
+                                                                ),
+                                                            ),
+                                                    ),
+                                                    "sourceC",
+                                                ),
+                                            )
                                         every { display?.value } returns "targetTextCCC"
                                         every { target } returns
                                             listOf(
                                                 mockk {
+                                                    every { id } returns null
                                                     every { code?.value } returns "targetValueCCC"
                                                     every { display?.value } returns "targetDisplayCCC"
                                                     every { dependsOn } returns emptyList()
@@ -3395,11 +3457,26 @@ class NormalizationRegistryClientTest {
                                             )
                                     },
                                     mockk {
-                                        every { code?.value } returns "sourceValueD"
+                                        every { code?.extension } returns
+                                            listOf(
+                                                createClinicalSourceDataExtension(
+                                                    CodeableConcept(
+                                                        coding =
+                                                            listOf(
+                                                                Coding(
+                                                                    code = Code("sourceValueD"),
+                                                                    system = Uri("system-HeartRate-3"),
+                                                                ),
+                                                            ),
+                                                    ),
+                                                    "sourceD",
+                                                ),
+                                            )
                                         every { display?.value } returns "targetTextDDD"
                                         every { target } returns
                                             listOf(
                                                 mockk {
+                                                    every { id } returns null
                                                     every { code?.value } returns "targetValueDDD"
                                                     every { display?.value } returns "targetDisplayDDD"
                                                     every { dependsOn } returns emptyList()
@@ -3446,216 +3523,6 @@ class NormalizationRegistryClientTest {
 
         assertEquals(
             "Concept map(s) for tenant 'test' and Observation.code have missing or inconsistent source extension URLs",
-            exception.message,
-        )
-    }
-
-    @Test
-    fun `getConceptMapping for CodeableConcept - group element code with no system`() {
-        val sourceUrl = "tenant-sourceObservationCode"
-        val cmTestRegistry =
-            listOf(
-                NormalizationRegistryItem(
-                    dataElement = "Observation.code",
-                    registryUuid = "registry-uuid",
-                    filename = "file1.json",
-                    conceptMapName = "TestObservationsMashup",
-                    conceptMapUuid = "TestObservationsMashup-uuid",
-                    registryEntryType = RegistryType.CONCEPT_MAP,
-                    version = "1",
-                    sourceExtensionUrl = sourceUrl,
-                    resourceType = "Observation",
-                    tenantId = "test",
-                ),
-            )
-        mockkObject(JacksonUtil)
-        every { ociClient.getObjectFromINFX(registryPath) } returns "registryJson"
-        every {
-            JacksonUtil.readJsonList(
-                "registryJson",
-                NormalizationRegistryItem::class,
-            )
-        } returns cmTestRegistry
-        every { ociClient.getObjectFromINFX("file1.json") } returns
-            """
-                {
-                  "resourceType": "ConceptMap",
-                  "title": "Test Observations Mashup (for Dev Testing ONLY)",
-                  "id": "TestObservationsMashup-id",
-                  "name": "TestObservationsMashup-name",
-                  "contact": [
-                    {
-                      "name": "Interops (for Dev Testing ONLY)"
-                    }
-                  ],
-                  "url": "http://projectronin.io/fhir/StructureDefinition/ConceptMap/TestObservationsMashup",
-                  "description": "Interops  (for Dev Testing ONLY)",
-                  "purpose": "Testing",
-                  "publisher": "Project Ronin",
-                  "experimental": true,
-                  "date": "2023-05-26",
-                  "version": 1,
-                  "group": [
-                    {
-                      "source": "http://projectronin.io/fhir/CodeSystem/test/TestObservationsMashup",
-                      "sourceVersion": "1.0",
-                      "target": "http://loinc.org",
-                      "targetVersion": "0.0.1",
-                      "element": [
-                        {
-                          "id": "06c19b8e4718f1bf6e81f992cfc12c1e",
-                          "code": "{\"valueCodeableConcept\": {\"coding\": [{\"code\": \"72166-2\", \"display\": null, \"system\": null}]}}",
-                          "display": "Tobacco smoking status",
-                          "target": [
-                            {
-                              "id": "836cc342c39afcc7a8dee6277abc7b75",
-                              "code": "72166-2",
-                              "display": "Tobacco smoking status",
-                              "equivalence": "equivalent",
-                              "comment": null
-                            }
-                          ]
-                        }
-                      ]
-                    }
-                  ],
-                  "extension": [
-                    {
-                      "url": "http://projectronin.io/fhir/StructureDefinition/Extension/ronin-conceptMapSchema",
-                      "valueString": "1.0.0"
-                    }
-                  ],
-                  "meta": {
-                    "lastUpdated": "2023-05-26T12:49:56.285403+00:00"
-                  }
-            }
-            """.trimIndent()
-        val concept =
-            CodeableConcept(
-                coding =
-                    listOf(
-                        Coding(
-                            code = Code(value = "85354-9"),
-                            system = Uri(value = "http://loinc.org"),
-                        ),
-                    ),
-            )
-        val exception =
-            assertThrows<IllegalStateException> {
-                client.getConceptMapping(
-                    tenant,
-                    "Observation.code",
-                    concept,
-                    mockk<Observation>(),
-                )
-            }
-        assertEquals(
-            """Could not create SourceConcept from {"valueCodeableConcept": {"coding": [{"code": "72166-2", "display": null, "system": null}]}}""",
-            exception.message,
-        )
-    }
-
-    @Test
-    fun `getConceptMapping for CodeableConcept - group element code with no code`() {
-        val sourceUrl = "tenant-sourceObservationCode"
-        val cmTestRegistry =
-            listOf(
-                NormalizationRegistryItem(
-                    dataElement = "Observation.code",
-                    registryUuid = "registry-uuid",
-                    filename = "file1.json",
-                    conceptMapName = "TestObservationsMashup",
-                    conceptMapUuid = "TestObservationsMashup-uuid",
-                    registryEntryType = RegistryType.CONCEPT_MAP,
-                    version = "1",
-                    sourceExtensionUrl = sourceUrl,
-                    resourceType = "Observation",
-                    tenantId = "test",
-                ),
-            )
-        mockkObject(JacksonUtil)
-        every { ociClient.getObjectFromINFX(registryPath) } returns "registryJson"
-        every {
-            JacksonUtil.readJsonList(
-                "registryJson",
-                NormalizationRegistryItem::class,
-            )
-        } returns cmTestRegistry
-        every { ociClient.getObjectFromINFX("file1.json") } returns
-            """
-                {
-                  "resourceType": "ConceptMap",
-                  "title": "Test Observations Mashup (for Dev Testing ONLY)",
-                  "id": "TestObservationsMashup-id",
-                  "name": "TestObservationsMashup-name",
-                  "contact": [
-                    {
-                      "name": "Interops (for Dev Testing ONLY)"
-                    }
-                  ],
-                  "url": "http://projectronin.io/fhir/StructureDefinition/ConceptMap/TestObservationsMashup",
-                  "description": "Interops  (for Dev Testing ONLY)",
-                  "purpose": "Testing",
-                  "publisher": "Project Ronin",
-                  "experimental": true,
-                  "date": "2023-05-26",
-                  "version": 1,
-                  "group": [
-                    {
-                      "source": "http://projectronin.io/fhir/CodeSystem/test/TestObservationsMashup",
-                      "sourceVersion": "1.0",
-                      "target": "http://loinc.org",
-                      "targetVersion": "0.0.1",
-                      "element": [
-                        {
-                          "id": "06c19b8e4718f1bf6e81f992cfc12c1e",
-                          "code": "{\"valueCodeableConcept\": {\"coding\": [{\"code\": null, \"display\": null, \"system\": \"system\"}]}}",
-                          "display": "Tobacco smoking status",
-                          "target": [
-                            {
-                              "id": "836cc342c39afcc7a8dee6277abc7b75",
-                              "code": "72166-2",
-                              "display": "Tobacco smoking status",
-                              "equivalence": "equivalent",
-                              "comment": null
-                            }
-                          ]
-                        }
-                      ]
-                    }
-                  ],
-                  "extension": [
-                    {
-                      "url": "http://projectronin.io/fhir/StructureDefinition/Extension/ronin-conceptMapSchema",
-                      "valueString": "1.0.0"
-                    }
-                  ],
-                  "meta": {
-                    "lastUpdated": "2023-05-26T12:49:56.285403+00:00"
-                  }
-            }
-            """.trimIndent()
-        val concept =
-            CodeableConcept(
-                coding =
-                    listOf(
-                        Coding(
-                            code = Code(value = "85354-9"),
-                            system = Uri(value = "http://loinc.org"),
-                        ),
-                    ),
-            )
-        val exception =
-            assertThrows<IllegalStateException> {
-                client.getConceptMapping(
-                    tenant,
-                    "Observation.code",
-                    concept,
-                    mockk<Observation>(),
-                )
-            }
-        assertEquals(
-            """Could not create SourceConcept from {"valueCodeableConcept": {"coding": [{"code": null, "display": null, "system": "system"}]}}""",
             exception.message,
         )
     }
@@ -3714,7 +3581,19 @@ class NormalizationRegistryClientTest {
                       "element": [
                         {
                           "id": "06c19b8e4718f1bf6e81f992cfc12c1e",
-                          "code": "{\"coding\": [{\"code\": \"363905002\", \"display\": \"Details of alcohol drinking behavior (observable entity)\", \"system\": \"http://snomed.info/sct\"}]}",
+                          "_code": {
+                            "extension": [ {
+                              "id": "sourceExtension1",
+                              "url": "http://projectronin.io/fhir/StructureDefinition/Extension/canonicalSourceData",
+                              "valueCodeableConcept": {
+                                "coding": [ {
+                                  "code": "363905002",
+                                  "system": "http://snomed.info/sct",
+                                  "display": "Details of alcohol drinking behavior (observable entity)"
+                                } ]
+                              }
+                            } ]
+                          },
                           "display": "Tobacco smoking status",
                           "target": [
                             {
@@ -3760,29 +3639,44 @@ class NormalizationRegistryClientTest {
     private val dependsOn =
         ConceptMapDependsOn(
             property = Uri("medication.form"),
-            value = FHIRString("some-form-value"),
+            value =
+                FHIRString(
+                    null,
+                    extension =
+                        listOf(
+                            createClinicalSourceDataExtension(
+                                CodeableConcept(text = "some-form-value".asFHIR()),
+                                "dependsOn1",
+                            ),
+                        ),
+                ),
         )
     private val dependsOn2 =
         ConceptMapDependsOn(
             property = Uri("medication.amount"),
-            value = FHIRString("some-amount-value"),
+            value =
+                FHIRString(
+                    null,
+                    extension =
+                        listOf(
+                            createClinicalSourceDataExtension(
+                                CodeableConcept(text = "some-amount-value".asFHIR()),
+                                "dependsOn2",
+                            ),
+                        ),
+                ),
         )
+
     private val mappingWithDependsOnTargets =
         SourceConcept(
-            element =
-                setOf(
-                    SourceKey(
-                        value = "valueA",
-                        system = "systemA",
-                    ),
-                ),
+            codeableConcept = CodeableConcept(coding = listOf(Coding(code = Code("valueA"), system = Uri("systemA")))),
         ) to
             listOf(
                 TargetConcept(
                     text = "textAAA",
                     element =
                         listOf(
-                            TargetValue(
+                            TargetConceptMapValue(
                                 "targetValueAAA",
                                 "targetSystemAAA",
                                 "targetDisplayAAA",
@@ -3795,7 +3689,7 @@ class NormalizationRegistryClientTest {
                     text = "textBBB",
                     element =
                         listOf(
-                            TargetValue(
+                            TargetConceptMapValue(
                                 "targetValueBBB",
                                 "targetSystemBBB",
                                 "targetDisplayBBB",
@@ -3828,6 +3722,8 @@ class NormalizationRegistryClientTest {
                 system = Uri("systemA"),
                 code = Code("valueA"),
             )
+        val sourceConcept = CodeableConcept(coding = listOf(sourceCoding))
+
         val targetCoding =
             Coding(
                 system = Uri("targetSystemAAA"),
@@ -3835,25 +3731,30 @@ class NormalizationRegistryClientTest {
                 display = "targetDisplayAAA".asFHIR(),
                 version = "targetVersionAAA".asFHIR(),
             )
+        val targetConcept =
+            CodeableConcept(
+                text = "textAAA".asFHIR(),
+                coding = listOf(targetCoding),
+            )
         val targetSourceExtension =
             Extension(
                 url = Uri(value = "ext-AB"),
                 value =
                     DynamicValue(
-                        type = DynamicValueType.CODING,
-                        value = sourceCoding,
+                        type = DynamicValueType.CODEABLE_CONCEPT,
+                        value = sourceConcept,
                     ),
             )
         val mappedResult =
             client.getConceptMapping(
                 tenant,
                 "Observation.code",
-                sourceCoding,
+                sourceConcept,
                 mockk<Observation>(),
             )
         assertEquals(
-            targetCoding,
-            mappedResult?.coding,
+            targetConcept,
+            mappedResult?.codeableConcept,
         )
         assertEquals(
             targetSourceExtension,
@@ -3885,6 +3786,7 @@ class NormalizationRegistryClientTest {
                 system = Uri("systemA"),
                 code = Code("valueA"),
             )
+        val sourceConcept = CodeableConcept(coding = listOf(sourceCoding))
         val targetCoding =
             Coding(
                 system = Uri("targetSystemAAA"),
@@ -3892,25 +3794,30 @@ class NormalizationRegistryClientTest {
                 display = "targetDisplayAAA".asFHIR(),
                 version = "targetVersionAAA".asFHIR(),
             )
+        val targetConcept =
+            CodeableConcept(
+                text = "textAAA".asFHIR(),
+                coding = listOf(targetCoding),
+            )
         val targetSourceExtension =
             Extension(
                 url = Uri(value = "ext-AB"),
                 value =
                     DynamicValue(
-                        type = DynamicValueType.CODING,
-                        value = sourceCoding,
+                        type = DynamicValueType.CODEABLE_CONCEPT,
+                        value = sourceConcept,
                     ),
             )
         val mappedResult =
             client.getConceptMapping(
                 tenant,
                 "Medication.code",
-                sourceCoding,
+                sourceConcept,
                 mockk<Medication>(),
             )
         assertEquals(
-            targetCoding,
-            mappedResult?.coding,
+            targetConcept,
+            mappedResult?.codeableConcept,
         )
         assertEquals(
             targetSourceExtension,
@@ -3942,11 +3849,12 @@ class NormalizationRegistryClientTest {
                 system = Uri("systemA"),
                 code = Code("valueA"),
             )
+        val sourceConcept = CodeableConcept(coding = listOf(sourceCoding))
         val mappedResult =
             client.getConceptMapping(
                 tenant,
                 "Observation.code",
-                sourceCoding,
+                sourceConcept,
                 mockk<Observation>(),
             )
         assertNull(mappedResult)
@@ -3981,11 +3889,12 @@ class NormalizationRegistryClientTest {
                 system = Uri("systemA"),
                 code = Code("valueA"),
             )
+        val sourceConcept = CodeableConcept(coding = listOf(sourceCoding))
         val mappedResult =
             client.getConceptMapping(
                 tenant,
                 "Observation.code",
-                sourceCoding,
+                sourceConcept,
                 medication,
             )
         assertNull(mappedResult)
@@ -4021,6 +3930,7 @@ class NormalizationRegistryClientTest {
                 system = Uri("systemA"),
                 code = Code("valueA"),
             )
+        val sourceConcept = CodeableConcept(coding = listOf(sourceCoding))
         val targetCoding =
             Coding(
                 system = Uri("targetSystemAAA"),
@@ -4028,25 +3938,30 @@ class NormalizationRegistryClientTest {
                 display = "targetDisplayAAA".asFHIR(),
                 version = "targetVersionAAA".asFHIR(),
             )
+        val targetConcept =
+            CodeableConcept(
+                text = "textAAA".asFHIR(),
+                coding = listOf(targetCoding),
+            )
         val targetSourceExtension =
             Extension(
                 url = Uri(value = "ext-AB"),
                 value =
                     DynamicValue(
-                        type = DynamicValueType.CODING,
-                        value = sourceCoding,
+                        type = DynamicValueType.CODEABLE_CONCEPT,
+                        value = sourceConcept,
                     ),
             )
         val mappedResult =
             client.getConceptMapping(
                 tenant,
                 "Observation.code",
-                sourceCoding,
+                sourceConcept,
                 medication,
             )
         assertEquals(
-            targetCoding,
-            mappedResult?.coding,
+            targetConcept,
+            mappedResult?.codeableConcept,
         )
         assertEquals(
             targetSourceExtension,
@@ -4084,28 +3999,13 @@ class NormalizationRegistryClientTest {
                 system = Uri("systemA"),
                 code = Code("valueA"),
             )
-        val targetCoding =
-            Coding(
-                system = Uri("targetSystemAAA"),
-                code = Code("targetValueAAA"),
-                display = "targetDisplayAAA".asFHIR(),
-                version = "targetVersionAAA".asFHIR(),
-            )
-        val targetSourceExtension =
-            Extension(
-                url = Uri(value = "ext-AB"),
-                value =
-                    DynamicValue(
-                        type = DynamicValueType.CODING,
-                        value = sourceCoding,
-                    ),
-            )
+        val sourceConcept = CodeableConcept(coding = listOf(sourceCoding))
         val exception =
             assertThrows<IllegalStateException> {
                 client.getConceptMapping(
                     tenant,
                     "Observation.code",
-                    sourceCoding,
+                    sourceConcept,
                     medication,
                 )
             }
@@ -4166,19 +4066,13 @@ class NormalizationRegistryClientTest {
                 map =
                     mapOf(
                         SourceConcept(
-                            element =
-                                setOf(
-                                    SourceKey(
-                                        value = "MyPhone",
-                                        system = "http://projectronin.io/fhir/CodeSystem/ContactPointSystem",
-                                    ),
-                                ),
+                            code = Code("MyPhone"),
                         ) to
                             listOf(
                                 TargetConcept(
                                     element =
                                         listOf(
-                                            TargetValue(
+                                            TargetConceptMapValue(
                                                 "good-or-bad-for-enum",
                                                 "good-or-bad-for-enum",
                                                 "good-or-bad-for-enum",
@@ -4199,19 +4093,13 @@ class NormalizationRegistryClientTest {
                 map =
                     mapOf(
                         SourceConcept(
-                            element =
-                                setOf(
-                                    SourceKey(
-                                        value = "MyPhone",
-                                        system = "http://projectronin.io/fhir/CodeSystem/ContactPointUse",
-                                    ),
-                                ),
+                            code = Code("MyPhone"),
                         ) to
                             listOf(
                                 TargetConcept(
                                     element =
                                         listOf(
-                                            TargetValue(
+                                            TargetConceptMapValue(
                                                 "good-or-bad-for-enum",
                                                 "good-or-bad-for-enum",
                                                 "good-or-bad-for-enum",
@@ -4295,19 +4183,13 @@ class NormalizationRegistryClientTest {
                 map =
                     mapOf(
                         SourceConcept(
-                            element =
-                                setOf(
-                                    SourceKey(
-                                        value = "MyPhone",
-                                        system = "http://projectronin.io/fhir/CodeSystem/ContactPointSystem",
-                                    ),
-                                ),
+                            code = Code("MyPhone"),
                         ) to
                             listOf(
                                 TargetConcept(
                                     element =
                                         listOf(
-                                            TargetValue(
+                                            TargetConceptMapValue(
                                                 "good-or-bad-for-enum",
                                                 "good-or-bad-for-enum",
                                                 "good-or-bad-for-enum",
@@ -4328,19 +4210,13 @@ class NormalizationRegistryClientTest {
                 map =
                     mapOf(
                         SourceConcept(
-                            element =
-                                setOf(
-                                    SourceKey(
-                                        value = "MyPhone",
-                                        system = "http://projectronin.io/fhir/CodeSystem/ContactPointUse",
-                                    ),
-                                ),
+                            code = Code("MyPhone"),
                         ) to
                             listOf(
                                 TargetConcept(
                                     element =
                                         listOf(
-                                            TargetValue(
+                                            TargetConceptMapValue(
                                                 "good-or-bad-for-enum",
                                                 "good-or-bad-for-enum",
                                                 "good-or-bad-for-enum",
@@ -4438,19 +4314,13 @@ class NormalizationRegistryClientTest {
                 map =
                     mapOf(
                         SourceConcept(
-                            element =
-                                setOf(
-                                    SourceKey(
-                                        value = "MyPhone",
-                                        system = "http://projectronin.io/fhir/CodeSystem/ContactPointSystem",
-                                    ),
-                                ),
+                            code = Code("MyPhone"),
                         ) to
                             listOf(
                                 TargetConcept(
                                     element =
                                         listOf(
-                                            TargetValue(
+                                            TargetConceptMapValue(
                                                 "good-or-bad-for-enum",
                                                 "good-or-bad-for-enum",
                                                 "good-or-bad-for-enum",
@@ -4471,19 +4341,13 @@ class NormalizationRegistryClientTest {
                 map =
                     mapOf(
                         SourceConcept(
-                            element =
-                                setOf(
-                                    SourceKey(
-                                        value = "MyPhone",
-                                        system = "http://projectronin.io/fhir/CodeSystem/ContactPointUse",
-                                    ),
-                                ),
+                            code = Code("MyPhone"),
                         ) to
                             listOf(
                                 TargetConcept(
                                     element =
                                         listOf(
-                                            TargetValue(
+                                            TargetConceptMapValue(
                                                 "good-or-bad-for-enum",
                                                 "good-or-bad-for-enum",
                                                 "good-or-bad-for-enum",
@@ -4515,246 +4379,70 @@ class NormalizationRegistryClientTest {
         assertEquals(registry1, client.conceptMapCache.getIfPresent(key1))
         assertEquals(registry2, client.conceptMapCache.getIfPresent(key2))
     }
-}
 
-private val testConceptMapTest =
-    """
-    {
-      "resourceType": "ConceptMap",
-      "id": "TestObservationsMashup-id",
-      "name": "TestObservationsMashup-name",
-      "url": "http://projectronin.io/fhir/ConceptMap/03659ed9-c591-4bbc-9bcf-37260e0e402f",
-      "description": "Observations Values to Ronin Observation Values",
-      "purpose": null,
-      "experimental": false,
-      "date": "2023-10-09T18:20:47.059Z",
-      "version": 7,
-      "group": [
+    private val testConceptMapTest =
+        """
         {
-          "source": "http://projectronin.io/fhir/CodeSystem/test/TestObservationsMashup",
-          "sourceVersion": "1.0",
-          "target": "http://snomed.info/sct",
-          "targetVersion": "0.0.1",
-          "element": [
+          "resourceType": "ConceptMap",
+          "id": "TestObservationsMashup-id",
+          "name": "TestObservationsMashup-name",
+          "url": "http://projectronin.io/fhir/ConceptMap/03659ed9-c591-4bbc-9bcf-37260e0e402f",
+          "description": "Observations Values to Ronin Observation Values",
+          "purpose": null,
+          "experimental": false,
+          "date": "2023-10-09T18:20:47.059Z",
+          "version": 7,
+          "group": [
             {
-              "id": "54c57f92d30fc58bf76c757b42ab9dc1",
-              "code": "{\"text\": \"Negative\"}",
-              "display": "Negative",
-              "target": [
+              "source": "http://projectronin.io/fhir/CodeSystem/test/TestObservationsMashup",
+              "sourceVersion": "1.0",
+              "target": "http://snomed.info/sct",
+              "targetVersion": "0.0.1",
+              "element": [
                 {
-                  "id": "c555f11db938325a89c30922509f41e6",
-                  "code": "260385009",
-                  "display": "Negative (qualifier value)",
-                  "equivalence": "equivalent"
-                }
-              ]
-            },
-            {
-              "id": "26ea2d0a1c891bd35b2376b998a92118",
-              "code": "{\"coding\": [{\"system\": \"http://snomed.info/sct\", \"code\": \"263707001\", \"display\": \"Clear (qualifier value)\", \"userSelected\": false}], \"text\": \"Clear\"}",
-              "display": "Clear",
-              "target": [
-                {
-                  "id": "5058d7a0e3a720cf9afe3b4436bf1c41",
-                  "code": "263707001",
-                  "display": "Clear (qualifier value)",
-                  "equivalence": "equivalent"
-                }
-              ]
-            },
-            {
-              "id": "74e5003998ecc635b8ab8227d2d3d28a",
-              "code": "{\"coding\": [{\"code\": \"0\", \"display\": \"Positive\", \"system\": \"urn:oid:1.2.840.114350.1.13.412.2.7.4.696784.55405\"}], \"text\": \"null\"}",
-              "display": "-",
-              "target": [
-                {
-                  "id": "55cd8382019bad0b9e5e41b2512a12e2",
-                  "code": "10828004",
-                  "display": "Positive (qualifier value)",
-                  "equivalence": "equivalent"
-                }
-              ]
-            },
-            {
-              "id": "81917bffa55aba1840033a54187423a7",
-              "code": "{\"coding\": [{\"system\": \"http://snomed.info/sct\", \"code\": \"260385009\", \"display\": \"Negative (qualifier value)\", \"userSelected\": false}], \"text\": \"Neg\"}",
-              "display": "Neg",
-              "target": [
-                {
-                  "id": "962db91a0bc5886f2239bee64ad2193b",
-                  "code": "260385009",
-                  "display": "Negative (qualifier value)",
-                  "equivalence": "equivalent"
-                }
-              ]
-            },
-            {
-              "id": "fb9b8c03a2a75da276874f3dea768fd3",
-              "code": "{\"text\": \"Yellow\"}",
-              "display": "Yellow",
-              "target": [
-                {
-                  "id": "50ef6185b78f2f5f0dad3f34017e102a",
-                  "code": "371244009",
-                  "display": "Yellow color (qualifier value)",
-                  "equivalence": "equivalent"
+                  "id": "fb9b8c03a2a75da276874f3dea768fd3",
+                  "_code": {
+                    "extension": [ {
+                      "id": "sourceExtension1",
+                      "url": "http://projectronin.io/fhir/StructureDefinition/Extension/canonicalSourceData",
+                      "valueCodeableConcept": {
+                        "text": "Yellow"
+                      }
+                    } ]
+                  },
+                  "display": "Yellow",
+                  "target": [
+                    {
+                      "id": "50ef6185b78f2f5f0dad3f34017e102a",
+                      "code": "371244009",
+                      "display": "Yellow color (qualifier value)",
+                      "equivalence": "equivalent"
+                    }
+                  ]
                 }
               ]
             }
-          ]
-        },
-        {
-          "source": "http://projectronin.io/fhir/CodeSystem/p1941/ObservationValue",
-          "sourceVersion": "1.0",
-          "target": "http://projectronin.io/fhir/CodeSystem/ronin/nomap",
-          "targetVersion": "1.0",
-          "element": [
+          ],
+          "extension": [
             {
-              "id": "bb0ac2b94b21cf2a465e68122905f274",
-              "code": "{\"coding\": [{\"code\": \"9986\", \"display\": null, \"system\": \"urn:oid:1.2.840.114350.1.13.412.2.7.5.737384.212\"}, {\"code\": \"9986\", \"display\": \"Archived Material\", \"system\": \"urn:oid:1.2.840.114350.1.13.412.2.7.2.768282\"}], \"text\": \"Archived Material\"}",
-              "display": "Archived Material",
-              "target": [
-                {
-                  "id": "6deaaee35414fe865fe4a149c578405f",
-                  "code": "No map",
-                  "display": "No matching concept",
-                  "equivalence": "wider",
-                  "comment": "Not in target code system source-is-narrower-than-target"
-                },
-                {
-                  "id": "6deaaee35414fe865fe4a149c578405f",
-                  "code": "No map",
-                  "display": "No matching concept",
-                  "equivalence": "wider",
-                  "comment": "Not in target code system source-is-narrower-than-target"
-                }
-              ]
-            },
-            {
-              "id": "0cbf6e53b17940e505653842ff9c687b",
-              "code": "{\"text\": \"Man indicated\"}",
-              "display": "Man indicated",
-              "target": [
-                {
-                  "id": "19877f5c965cb8ec6ea6a6cbdc7464d7",
-                  "code": "No map",
-                  "display": "No matching concept",
-                  "equivalence": "wider",
-                  "comment": "Not enough information source-is-narrower-than-target"
-                }
-              ]
-            },
-            {
-              "id": "15f8d6c0d313197a395815c452d7e2fb",
-              "code": "{\"text\": \"1.020\"}",
-              "display": "1.020",
-              "target": [
-                {
-                  "id": "cedb190d43b807441bcbbea79e1100ef",
-                  "code": "No map",
-                  "display": "No matching concept",
-                  "equivalence": "wider",
-                  "comment": "Other source-is-narrower-than-target"
-                }
-              ]
-            },
-            {
-              "id": "6389562a3e1d8d63c3e0ac4b9b21ac35",
-              "code": "{\"text\": \"8\"}",
-              "display": "8",
-              "target": [
-                {
-                  "id": "e571b7184940768273ed21a372d79fbc",
-                  "code": "No map",
-                  "display": "No matching concept",
-                  "equivalence": "wider",
-                  "comment": "Other source-is-narrower-than-target"
-                }
-              ]
-            },
-            {
-              "id": "eb8250eabd3d878753d0decbdf24013c",
-              "code": "{\"text\": \"Greater than 1.030\"}",
-              "display": "Greater than 1.030",
-              "target": [
-                {
-                  "id": "cc49e93b9b683d3d1e29ecb1eae71f66",
-                  "code": "No map",
-                  "display": "No matching concept",
-                  "equivalence": "wider",
-                  "comment": "Not enough information source-is-narrower-than-target"
-                }
-              ]
-            },
-            {
-              "id": "9edb81b3e960a98ec64a1fa5460e6cda",
-              "code": "{\"text\": \"6.5\"}",
-              "display": "6.5",
-              "target": [
-                {
-                  "id": "dd55c969152c108472e1465371577eb7",
-                  "code": "No map",
-                  "display": "No matching concept",
-                  "equivalence": "wider",
-                  "comment": "Other source-is-narrower-than-target"
-                }
-              ]
-            },
-            {
-              "id": "c579a44386efb92504488a1fdc5b30cb",
-              "code": "{\"text\": \"0.2 mg/dl\"}",
-              "display": "0.2 mg/dl",
-              "target": [
-                {
-                  "id": "41f4b1f785ff4e04eee489619c09dc8a",
-                  "code": "No map",
-                  "display": "No matching concept",
-                  "equivalence": "wider",
-                  "comment": "Other source-is-narrower-than-target"
-                }
-              ]
-            },
-            {
-              "id": "a9a46179e6e9410da05372f055eb6e8f",
-              "code": "{\"text\": \"1.000\"}",
-              "display": "1.000",
-              "target": [
-                {
-                  "id": "6ff772b6fb7ca409ac34ba2353f6c2a7",
-                  "code": "No map",
-                  "display": "No matching concept",
-                  "equivalence": "wider",
-                  "comment": "Other source-is-narrower-than-target"
-                }
-              ]
-            },
-            {
-              "id": "d22eafe40ee7565acbfcc02cb426610c",
-              "code": "{\"text\": \"2 mg/dl\"}",
-              "display": "2 mg/dl",
-              "target": [
-                {
-                  "id": "16eba8e35e50d228b533bc4c90a983b2",
-                  "code": "No map",
-                  "display": "No matching concept",
-                  "equivalence": "wider",
-                  "comment": "Other source-is-narrower-than-target"
-                }
-              ]
+              "url": "http://projectronin.io/fhir/StructureDefinition/Extension/ronin-conceptMapSchema",
+              "valueString": "3.0.0"
             }
-          ]
+          ],
+          "meta": {
+            "profile": [
+              "http://projectronin.io/fhir/StructureDefinition/ronin-conceptMap"
+            ]
+          }
         }
-      ],
-      "extension": [
-        {
-          "url": "http://projectronin.io/fhir/StructureDefinition/Extension/ronin-conceptMapSchema",
-          "valueString": "3.0.0"
-        }
-      ],
-      "meta": {
-        "profile": [
-          "http://projectronin.io/fhir/StructureDefinition/ronin-conceptMap"
-        ]
-      }
-    }
-    """.trimIndent()
+        """.trimIndent()
+
+    fun createClinicalSourceDataExtension(
+        codeableConcept: CodeableConcept,
+        id: String,
+    ) = Extension(
+        id = id.asFHIR(),
+        url = RoninExtension.CANONICAL_SOURCE_DATA_EXTENSION.uri,
+        value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, codeableConcept),
+    )
+}

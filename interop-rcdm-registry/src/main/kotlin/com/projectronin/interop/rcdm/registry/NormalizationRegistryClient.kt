@@ -22,13 +22,13 @@ import com.projectronin.interop.fhir.r4.resource.ConceptMap
 import com.projectronin.interop.fhir.r4.resource.ConceptMapDependsOn
 import com.projectronin.interop.fhir.r4.resource.Resource
 import com.projectronin.interop.fhir.r4.resource.ValueSet
+import com.projectronin.interop.rcdm.common.enums.RoninExtension
 import com.projectronin.interop.rcdm.common.metadata.ConceptMapMetadata
 import com.projectronin.interop.rcdm.common.metadata.ValueSetMetadata
 import com.projectronin.interop.rcdm.registry.dependson.DependsOnEvaluator
 import com.projectronin.interop.rcdm.registry.exception.MissingNormalizationContentException
 import com.projectronin.interop.rcdm.registry.model.ConceptMapCodeableConcept
 import com.projectronin.interop.rcdm.registry.model.ConceptMapCoding
-import com.projectronin.interop.rcdm.registry.model.RoninConceptMap
 import com.projectronin.interop.rcdm.registry.model.ValueSetList
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
@@ -51,6 +51,8 @@ class NormalizationRegistryClient(
     private val logger = KotlinLogging.logger { }
 
     private val dependsOnEvaluatorByType = dependsOnEvaluators.associateBy { it.resourceType }
+
+    internal val isV4: Boolean = registryFileName.contains("/v4/")
 
     internal var conceptMapCache = Caffeine.newBuilder().build<CacheKey, ConceptMapItem>()
     internal var valueSetCache = Caffeine.newBuilder().build<CacheKey, ValueSetItem>()
@@ -82,30 +84,6 @@ class NormalizationRegistryClient(
             )
         val registryItem = getConceptMapItem(cacheKey, forceCacheReloadTS)
         return registryItem?.let { codeableConcept.getConceptMapping(registryItem, resource) }
-    }
-
-    /**
-     * Get a Coding mapping from the DataNormalizationRegistry.
-     * The input Coding value and system must not be null.
-     * Return a [Triple] with the transformed [Coding] as the first, a Coding [Extension] as the second, and
-     * the [ConceptMapMetadata] as the third
-     * or null to match any element of the type [elementName].
-     */
-    fun <T : Resource<T>> getConceptMapping(
-        tenantMnemonic: String,
-        elementName: String,
-        coding: Coding,
-        resource: T,
-        forceCacheReloadTS: LocalDateTime? = null,
-    ): ConceptMapCoding? {
-        val cacheKey =
-            CacheKey(
-                registryType = RegistryType.CONCEPT_MAP,
-                elementName = elementName,
-                tenantId = tenantMnemonic,
-            )
-        val registryItem = getConceptMapItem(cacheKey, forceCacheReloadTS)
-        return registryItem?.let { coding.getConceptMapping(registryItem, resource) }
     }
 
     /**
@@ -241,7 +219,7 @@ class NormalizationRegistryClient(
         conceptMapItem: ConceptMapItem,
         resource: T,
     ): ConceptMapCodeableConcept? {
-        val sourceConcept = getSourceConcept() ?: return null
+        val sourceConcept = SourceConcept(codeableConcept = this.normalized())
         val target = getTarget(conceptMapItem, sourceConcept, resource) ?: return null
 
         // if elementName is a CodeableConcept datatype: expect 1+ target.element
@@ -264,16 +242,6 @@ class NormalizationRegistryClient(
     }
 
     /**
-     * if only the text of the codeable concept is available/there is no coding create the source-key from text.
-     * otherwise use coding to create the source-key using code and system
-     */
-    private fun CodeableConcept.getSourceConcept(): SourceConcept? {
-        val sourceKeys = coding.mapNotNull { it.getSourceKey() ?: return null }.toSet()
-        // add text to SourceConcept
-        return SourceConcept(sourceKeys, text?.value)
-    }
-
-    /**
      * Find a Coding mapping in the DataNormalizationRegistry that matches the
      * input Coding system and value. Matching ignores other attributes.
      *
@@ -286,7 +254,7 @@ class NormalizationRegistryClient(
         conceptMapItem: ConceptMapItem,
         resource: T,
     ): ConceptMapCoding? {
-        val sourceConcept = getSourceConcept() ?: return null
+        val sourceConcept = this.code?.let { SourceConcept(code = it) } ?: return null
         val target = getTarget(conceptMapItem, sourceConcept, resource) ?: return null
 
         // if elementName is a Code or Coding datatype: expect 1 target.element
@@ -302,17 +270,6 @@ class NormalizationRegistryClient(
                 conceptMapItem.metadata,
             )
         }
-    }
-
-    private fun Coding.getSourceConcept(): SourceConcept? = getSourceKey()?.let { SourceConcept(setOf(it)) }
-
-    private fun Coding.getSourceKey(): SourceKey? {
-        val sourceVal = this.code?.value ?: return null
-        val sourceSystem = this.system?.value ?: return null
-        val sourceDisplay = this.display?.value
-        val sourceVersion = this.version?.value
-        val agnosticSourceSystem = getTenantAgnosticCodeSystem(sourceSystem)
-        return SourceKey(sourceVal, agnosticSourceSystem, sourceDisplay, sourceVersion)
     }
 
     private fun createCodeableConceptExtension(
@@ -379,39 +336,49 @@ class NormalizationRegistryClient(
         }
     }
 
-    private fun getTenantAgnosticCodeSystem(system: String): String =
-        if (RoninConceptMap.CODE_SYSTEMS.isMappedUri(system)) {
-            RoninConceptMap.CODE_SYSTEMS.toTenantAgnosticUri(system)
-        } else {
-            system
-        }
-
-    /**
-     * Read a ConceptMap group.element.code value into a SourceConcept so that
-     * we can match it against the Coding entries from a source CodeableConcept.
-     * group.element.code may be a simple code value, but for maps of
-     * CodeableConcept to CodeableConcept it will contain a JSON-representation of the concept.
-     */
-    private fun readGroupElementCode(
-        groupElementCode: String,
-        tenantAgnosticSourceSystem: String,
-    ): SourceConcept {
-        if (!groupElementCode.contains("{")) {
-            // No embedded JSON, represent as just a code
-            return SourceConcept(setOf(SourceKey(groupElementCode, tenantAgnosticSourceSystem)))
-        }
-
-        val sourceCodeableConcept =
-            if (groupElementCode.contains("valueCodeableConcept")) {
-                // Handle JSON entries wrapped in the valueCodeableConcept
-                JacksonManager.objectMapper.readValue<ConceptMapCode>(groupElementCode).valueCodeableConcept
-            } else {
-                // Handle JSON structured directly as CodeableConcept objects
-                JacksonManager.objectMapper.readValue<CodeableConcept>(groupElementCode)
+    private fun readGroupElementCode(groupElementCode: Code): Pair<SourceConcept, String?> {
+        if (isV4) {
+            val groupElementCodeText = groupElementCode.value!!
+            if (!groupElementCodeText.contains("{")) {
+                // No embedded JSON, represent as just a code
+                return Pair(SourceConcept(code = Code(groupElementCodeText)), null)
             }
 
-        return sourceCodeableConcept.getSourceConcept()
-            ?: throw IllegalStateException("Could not create SourceConcept from $groupElementCode")
+            val sourceCodeableConcept =
+                if (groupElementCodeText.contains("valueCodeableConcept")) {
+                    // Handle JSON entries wrapped in the valueCodeableConcept
+                    JacksonManager.objectMapper.readValue<ConceptMapCode>(groupElementCodeText).valueCodeableConcept
+                } else {
+                    // Handle JSON structured directly as CodeableConcept objects
+                    JacksonManager.objectMapper.readValue<CodeableConcept>(groupElementCodeText)
+                }
+
+            return Pair(SourceConcept(codeableConcept = sourceCodeableConcept.normalized()), null)
+        }
+
+        val sourceDataExtension =
+            groupElementCode.extension.singleOrNull { it.url == RoninExtension.CANONICAL_SOURCE_DATA_EXTENSION.uri }
+                ?: throw IllegalStateException(
+                    "Could not create SourceConcept from $groupElementCode due to missing canonicalSourceData extension",
+                )
+        val sourceDataExtensionValue =
+            sourceDataExtension.value
+                ?: throw IllegalStateException(
+                    "Could not create SourceConcept from $groupElementCode due to canonicalSourceData extension with no value",
+                )
+
+        val sourceConcept =
+            when (sourceDataExtensionValue.type) {
+                DynamicValueType.CODE -> SourceConcept(code = sourceDataExtensionValue.value as Code)
+                DynamicValueType.CODEABLE_CONCEPT -> {
+                    val codeableConcept = sourceDataExtensionValue.value as CodeableConcept
+                    SourceConcept(codeableConcept = codeableConcept.normalized())
+                }
+
+                else -> throw IllegalStateException("Unknown canonicalSourceData extension value type found for $groupElementCode")
+            }
+
+        return Pair(sourceConcept, sourceDataExtension.id?.value)
     }
 
     private data class ConceptMapCode(val valueCodeableConcept: CodeableConcept)
@@ -536,7 +503,7 @@ class NormalizationRegistryClient(
         cache.invalidateAll(keysToInvalidate)
     }
 
-    private fun getConceptMapData(filename: String): Map<SourceConcept, List<TargetConcept>> {
+    internal fun getConceptMapData(filename: String): Map<SourceConcept, List<TargetConcept>> {
         val conceptMap =
             try {
                 JacksonUtil.readJsonObject(
@@ -551,28 +518,30 @@ class NormalizationRegistryClient(
         val mutableMap = mutableMapOf<SourceConcept, MutableList<TargetConcept>>()
         conceptMap.group.forEach forEachGroup@{ group ->
             val targetSystem = group.target?.value ?: return@forEachGroup
-            val sourceSystem = group.source?.value ?: return@forEachGroup
             val targetVersion = group.targetVersion?.value ?: return@forEachGroup
-            val agnosticSourceSystem = getTenantAgnosticCodeSystem(sourceSystem)
+
             group.element?.forEach forEachElement@{ element ->
+                val sourceCode = element.code ?: return@forEachElement
+                val (sourceConcept, sourceId) = readGroupElementCode(sourceCode)
+
                 val targetText = element.display?.value ?: return@forEachElement
-                val sourceCode = element.code?.value ?: return@forEachElement
                 val targetList =
                     element.target.mapNotNull { target ->
                         target.code?.value?.let { targetCode ->
                             target.display?.value?.let { targetDisplay ->
-                                TargetValue(
+                                TargetConceptMapValue(
                                     targetCode,
                                     targetSystem,
                                     targetDisplay,
                                     targetVersion,
                                     target.dependsOn,
+                                    if (isV4) null else sourceId,
+                                    if (isV4) null else target.id?.value,
                                 )
                             }
                         }
                     }
                 val targetConcept = TargetConcept(targetList, targetText)
-                val sourceConcept = readGroupElementCode(sourceCode, agnosticSourceSystem)
 
                 mutableMap.computeIfAbsent(sourceConcept) { mutableListOf() }.add(targetConcept)
             }
@@ -580,7 +549,7 @@ class NormalizationRegistryClient(
         return mutableMap
     }
 
-    private fun getValueSetData(filename: String): List<TargetValue> {
+    private fun getValueSetData(filename: String): List<TargetValueSetValue> {
         val valueSet =
             try {
                 JacksonUtil.readJsonObject(ociClient.getObjectFromINFX(filename)!!, ValueSet::class)
@@ -598,7 +567,7 @@ class NormalizationRegistryClient(
                 logger.warn { "Skipping value in ValueSet from $filename as required property is null $it" }
                 null
             } else {
-                TargetValue(targetCode, targetSystem, targetDisplay, targetVersion)
+                TargetValueSetValue(targetCode, targetSystem, targetDisplay, targetVersion)
             }
         } ?: emptyList()
     }
@@ -649,25 +618,40 @@ internal data class ConceptMapItem(
 )
 
 internal data class ValueSetItem(
-    val set: List<TargetValue>?,
+    val set: List<TargetValueSetValue>?,
     val metadata: ValueSetMetadata,
 )
 
-internal data class SourceKey(
+internal data class TargetValueSetValue(
     val value: String,
-    val system: String?,
-    val display: String? = null,
-    val version: String? = null,
+    val system: String,
+    val display: String,
+    val version: String,
 )
 
-internal data class TargetValue(
+internal data class TargetConceptMapValue(
     val value: String,
     val system: String,
     val display: String,
     val version: String,
     val dependsOn: List<ConceptMapDependsOn> = emptyList(),
+    val sourceId: String? = null,
+    val targetId: String? = null,
 )
 
-internal data class SourceConcept(val element: Set<SourceKey>, val text: String? = null)
+internal data class SourceConcept(
+    val code: Code? = null,
+    val codeableConcept: CodeableConcept? = null,
+)
 
-internal data class TargetConcept(val element: List<TargetValue>, val text: String? = null)
+internal data class TargetConcept(val element: List<TargetConceptMapValue>, val text: String? = null)
+
+internal fun CodeableConcept.normalized(): CodeableConcept =
+    this.copy(
+        coding =
+            this.coding.map { it.copy(userSelected = null) }
+                .sortedWith(
+                    compareBy<Coding> { it.system?.value }.thenBy { it.code?.value }
+                        .thenBy { it.display?.value }.thenBy { it.version?.value },
+                ),
+    )

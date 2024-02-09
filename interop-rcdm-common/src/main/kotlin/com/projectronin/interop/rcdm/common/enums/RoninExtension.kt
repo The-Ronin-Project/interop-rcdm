@@ -48,6 +48,7 @@ enum class RoninExtension(val value: String) {
     TENANT_SOURCE_MEDICATION_ADMINISTRATION_STATUS(
         "http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceMedicationAdministrationStatus",
     ),
+    CANONICAL_SOURCE_DATA_EXTENSION("http://projectronin.io/fhir/StructureDefinition/Extension/canonicalSourceData"),
     ;
 
     val uri = Uri(value)
