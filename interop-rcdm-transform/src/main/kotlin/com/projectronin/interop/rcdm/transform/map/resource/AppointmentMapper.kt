@@ -45,7 +45,7 @@ class AppointmentMapper(registryClient: NormalizationRegistryClient) :
         return MapResponse(
             mappedStatus?.let {
                 resource.copy(
-                    status = it.coding.code,
+                    status = it.coding.code?.copy(id = it.coding.id),
                     extension = resource.extension + it.extension,
                 )
             } ?: resource,

@@ -3,6 +3,7 @@ package com.projectronin.interop.rcdm.transform.map.element
 import com.projectronin.interop.fhir.r4.datatype.ContactPoint
 import com.projectronin.interop.fhir.r4.datatype.Extension
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
+import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.fhir.r4.valueset.ContactPointSystem
 import com.projectronin.interop.fhir.r4.valueset.ContactPointUse
@@ -98,7 +99,11 @@ class ContactPointMapperTest {
             )
         } returns
             mockk {
-                every { coding.code?.value } returns "email"
+                every { coding.code } returns
+                    mockk {
+                        every { id } returns null
+                        every { value } returns "email"
+                    }
                 every { extension } returns mockExtension
                 every { metadata } returns listOf()
             }
@@ -185,7 +190,11 @@ class ContactPointMapperTest {
             )
         } returns
             mockk {
-                every { coding.code?.value } returns "temp"
+                every { coding.code } returns
+                    mockk {
+                        every { id } returns null
+                        every { value } returns "temp"
+                    }
                 every { extension } returns mockExtension
                 every { metadata } returns listOf()
             }
@@ -222,7 +231,11 @@ class ContactPointMapperTest {
             )
         } returns
             mockk {
-                every { coding.code?.value } returns "email"
+                every { coding.code } returns
+                    mockk {
+                        every { id } returns null
+                        every { value } returns "email"
+                    }
                 every { extension } returns mockSystemExtension
                 every { metadata } returns listOf()
             }
@@ -240,7 +253,11 @@ class ContactPointMapperTest {
             )
         } returns
             mockk {
-                every { coding.code?.value } returns "temp"
+                every { coding.code } returns
+                    mockk {
+                        every { id } returns null
+                        every { value } returns "temp"
+                    }
                 every { extension } returns mockUseExtension
                 every { metadata } returns listOf()
             }
@@ -251,6 +268,70 @@ class ContactPointMapperTest {
             ContactPoint(
                 system = Code(value = "email", extension = listOf(mockSystemExtension)),
                 use = Code(value = "temp", extension = listOf(mockUseExtension)),
+            )
+        assertEquals(expected, mapped)
+        assertEquals(0, validation.issues().size)
+    }
+
+    @Test
+    fun `maps with use and system that are mapped with target IDs`() {
+        val initial =
+            ContactPoint(
+                system = Code("mapped-system"),
+                use = Code("mapped-use"),
+            )
+        val validation = Validation()
+
+        val mockSystemExtension = mockk<Extension>()
+        every {
+            registryClient.getConceptMappingForEnum(
+                "test",
+                "Patient.telecom.system",
+                any(),
+                ContactPointSystem::class,
+                RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value,
+                patient,
+                null,
+            )
+        } returns
+            mockk {
+                every { coding.code } returns
+                    mockk {
+                        every { id } returns "email-id".asFHIR()
+                        every { value } returns "email"
+                    }
+                every { extension } returns mockSystemExtension
+                every { metadata } returns listOf()
+            }
+
+        val mockUseExtension = mockk<Extension>()
+        every {
+            registryClient.getConceptMappingForEnum(
+                "test",
+                "Patient.telecom.use",
+                any(),
+                ContactPointUse::class,
+                RoninExtension.TENANT_SOURCE_TELECOM_USE.value,
+                patient,
+                null,
+            )
+        } returns
+            mockk {
+                every { coding.code } returns
+                    mockk {
+                        every { id } returns "temp-id".asFHIR()
+                        every { value } returns "temp"
+                    }
+                every { extension } returns mockUseExtension
+                every { metadata } returns listOf()
+            }
+
+        val mapped = mapper.map(initial, patient, tenant, LocationContext(Patient::class), validation, null)
+
+        val expected =
+            ContactPoint(
+                system = Code(value = "email", id = "email-id".asFHIR(), extension = listOf(mockSystemExtension)),
+                use = Code(value = "temp", id = "temp-id".asFHIR(), extension = listOf(mockUseExtension)),
             )
         assertEquals(expected, mapped)
         assertEquals(0, validation.issues().size)

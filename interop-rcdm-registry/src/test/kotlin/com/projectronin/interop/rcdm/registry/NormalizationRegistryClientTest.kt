@@ -148,7 +148,7 @@ class NormalizationRegistryClientTest {
                       "id": "921618c5505606cff5626f3468d4b396",
                       "_code": {
                         "extension": [ {
-                          "id": "sourceExtension1",
+                          "id": "sourceExtension2",
                           "url": "http://projectronin.io/fhir/StructureDefinition/Extension/canonicalSourceData",
                           "valueCodeableConcept": {
                             "coding": [ {
@@ -188,7 +188,7 @@ class NormalizationRegistryClientTest {
                       "id": "5aec5a329873f3842748e2beeb69643b",
                       "_code": {
                         "extension": [ {
-                          "id": "sourceExtension2",
+                          "id": "sourceExtension3",
                           "url": "http://projectronin.io/fhir/StructureDefinition/Extension/canonicalSourceData",
                           "valueCodeableConcept": {
                             "coding": [ {
@@ -284,7 +284,7 @@ class NormalizationRegistryClientTest {
                   "id": "827f75db7803e5fc9ba811c19ccf4fbb",
                   "_code": {
                     "extension": [ {
-                      "id": "sourceExtension1",
+                      "id": "sourceExtension2",
                       "url": "http://projectronin.io/fhir/StructureDefinition/Extension/canonicalSourceData",
                       "valueCodeableConcept": {
                         "coding": [ {
@@ -310,7 +310,7 @@ class NormalizationRegistryClientTest {
                   "id": "fc8e25ae3ed568f4dbf4b5d447452a18",
                   "_code": {
                     "extension": [ {
-                      "id": "sourceExtension1",
+                      "id": "sourceExtension3",
                       "url": "http://projectronin.io/fhir/StructureDefinition/Extension/canonicalSourceData",
                       "valueCodeableConcept": {
                         "coding": [ {
@@ -339,7 +339,7 @@ class NormalizationRegistryClientTest {
                   "id": "58ca30808a5de848ab6f0e33f8f5e1e3",
                   "_code": {
                     "extension": [ {
-                      "id": "sourceExtension1",
+                      "id": "sourceExtension4",
                       "url": "http://projectronin.io/fhir/StructureDefinition/Extension/canonicalSourceData",
                       "valueCodeableConcept": {
                         "coding": [ {
@@ -365,7 +365,7 @@ class NormalizationRegistryClientTest {
                   "id": "8ba61a5649cbd2f326d526acdcc459ff",
                   "_code": {
                     "extension": [ {
-                      "id": "sourceExtension1",
+                      "id": "sourceExtension5",
                       "url": "http://projectronin.io/fhir/StructureDefinition/Extension/canonicalSourceData",
                       "valueCodeableConcept": {
                         "coding": [ {
@@ -658,6 +658,76 @@ class NormalizationRegistryClientTest {
                                                 "1",
                                                 sourceId = "source1",
                                                 targetId = "target1",
+                                            ),
+                                        ),
+                                    text = "good-or-bad-for-enum, not validated here",
+                                ),
+                            ),
+                    ),
+                metadata = listOf(conceptMapMetadata),
+            )
+        val key =
+            CacheKey(
+                RegistryType.CONCEPT_MAP,
+                "Patient.telecom.system",
+                "test",
+            )
+        client.conceptMapCache.put(key, registry1)
+        client.registryLastUpdated = LocalDateTime.now()
+        val coding =
+            RoninConceptMap.CODE_SYSTEMS.toCoding(
+                tenant,
+                "ContactPoint.system",
+                "MyPhone",
+            )
+        val mapping =
+            client.getConceptMappingForEnum(
+                tenant,
+                "Patient.telecom.system",
+                coding,
+                ContactPointSystem::class,
+                RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value,
+                mockk<Patient>(),
+            )!!
+        assertEquals(
+            Coding(
+                id = "target1".asFHIR(),
+                system = Uri("good-or-bad-for-enum"),
+                code = Code("good-or-bad-for-enum"),
+                display = "good-or-bad-for-enum".asFHIR(),
+                version = "1".asFHIR(),
+            ),
+            mapping.coding,
+        )
+        assertEquals(
+            Extension(
+                id = "source1".asFHIR(),
+                url = Uri("ext1"),
+                value = DynamicValue(DynamicValueType.CODING, value = coding),
+            ),
+            mapping.extension,
+        )
+    }
+
+    @Test
+    fun `getConceptMappingForEnum with match found in registry - returns target and extension without IDs`() {
+        val registry1 =
+            ConceptMapItem(
+                sourceExtensionUrl = "ext1",
+                map =
+                    mapOf(
+                        SourceConcept(
+                            code = Code("MyPhone"),
+                        ) to
+                            listOf(
+                                TargetConcept(
+                                    element =
+                                        listOf(
+                                            TargetConceptMapValue(
+                                                "good-or-bad-for-enum",
+                                                "good-or-bad-for-enum",
+                                                "good-or-bad-for-enum",
+                                                "1",
                                             ),
                                         ),
                                     text = "good-or-bad-for-enum, not validated here",
@@ -2364,11 +2434,13 @@ class NormalizationRegistryClientTest {
                         ),
                     ),
                 text = "Yellow".asFHIR(),
+                id = "50ef6185b78f2f5f0dad3f34017e102a".asFHIR(),
             ),
             mapping.codeableConcept,
         )
         assertEquals(
             Extension(
+                id = "sourceExtension1".asFHIR(),
                 url = Uri(sourceUrl),
                 value = DynamicValue(type = DynamicValueType.CODEABLE_CONCEPT, value = concept),
             ),
@@ -2432,11 +2504,13 @@ class NormalizationRegistryClientTest {
                         ),
                     ),
                 text = "Tobacco smoking status".asFHIR(),
+                id = "836cc342c39afcc7a8dee6277abc7b75".asFHIR(),
             ),
             mapping.codeableConcept,
         )
         assertEquals(
             Extension(
+                id = "sourceExtension1".asFHIR(),
                 url = Uri(sourceUrl),
                 value = DynamicValue(type = DynamicValueType.CODEABLE_CONCEPT, value = concept),
             ),
@@ -2505,11 +2579,13 @@ class NormalizationRegistryClientTest {
                         ),
                     ),
                 text = "Potassium Level".asFHIR(),
+                id = "e194363d552c9edf5c106fffc01236e1".asFHIR(),
             ),
             mapping.codeableConcept,
         )
         assertEquals(
             Extension(
+                id = "sourceExtension3".asFHIR(),
                 url = Uri(sourceUrl),
                 value = DynamicValue(type = DynamicValueType.CODEABLE_CONCEPT, value = concept),
             ),
@@ -2578,11 +2654,13 @@ class NormalizationRegistryClientTest {
                         ),
                     ),
                 text = "Potassium Level".asFHIR(),
+                id = "e194363d552c9edf5c106fffc01236e1".asFHIR(),
             ),
             mapping.codeableConcept,
         )
         assertEquals(
             Extension(
+                id = "sourceExtension3".asFHIR(),
                 url = Uri(sourceUrl),
                 value = DynamicValue(type = DynamicValueType.CODEABLE_CONCEPT, value = concept),
             ),
@@ -2761,11 +2839,13 @@ class NormalizationRegistryClientTest {
                         ),
                     ),
                 text = "Blood pressure".asFHIR(),
+                id = "51afcac380447929e3f8d493590ded03".asFHIR(),
             ),
             mapping.codeableConcept,
         )
         assertEquals(
             Extension(
+                id = "sourceExtension2".asFHIR(),
                 url = Uri(sourceUrl),
                 value = DynamicValue(type = DynamicValueType.CODEABLE_CONCEPT, value = concept),
             ),
@@ -2833,11 +2913,13 @@ class NormalizationRegistryClientTest {
                         ),
                     ),
                 text = "FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - PROGNOSTIC INDICATORS - CLARK'S LEVEL".asFHIR(),
+                id = "325f634512313c32178c27b5e9a53929".asFHIR(),
             ),
             mapping.codeableConcept,
         )
         assertEquals(
             Extension(
+                id = "sourceExtension1".asFHIR(),
                 url = Uri(sourceUrl),
                 value = DynamicValue(type = DynamicValueType.CODEABLE_CONCEPT, value = concept),
             ),
@@ -2909,11 +2991,13 @@ class NormalizationRegistryClientTest {
                         ),
                     ),
                 text = "FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - ANATOMIC STAGE/PROGNOSTIC GROUP".asFHIR(),
+                id = "ae2c9f8e00c7426b0557cb1f4f0dded5".asFHIR(),
             ),
             mapping.codeableConcept,
         )
         assertEquals(
             Extension(
+                id = "sourceExtension3".asFHIR(),
                 url = Uri(sourceUrl),
                 value = DynamicValue(type = DynamicValueType.CODEABLE_CONCEPT, value = concept),
             ),
@@ -2985,11 +3069,13 @@ class NormalizationRegistryClientTest {
                         ),
                     ),
                 text = "FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - ANATOMIC STAGE/PROGNOSTIC GROUP".asFHIR(),
+                id = "ae2c9f8e00c7426b0557cb1f4f0dded5".asFHIR(),
             ),
             mapping.codeableConcept,
         )
         assertEquals(
             Extension(
+                id = "sourceExtension3".asFHIR(),
                 url = Uri(sourceUrl),
                 value = DynamicValue(type = DynamicValueType.CODEABLE_CONCEPT, value = concept),
             ),
@@ -3057,11 +3143,13 @@ class NormalizationRegistryClientTest {
                         ),
                     ),
                 text = "FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - LYMPH-VASCULAR INVASION (LVI)".asFHIR(),
+                id = "aa883e707553eb434789bb77ffb823bb".asFHIR(),
             ),
             mapping1.codeableConcept,
         )
         assertEquals(
             Extension(
+                id = "sourceExtension2".asFHIR(),
                 url = Uri(sourceUrl),
                 value = DynamicValue(type = DynamicValueType.CODEABLE_CONCEPT, value = concept1),
             ),
@@ -3100,11 +3188,13 @@ class NormalizationRegistryClientTest {
                         ),
                     ),
                 text = "FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - WHO/ISUP GRADE (LOW/HIGH)".asFHIR(),
+                id = "e7674b7ff6e68a57d7859c1b643264f1".asFHIR(),
             ),
             mapping2.codeableConcept,
         )
         assertEquals(
             Extension(
+                id = "sourceExtension4".asFHIR(),
                 url = Uri(sourceUrl),
                 value = DynamicValue(type = DynamicValueType.CODEABLE_CONCEPT, value = concept2),
             ),
@@ -3148,11 +3238,13 @@ class NormalizationRegistryClientTest {
                         ),
                     ),
                 text = "FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - TNM CLASSIFICATION - AJCC N - REGIONAL LYMPH NODES (N)".asFHIR(),
+                id = "73cb15052d834f3ffe2fb2484c2d7ef9".asFHIR(),
             ),
             mapping3.codeableConcept,
         )
         assertEquals(
             Extension(
+                id = "sourceExtension5".asFHIR(),
                 url = Uri(sourceUrl),
                 value = DynamicValue(type = DynamicValueType.CODEABLE_CONCEPT, value = concept3),
             ),

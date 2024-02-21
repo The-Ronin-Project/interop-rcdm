@@ -15,7 +15,8 @@ import java.time.LocalDateTime
 import kotlin.reflect.KClass
 
 @Component
-class MedicationAdministrationMapper(registryClient: NormalizationRegistryClient) : ResourceMapper<MedicationAdministration>,
+class MedicationAdministrationMapper(registryClient: NormalizationRegistryClient) :
+    ResourceMapper<MedicationAdministration>,
     BaseMapper<MedicationAdministration>(registryClient) {
     override val supportedResource: KClass<MedicationAdministration> = MedicationAdministration::class
 
@@ -43,7 +44,7 @@ class MedicationAdministrationMapper(registryClient: NormalizationRegistryClient
         return MapResponse(
             mappedStatus?.let {
                 resource.copy(
-                    status = it.coding.code,
+                    status = it.coding.code?.copy(id = it.coding.id),
                     extension = resource.extension + it.extension,
                 )
             } ?: resource,

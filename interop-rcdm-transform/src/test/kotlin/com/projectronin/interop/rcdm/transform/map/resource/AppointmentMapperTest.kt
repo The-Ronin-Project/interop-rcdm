@@ -5,6 +5,7 @@ import com.projectronin.interop.fhir.r4.datatype.DynamicValue
 import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
 import com.projectronin.interop.fhir.r4.datatype.Extension
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
+import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.Appointment
 import com.projectronin.interop.fhir.r4.valueset.AppointmentStatus
 import com.projectronin.interop.rcdm.common.enums.RoninExtension
@@ -69,6 +70,46 @@ class AppointmentMapperTest {
         val (mappedResource, validation) = mapper.map(appointment, tenant, null)
         mappedResource!!
         assertEquals(mappedStatus, mappedResource.status)
+        assertEquals(listOf(mappedExtension), mappedResource.extension)
+
+        assertFalse(validation.hasIssues())
+    }
+
+    @Test
+    fun `concept mapping finds status with ID`() {
+        val status = Code("input")
+
+        val appointment =
+            Appointment(
+                status = status,
+                participant = emptyList(),
+            )
+
+        val mappedExtension =
+            Extension(
+                url = RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS.uri,
+                value = DynamicValue(DynamicValueType.CODING, status),
+            )
+
+        every {
+            registryClient.getConceptMappingForEnum(
+                tenantMnemonic = "tenant",
+                elementName = "Appointment.status",
+                coding = any(),
+                enumClass = AppointmentStatus::class,
+                enumExtensionUrl = RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS.value,
+                resource = appointment,
+            )
+        } returns
+            ConceptMapCoding(
+                coding = Coding(code = Code("booked"), id = "booked-id".asFHIR()),
+                extension = mappedExtension,
+                metadata = emptyList(),
+            )
+
+        val (mappedResource, validation) = mapper.map(appointment, tenant, null)
+        mappedResource!!
+        assertEquals(Code("booked", id = "booked-id".asFHIR()), mappedResource.status)
         assertEquals(listOf(mappedExtension), mappedResource.extension)
 
         assertFalse(validation.hasIssues())

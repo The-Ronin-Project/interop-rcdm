@@ -16,6 +16,7 @@ import com.projectronin.interop.fhir.r4.datatype.DynamicValue
 import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
 import com.projectronin.interop.fhir.r4.datatype.Extension
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
+import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.ConceptMap
@@ -225,6 +226,7 @@ class NormalizationRegistryClient(
         // if elementName is a CodeableConcept datatype: expect 1+ target.element
         return ConceptMapCodeableConcept(
             this.copy(
+                id = target.element.first().targetId?.let { FHIRString(it) },
                 text = target.text?.asFHIR(),
                 coding =
                     target.element.map {
@@ -236,7 +238,7 @@ class NormalizationRegistryClient(
                         )
                     },
             ),
-            createCodeableConceptExtension(conceptMapItem, this),
+            createCodeableConceptExtension(conceptMapItem, this, target),
             conceptMapItem.metadata,
         )
     }
@@ -261,12 +263,13 @@ class NormalizationRegistryClient(
         return target.element.first().let {
             ConceptMapCoding(
                 Coding(
+                    id = it.targetId?.let { t -> FHIRString(t) },
                     system = Uri(it.system),
                     code = Code(it.value),
                     display = it.display.asFHIR(),
                     version = it.version.asFHIR(),
                 ),
-                createCodingExtension(conceptMapItem, this),
+                createCodingExtension(conceptMapItem, this, target),
                 conceptMapItem.metadata,
             )
         }
@@ -275,7 +278,9 @@ class NormalizationRegistryClient(
     private fun createCodeableConceptExtension(
         conceptMapItem: ConceptMapItem,
         codeableConcept: CodeableConcept,
+        targetConcept: TargetConcept,
     ) = Extension(
+        id = targetConcept.getSourceId(),
         url = Uri(conceptMapItem.sourceExtensionUrl),
         value = DynamicValue(type = DynamicValueType.CODEABLE_CONCEPT, value = codeableConcept),
     )
@@ -283,7 +288,9 @@ class NormalizationRegistryClient(
     private fun createCodingExtension(
         conceptMapItem: ConceptMapItem,
         coding: Coding,
+        targetConcept: TargetConcept,
     ) = Extension(
+        id = targetConcept.getSourceId(),
         url = Uri(conceptMapItem.sourceExtensionUrl),
         value = DynamicValue(type = DynamicValueType.CODING, value = coding),
     )
@@ -644,7 +651,9 @@ internal data class SourceConcept(
     val codeableConcept: CodeableConcept? = null,
 )
 
-internal data class TargetConcept(val element: List<TargetConceptMapValue>, val text: String? = null)
+internal data class TargetConcept(val element: List<TargetConceptMapValue>, val text: String? = null) {
+    fun getSourceId(): FHIRString? = element.first().sourceId?.let { FHIRString(it) }
+}
 
 internal fun CodeableConcept.normalized(): CodeableConcept =
     this.copy(

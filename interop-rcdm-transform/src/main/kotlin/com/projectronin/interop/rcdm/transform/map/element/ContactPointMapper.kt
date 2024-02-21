@@ -42,7 +42,11 @@ class ContactPointMapper(registryClient: NormalizationRegistryClient) : ElementM
                     validation,
                     forceCacheReloadTS,
                 )?.let { response ->
-                    Code(value = response.coding.code?.value, extension = listOf(response.extension))
+                    Code(
+                        value = response.coding.code?.value,
+                        id = response.coding.code?.id,
+                        extension = listOf(response.extension),
+                    )
                 }
             } ?: element.system
 
@@ -59,7 +63,11 @@ class ContactPointMapper(registryClient: NormalizationRegistryClient) : ElementM
                     validation,
                     forceCacheReloadTS,
                 )?.let { response ->
-                    Code(value = response.coding.code?.value, extension = listOf(response.extension))
+                    Code(
+                        value = response.coding.code?.value,
+                        id = response.coding.code?.id,
+                        extension = listOf(response.extension),
+                    )
                 }
             } ?: element.use
 

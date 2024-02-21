@@ -5,6 +5,7 @@ import com.projectronin.interop.fhir.r4.datatype.DynamicValue
 import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
 import com.projectronin.interop.fhir.r4.datatype.Extension
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
+import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.MedicationAdministration
 import com.projectronin.interop.fhir.r4.valueset.MedicationAdministrationStatus
 import com.projectronin.interop.rcdm.common.enums.RoninExtension
@@ -68,6 +69,45 @@ class MedicationAdministrationMapperTest {
         val (mappedResource, validation) = mapper.map(medAdmin, tenant, null)
         mappedResource!!
         assertEquals(mappedStatus, mappedResource.status)
+        assertEquals(listOf(mappedExtension), mappedResource.extension)
+
+        assertFalse(validation.hasIssues())
+    }
+
+    @Test
+    fun `concept mapping finds status with ID`() {
+        val status = Code("input")
+
+        val medAdmin =
+            MedicationAdministration(
+                status = status,
+            )
+
+        val mappedExtension =
+            Extension(
+                url = RoninExtension.TENANT_SOURCE_MEDICATION_ADMINISTRATION_STATUS.uri,
+                value = DynamicValue(DynamicValueType.CODING, status),
+            )
+
+        every {
+            registryClient.getConceptMappingForEnum(
+                tenantMnemonic = "tenant",
+                elementName = "MedicationAdministration.status",
+                coding = any(),
+                enumClass = MedicationAdministrationStatus::class,
+                enumExtensionUrl = RoninExtension.TENANT_SOURCE_MEDICATION_ADMINISTRATION_STATUS.value,
+                resource = medAdmin,
+            )
+        } returns
+            ConceptMapCoding(
+                coding = Coding(code = Code("completed"), id = "completed-id".asFHIR()),
+                extension = mappedExtension,
+                metadata = emptyList(),
+            )
+
+        val (mappedResource, validation) = mapper.map(medAdmin, tenant, null)
+        mappedResource!!
+        assertEquals(Code("completed", id = "completed-id".asFHIR()), mappedResource.status)
         assertEquals(listOf(mappedExtension), mappedResource.extension)
 
         assertFalse(validation.hasIssues())
