@@ -55,8 +55,8 @@ class NormalizationRegistryClient(
 
     internal val isV4: Boolean = registryFileName.contains("/v4/")
 
-    internal var conceptMapCache = Caffeine.newBuilder().build<CacheKey, ConceptMapItem>()
-    internal var valueSetCache = Caffeine.newBuilder().build<CacheKey, ValueSetItem>()
+    internal var conceptMapCache = Caffeine.newBuilder().softValues().build<CacheKey, ConceptMapItem>()
+    internal var valueSetCache = Caffeine.newBuilder().softValues().build<CacheKey, ValueSetItem>()
 
     internal var registry = mapOf<CacheKey, List<NormalizationRegistryItem>>()
     internal var registryLastUpdated = LocalDateTime.MIN
