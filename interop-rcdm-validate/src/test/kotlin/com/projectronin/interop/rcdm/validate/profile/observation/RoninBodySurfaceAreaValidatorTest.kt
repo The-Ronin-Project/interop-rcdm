@@ -17,6 +17,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.Observation
+import com.projectronin.interop.fhir.r4.valueset.ObservationStatus
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.rcdm.common.enums.RoninExtension
@@ -85,7 +86,7 @@ class RoninBodySurfaceAreaValidatorTest {
                                 ),
                         ),
                     ),
-                status = com.projectronin.interop.fhir.r4.valueset.ObservationStatus.FINAL.asCode(),
+                status = ObservationStatus.FINAL.asCode(),
                 code = CodeableConcept(coding = listOf(bodySurfaceAreaCoding)),
                 subject = Reference(reference = FHIRString("Patient/1234")),
                 category = listOf(vitalSignsCategoryConcept),
@@ -127,10 +128,10 @@ class RoninBodySurfaceAreaValidatorTest {
                                 ),
                         ),
                     ),
-                status = com.projectronin.interop.fhir.r4.valueset.ObservationStatus.FINAL.asCode(),
+                status = ObservationStatus.FINAL.asCode(),
                 code = CodeableConcept(coding = listOf(bodySurfaceAreaCoding)),
                 subject = Reference(reference = FHIRString("Patient/1234")),
-                category = listOf(vitalSignsCategoryConcept),
+                category = emptyList(),
                 effective = DynamicValue(DynamicValueType.DATE_TIME, DateTime("2023")),
                 value =
                     DynamicValue(
@@ -174,7 +175,50 @@ class RoninBodySurfaceAreaValidatorTest {
                                 ),
                         ),
                     ),
-                status = com.projectronin.interop.fhir.r4.valueset.ObservationStatus.FINAL.asCode(),
+                status = ObservationStatus.FINAL.asCode(),
+                code = CodeableConcept(coding = listOf(bodySurfaceAreaCoding)),
+                subject = Reference(reference = FHIRString("Patient/1234")),
+                category = emptyList(),
+                effective = DynamicValue(DynamicValueType.DATE_TIME, DateTime("2023")),
+                value =
+                    DynamicValue(
+                        DynamicValueType.QUANTITY,
+                        Quantity(
+                            value = Decimal(BigDecimal.valueOf(1.7)),
+                            unit = "m2".asFHIR(),
+                            system = CodeSystem.UCUM.uri,
+                            code = Code("m2"),
+                        ),
+                    ),
+                bodySite = null,
+            )
+        val validation = validator.validate(bodySurfaceArea, LocationContext(Observation::class))
+        assertEquals(0, validation.issues().size)
+    }
+
+    @Test
+    fun `validate succeeds with category value`() {
+        val bodySurfaceArea =
+            Observation(
+                id = Id("1234"),
+                meta =
+                    Meta(
+                        profile = listOf(RoninProfile.OBSERVATION_BODY_SURFACE_AREA.canonical),
+                        source = Uri("source"),
+                    ),
+                identifier = requiredIdentifiers,
+                extension =
+                    listOf(
+                        Extension(
+                            url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
+                            value =
+                                DynamicValue(
+                                    DynamicValueType.CODEABLE_CONCEPT,
+                                    CodeableConcept(text = "code".asFHIR()),
+                                ),
+                        ),
+                    ),
+                status = ObservationStatus.FINAL.asCode(),
                 code = CodeableConcept(coding = listOf(bodySurfaceAreaCoding)),
                 subject = Reference(reference = FHIRString("Patient/1234")),
                 category = listOf(vitalSignsCategoryConcept),

@@ -23,6 +23,7 @@ import com.projectronin.interop.fhir.r4.resource.Location
 import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.r4.resource.ObservationComponent
 import com.projectronin.interop.fhir.r4.resource.ObservationReferenceRange
+import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
 import com.projectronin.interop.fhir.r4.valueset.ObservationStatus
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.rcdm.common.enums.RoninProfile
@@ -79,33 +80,13 @@ class RoninBodySurfaceAreaTransformerTest {
     }
 
     @Test
-    fun `does not qualify when no category`() {
-        val observation =
-            Observation(
-                id = Id("123"),
-                status = com.projectronin.interop.fhir.r4.valueset.ObservationStatus.AMENDED.asCode(),
-                dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-                category = listOf(),
-                subject = Reference(reference = "Patient/1234".asFHIR()),
-                effective =
-                    DynamicValue(
-                        type = DynamicValueType.DATE_TIME,
-                        "2022-01-01T00:00:00Z",
-                    ),
-                code = CodeableConcept(text = "vital sign".asFHIR()),
-            )
-
-        assertFalse(transformer.qualifies(observation))
-    }
-
-    @Test
     fun `does not qualify when no code`() {
         val observation =
             Observation(
                 id = Id("123"),
-                status = com.projectronin.interop.fhir.r4.valueset.ObservationStatus.AMENDED.asCode(),
+                status = ObservationStatus.AMENDED.asCode(),
                 dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-                category = vitalSignsCategoryConceptList,
+                category = emptyList(),
                 subject = Reference(reference = "Patient/1234".asFHIR()),
                 effective =
                     DynamicValue(
@@ -124,9 +105,9 @@ class RoninBodySurfaceAreaTransformerTest {
         val observation =
             Observation(
                 id = Id("123"),
-                status = com.projectronin.interop.fhir.r4.valueset.ObservationStatus.AMENDED.asCode(),
+                status = ObservationStatus.AMENDED.asCode(),
                 dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-                category = vitalSignsCategoryConceptList,
+                category = emptyList(),
                 subject = Reference(reference = "Patient/1234".asFHIR()),
                 effective =
                     DynamicValue(
@@ -145,9 +126,9 @@ class RoninBodySurfaceAreaTransformerTest {
         val observation =
             Observation(
                 id = Id("123"),
-                status = com.projectronin.interop.fhir.r4.valueset.ObservationStatus.AMENDED.asCode(),
+                status = ObservationStatus.AMENDED.asCode(),
                 dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-                category = vitalSignsCategoryConceptList,
+                category = emptyList(),
                 subject = Reference(reference = "Patient/1234".asFHIR()),
                 effective =
                     DynamicValue(
@@ -166,9 +147,9 @@ class RoninBodySurfaceAreaTransformerTest {
         val observation =
             Observation(
                 id = Id("123"),
-                status = com.projectronin.interop.fhir.r4.valueset.ObservationStatus.AMENDED.asCode(),
+                status = ObservationStatus.AMENDED.asCode(),
                 dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-                category = vitalSignsCategoryConceptList,
+                category = emptyList(),
                 subject = Reference(reference = "Patient/1234".asFHIR()),
                 effective =
                     DynamicValue(
@@ -196,9 +177,9 @@ class RoninBodySurfaceAreaTransformerTest {
         val observation =
             Observation(
                 id = Id("123"),
-                status = com.projectronin.interop.fhir.r4.valueset.ObservationStatus.AMENDED.asCode(),
+                status = ObservationStatus.AMENDED.asCode(),
                 dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-                category = vitalSignsCategoryConceptList,
+                category = listOf(CodeableConcept(text = "This is ignored".asFHIR())),
                 subject = Reference(reference = "Patient/1234".asFHIR()),
                 effective =
                     DynamicValue(
@@ -226,7 +207,7 @@ class RoninBodySurfaceAreaTransformerTest {
                 language = Code("en-US"),
                 text =
                     Narrative(
-                        status = com.projectronin.interop.fhir.r4.valueset.NarrativeStatus.GENERATED.asCode(),
+                        status = NarrativeStatus.GENERATED.asCode(),
                         div = "div".asFHIR(),
                     ),
                 contained = listOf(Location(id = Id("67890"))),
@@ -314,7 +295,7 @@ class RoninBodySurfaceAreaTransformerTest {
         assertEquals(Code("en-US"), transformed.language)
         assertEquals(
             Narrative(
-                status = com.projectronin.interop.fhir.r4.valueset.NarrativeStatus.GENERATED.asCode(),
+                status = NarrativeStatus.GENERATED.asCode(),
                 div = "div".asFHIR(),
             ),
             transformed.text,
@@ -365,7 +346,7 @@ class RoninBodySurfaceAreaTransformerTest {
         assertEquals(listOf(Reference(reference = "CarePlan/1234".asFHIR())), transformed.basedOn)
         assertEquals(listOf(Reference(reference = "MedicationStatement/1234".asFHIR())), transformed.partOf)
         assertEquals(
-            com.projectronin.interop.fhir.r4.valueset.ObservationStatus.AMENDED.asCode(),
+            ObservationStatus.AMENDED.asCode(),
             transformed.status,
         )
         assertEquals(

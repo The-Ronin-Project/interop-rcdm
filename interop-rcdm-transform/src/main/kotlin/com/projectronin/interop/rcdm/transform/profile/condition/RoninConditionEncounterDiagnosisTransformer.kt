@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component
 @Component
 class RoninConditionEncounterDiagnosisTransformer : BaseRoninConditionProfileTransformer() {
     override val profile: RoninProfile = RoninProfile.CONDITION_ENCOUNTER_DIAGNOSIS
-    override val rcdmVersion: RCDMVersion = RCDMVersion.V3_19_0
+    override val rcdmVersion: RCDMVersion = RCDMVersion.V3_38_0
     override val profileVersion: Int = 3
 
     override fun getQualifyingCategories(): List<Coding> =
