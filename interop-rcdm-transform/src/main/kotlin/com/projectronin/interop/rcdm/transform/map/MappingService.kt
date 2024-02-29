@@ -9,6 +9,7 @@ import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.fhir.validate.append
 import com.projectronin.interop.tenant.config.model.Tenant
+import datadog.trace.api.Trace
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 import kotlin.reflect.KProperty1
@@ -30,6 +31,7 @@ class MappingService(
     /**
      * Maps the [resource] for the [tenant].
      */
+    @Trace
     fun <R : Resource<R>> map(
         resource: R,
         tenant: Tenant,

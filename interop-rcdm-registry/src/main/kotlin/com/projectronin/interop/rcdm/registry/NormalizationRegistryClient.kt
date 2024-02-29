@@ -31,6 +31,7 @@ import com.projectronin.interop.rcdm.registry.exception.MissingNormalizationCont
 import com.projectronin.interop.rcdm.registry.model.ConceptMapCodeableConcept
 import com.projectronin.interop.rcdm.registry.model.ConceptMapCoding
 import com.projectronin.interop.rcdm.registry.model.ValueSetList
+import datadog.trace.api.Trace
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -70,6 +71,7 @@ class NormalizationRegistryClient(
      * second, and the [ConceptMapMetadata] as the third
      * or null if no such mapping could be found. The [Extension] represents the original value before mapping.
      */
+    @Trace
     fun <T : Resource<T>> getConceptMapping(
         tenantMnemonic: String,
         elementName: String,
@@ -96,6 +98,7 @@ class NormalizationRegistryClient(
      * If there is no concept map found, but the input Coding.code value is correct for the enumClass,
      * return the input [Coding] with a source [Extension] using the enumExtensionUrl provided by the caller.
      */
+    @Trace
     fun <T, R : Resource<R>> getConceptMappingForEnum(
         tenantMnemonic: String,
         elementName: String,
@@ -126,6 +129,7 @@ class NormalizationRegistryClient(
      *        "Appointment.status" or "Patient.telecom.use".
      * @param profileUrl URL of an RCDM or FHIR profile
      */
+    @Trace
     fun getValueSet(
         elementName: String,
         profileUrl: String,
@@ -151,6 +155,7 @@ class NormalizationRegistryClient(
      * @param profileUrl URL of an RCDM or FHIR profile
      * @throws MissingNormalizationContentException if value set is not found.
      */
+    @Trace
     fun getRequiredValueSet(
         elementName: String,
         profileUrl: String,
@@ -303,6 +308,7 @@ class NormalizationRegistryClient(
         value = DynamicValue(type = DynamicValueType.CODING, value = coding),
     )
 
+    @Trace
     private fun getConceptMapItem(
         key: CacheKey,
         forceCacheReloadTS: LocalDateTime?,

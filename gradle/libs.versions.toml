@@ -1,6 +1,7 @@
 [versions]
 caffeine = "3.1.8"
 classgraph = "4.8.165"
+datadog = "1.28.0"
 interop-common = "4.1.0"
 interop-datalake = "9.2.1"
 interop-ehr = "13.4.0"
@@ -15,6 +16,7 @@ ronin-test = "0.2.0"
 [libraries]
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "caffeine" }
 classgraph = { module = "io.github.classgraph:classgraph", version.ref = "classgraph" }
+dd-trace-api = { module = "com.datadoghq:dd-trace-api", version.ref = "datadog" }
 event-interop-resource-internal = { module = "com.projectronin.contract.event:event-interop-resource-internal", version.ref = "interop-event-resource-internal" }
 interop-common = { module = "com.projectronin.interop:interop-common", version.ref = "interop-common" }
 interop-commonHttp = { module = "com.projectronin.interop:interop-common-http", version.ref = "interop-common" }

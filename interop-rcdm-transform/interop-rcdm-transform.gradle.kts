@@ -8,6 +8,7 @@ dependencies {
     implementation(project(":interop-rcdm-registry"))
 
     implementation(libs.interop.common)
+    implementation(libs.dd.trace.api)
     implementation(libs.interop.ehr.tenant)
     implementation(libs.interop.fhir)
     implementation(libs.interop.validation.client)

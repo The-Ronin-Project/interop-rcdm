@@ -9,6 +9,7 @@ import com.projectronin.interop.rcdm.transform.model.TransformResponse
 import com.projectronin.interop.rcdm.transform.normalization.Normalizer
 import com.projectronin.interop.rcdm.transform.profile.ProfileTransformer
 import com.projectronin.interop.tenant.config.model.Tenant
+import datadog.trace.api.Trace
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -28,6 +29,7 @@ class TransformManager(
     /**
      * Transforms the [resource] based off configured Ronin profiles.
      */
+    @Trace
     fun <R : Resource<R>> transformResource(
         resource: R,
         tenant: Tenant,

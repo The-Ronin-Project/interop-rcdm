@@ -7,6 +7,7 @@ dependencies {
     implementation(project(":interop-rcdm-common"))
 
     implementation(libs.caffeine)
+    implementation(libs.dd.trace.api)
     implementation(libs.interop.common)
     implementation(libs.interop.commonJackson)
     implementation(libs.interop.datalake)
